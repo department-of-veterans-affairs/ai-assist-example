@@ -1,0 +1,216 @@
+
+# VA Clinical Design System (VACDS) Guidelines
+
+Use the VA Clinical Design System (VACDS) for consistent, accessible clinical interfaces that complement EHR functionality.
+
+## Overview
+
+VACDS is specifically for **clinician-facing applications**, not general VA.gov interfaces. It inherits from the U.S. Web Design System (USWDS) and VA.gov Design System (VADS) while focusing on clinical workflows and reducing cognitive burden for busy clinicians.
+
+Reference: [VA Clinical Design System Documentation](https://department-of-veterans-affairs.github.io/clinical-design/)
+
+## Package Setup & Installation
+
+### Prerequisites
+
+1. **GitHub Personal Access Token** with `read:packages` scope:
+   - Follow [GitHub Personal Access Token Classic](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) documentation
+   - Select `read:packages` scope only
+
+2. **Authenticate with GitHub Package Registry**:
+
+   ```bash
+   # ~/.npmrc
+   //npm.pkg.github.com/:_authToken=YOUR_TOKEN_HERE
+   ```
+
+3. **Configure Package Registry**:
+
+   ```bash
+   # ./.npmrc (project root)
+   @department-of-veterans-affairs:registry=https://npm.pkg.github.com/
+   ```
+
+### Core Package Installation
+
+```bash
+npm install @department-of-veterans-affairs/clinical-design-system
+# or
+yarn add @department-of-veterans-affairs/clinical-design-system
+```
+
+## Clinical Design Principles
+
+### 8 Clinical Design Principles
+
+1. **Complement & supplement EHR, don't replace it** - Enhance existing systems without duplication
+2. **Maximize clarity; minimize noise** - Clean, focused interfaces that reduce distractions
+3. **Provide guidance with non-obtrusive feedback loops** - Help without interrupting clinical workflow
+4. **Facilitate insights over raw information** - Process data into actionable information for clinicians
+5. **Bridge clinical decisions & clinical actions** - Connect thinking to doing seamlessly
+6. **Support clinicians' sense of control** - Empower users even when control may be limited
+7. **Configuration, not customization** - Support workflow preferences through standardized options
+8. **Deliver consistency through total system approach** - Unified experience across process, outcome & experience
+
+### 6 Core Implementation Principles
+
+1. **Ease cognitive burden** - Reduce mental load on busy clinicians
+2. **Reduce noise** - Eliminate unnecessary visual and informational clutter
+3. **Make it actionable** - Enable quick, confident decisions
+4. **Provide useful context** - Show relevant information at the right time
+5. **Train the user** - Build learning into the interface
+6. **Empower clinicians** - Give control and agency to healthcare providers
+
+## Design Tokens
+
+### Token Categories
+
+- **Theme color tokens** - Primary brand colors for clinical interfaces
+- **State color tokens** - Interactive states (hover, active, focus)
+- **Spacing units** - Consistent spatial relationships (follows 8pt grid)
+- **Font tokens** - Typography settings optimized for clinical readability
+- **Breakpoint tokens** - Responsive design points for various screen sizes
+
+### Implementation Rules
+
+- **Always use VACDS tokens** instead of custom values
+- **Never use color alone** as method of communication
+- **Ensure 508 compliance** - All designs must meet accessibility standards
+- **Maintain consistency** across all clinical applications
+
+## Utilities System
+
+### HTML Utility Classes
+
+Simple classes scoped to single CSS properties that can be used:
+
+- **Additively** to style objects from scratch
+- **Override** styles defined in component CSS
+- **Rapid prototyping** for clinical interface iterations
+
+### Utility Categories
+
+- **Colors**: `bg-*`, `text-*`, `border-*` using VACDS color tokens
+- **Spacing**: `margin-*`, `padding-*` following clinical spacing standards
+- **Typography**: `font-*` for clinical-appropriate text hierarchy
+- **Layout**: Flexbox, grid, positioning utilities for clinical workflows
+
+## Component Library
+
+### Available Components (40+)
+
+Clinical-specific components including:
+
+- **Accordion** - Collapsible content sections
+- **Alert** - Clinical notifications and warnings
+- **Button** - Action triggers with clinical styling
+- **Card** - Content containers for clinical data
+- **Chart** - Data visualization for clinical metrics
+- **Clinician Initials Button** - Provider identification
+- **Data Grid** - Clinical data tables
+- **Form Controls** - Clinical data entry components
+- **Modal** - Clinical workflow overlays
+- **Toast** - Clinical notifications
+- **Tooltip** - Clinical context help
+
+### React Components Usage
+
+```typescript
+import {
+  Button,
+  Card,
+  Alert,
+  DataGrid
+} from '@department-of-veterans-affairs/clinical-design-system';
+
+// Import CSS
+import '@department-of-veterans-affairs/clinical-design-system/dist/core/css/utility-classes.css';
+import '@department-of-veterans-affairs/clinical-design-system/dist/core/css/typography.css';
+```
+
+## Storybook Documentation
+
+Access component documentation and interactive examples:
+
+- **Interactive Examples** - Live component demonstrations
+- **Implementation Details** - Code examples and API documentation
+- **Accessibility Notes** - Clinical accessibility considerations
+- **Variant Showcase** - Different component configurations
+
+Storybook URL: [Clinical Design System Storybook](https://crispy-succotash-9k23jen.pages.github.io/)
+
+## Styling Implementation in Your Project
+
+### CSS Integration
+
+```scss
+// In your main SCSS file (like vacds.scss)
+/* VACDS Utility Classes - includes colors, spacing, typography utilities */
+@import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/utility-classes.css";
+
+/* VACDS Typography System */
+@import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/typography.css";
+```
+
+### Component Pattern for Clinical Interfaces
+
+```typescript
+import styles from './clinical-component.module.css';
+
+interface ClinicalComponentProps {
+  patientData: PatientData;
+  onAction: (action: ClinicalAction) => void;
+}
+
+export function ClinicalComponent({ patientData, onAction }: ClinicalComponentProps) {
+  return (
+    <div className={`${styles.clinicalContainer} margin-bottom-3 border border-base-dark bg-base-lightest`}>
+      <h3 className={`${styles.clinicalTitle} font-sans-lg text-ink`}>
+        Patient Information
+      </h3>
+      <div className={`${styles.clinicalContent} text-base`}>
+        {/* Clinical content using VACDS utilities */}
+      </div>
+    </div>
+  );
+}
+```
+
+## Best Practices for Clinical Interfaces
+
+### Accessibility Requirements
+
+- **508 Compliance** - All components must meet federal accessibility standards
+- **Screen Reader Support** - Proper semantic markup for assistive technologies
+- **Keyboard Navigation** - Full functionality without mouse interaction
+- **Color Contrast** - Meet WCAG standards for clinical environments
+- **Alternative Navigation** - Multiple ways to access critical functions
+
+### Clinical Workflow Considerations
+
+- **Cognitive Load** - Minimize mental effort required from clinicians
+- **Speed** - Enable rapid data entry and navigation
+- **Error Prevention** - Design to prevent clinical mistakes
+- **Context Awareness** - Show relevant information for current task
+- **Consistency** - Maintain patterns across clinical applications
+
+### Integration with Electronic Health Records (EHR)
+
+- **Complement, don't replace** EHR functionality
+- **Seamless data flow** between VACDS interfaces and EHR systems
+- **Consistent user experience** across clinical tools
+- **Maintain clinical context** when transitioning between systems
+
+## Documentation & Resources
+
+- **Getting Started**: [Developer Guide](https://department-of-veterans-affairs.github.io/clinical-design/how-to-use/getting-started-for-developers)
+- **Design Principles**: [Clinical Design Principles](https://department-of-veterans-affairs.github.io/clinical-design/design-principles/)
+- **Design Tokens**: [Token Documentation](https://department-of-veterans-affairs.github.io/clinical-design/design-tokens/)
+- **Utilities**: [Utility Classes](https://department-of-veterans-affairs.github.io/clinical-design/utilities/)
+- **Components**: [Component Library](https://department-of-veterans-affairs.github.io/clinical-design/components/)
+
+## Contributing to VACDS
+
+If you have new components or updates for clinical interfaces, consider contributing back to the design system. Contact the Design System Team for guidance on contributing clinical-specific patterns and components.
+
+Always test components with screen readers and keyboard navigation.

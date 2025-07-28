@@ -1,0 +1,75 @@
+---
+globs: *.ts,*.tsx,*.js,*.jsx
+---
+
+# Frontend Development Patterns
+
+Guidelines for React TypeScript development in the [apps/web/](mdc:apps/web/) frontend.
+
+## File Structure
+
+- **Components**: [apps/web/src/components/](mdc:apps/web/src/components/) 
+  - `ui/` - Reusable UI components
+  - `layout/` - Layout components
+- **Styles**: [apps/web/src/styles/](mdc:apps/web/src/styles/) 
+  - Use VACDS utility classes only
+- **Entry**: [apps/web/src/main.tsx](mdc:apps/web/src/main.tsx)
+
+## Component Guidelines
+
+### File Naming
+- **MUST** use kebab-case: `user-profile.tsx` not `UserProfile.tsx`
+- Component files: `component-name.tsx`
+- CSS modules: `component-name.module.css`
+
+### Component Structure
+```typescript
+interface ComponentProps {
+  // Props with full TypeScript types
+}
+
+export function ComponentName({ prop }: ComponentProps) {
+  // Implementation
+}
+```
+
+### Example Component Pattern
+See [apps/web/src/components/ui/example-card.tsx](mdc:apps/web/src/components/ui/example-card.tsx):
+```typescript
+import styles from './example-card.module.css';
+
+interface ExampleCardProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+export function ExampleCard({ title, children }: ExampleCardProps) {
+  return (
+    <div className={`${styles.card} margin-bottom-3 border border-base-dark bg-base-lightest`}>
+      <h3 className={`${styles.cardTitle} font-sans-lg text-ink`}>{title}</h3>
+      <div className={`${styles.cardContent} text-base`}>{children}</div>
+    </div>
+  );
+}
+```
+
+## Styling Rules
+
+1. **VACDS First**: Use VACDS utility classes for colors, spacing, typography
+2. **CSS Modules**: For component-specific styles
+3. **No Arbitrary Values**: Only use predefined VACDS classes
+4. **Utility Classes**: `bg-*`, `text-*`, `border-*`, `margin-*`, `padding-*`, `font-*`
+
+## Import Organization
+
+1. React imports first
+2. Third-party libraries
+3. Internal components/utils
+4. CSS modules last
+
+```typescript
+import React from 'react';
+import { someLibrary } from 'some-library';
+import { InternalComponent } from '../internal-component';
+import styles from './component.module.css';
+```

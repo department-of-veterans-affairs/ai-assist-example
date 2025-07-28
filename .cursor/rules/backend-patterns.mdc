@@ -1,0 +1,87 @@
+---
+globs: *.py
+---
+
+# Backend Development Patterns
+
+Guidelines for Python FastAPI development in the [apps/api/](mdc:apps/api/) backend.
+
+## Project Structure
+
+- **Entry Point**: [apps/api/main.py](mdc:apps/api/main.py) - Development server
+- **App Module**: [apps/api/app/](mdc:apps/api/app/) - FastAPI application
+  - `main.py` - FastAPI app factory
+  - `config.py` - Settings and configuration
+  - `models/` - Pydantic models
+  - `routers/` - API route handlers
+  - `services/` - Business logic
+
+## FastAPI Patterns
+
+### Router Structure
+```python
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/api/v1", tags=["example"])
+
+@router.get("/endpoint")
+async def get_endpoint() -> ResponseModel:
+    """Endpoint description."""
+    pass
+```
+
+### Model Patterns
+Use Pydantic for all data models:
+```python
+from pydantic import BaseModel
+
+class RequestModel(BaseModel):
+    field: str
+    optional_field: Optional[int] = None
+
+class ResponseModel(BaseModel):
+    result: str
+    status: int
+```
+
+## Code Quality
+
+### Type Annotations
+- **Required**: All functions must have full type annotations
+- Use `-> None` for functions that don't return values
+- Import types from `typing` when needed
+
+### Error Handling
+```python
+from fastapi import HTTPException
+
+@router.get("/endpoint")
+async def endpoint() -> ResponseModel:
+    try:
+        # Logic here
+        return ResponseModel(result="success", status=200)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+```
+
+### Configuration
+Use Pydantic Settings in [apps/api/app/config.py](mdc:apps/api/app/config.py):
+```python
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    app_name: str = "AI Assist API"
+    debug: bool = False
+    
+    class Config:
+        env_file = ".env"
+```
+
+## Tools Integration
+
+- **Formatting**: `uv run ruff format .`
+- **Linting**: `uv run ruff check .`
+- **Type Checking**: `uv run basedpyright`
+- **Testing**: `uv run pytest`
+
+See [apps/api/pyproject.toml](mdc:apps/api/pyproject.toml) for tool configuration.

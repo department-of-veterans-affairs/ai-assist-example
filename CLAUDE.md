@@ -1,118 +1,252 @@
-# VA Clinical Design System (VACDS) Implementation Guide
+# CLAUDE.md
 
-## Overview
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-The VA Clinical Design System (VACDS) is a comprehensive design system for creating trustworthy, accessible, and consistent digital services for VA clinician experiences.
+## Project Overview
 
-## Key Design Principles
+AI Assist is a VA Clinical Tool built as a modern monorepo with:
+- **Frontend**: React 19 with VA Clinical Design System (VACDS)
+- **Backend**: FastAPI with Python 3.13
+- **Infrastructure**: Docker Compose, pnpm workspaces, mise for version management
 
-### Clinical Design Principles
+## Essential Commands
 
-1. **Complement & supplement EHR, not replace it** - Enhance existing systems
-2. **Maximize clarity; minimize noise** - Clean, focused interfaces
-3. **Provide non-obtrusive guidance with feedback loops** - Help without interrupting
-4. **Facilitate insights over raw information** - Process data for clinicians
-5. **Bridge clinical decisions and actions** - Connect thinking to doing
-6. **Support clinicians' sense of control** - Empower users
-7. **Prioritize configuration over customization** - Standardized but flexible
-8. **Deliver consistency through a total system approach** - Unified experience
-
-### Core Implementation Guidelines
-
-- **Ease cognitive burden** - Reduce mental load
-- **Make interfaces actionable** - Enable quick decisions
-- **Provide useful context** - Show relevant information
-- **Empower clinicians** - Give control to users
-
-## Design Tokens
-
-### Token Categories
-
-- **Theme color tokens** - Primary brand colors
-- **State color tokens** - Interactive states (hover, active, etc.)
-- **Spacing units** - Consistent spacing system
-- **Font tokens** - Typography settings
-- **Breakpoint tokens** - Responsive design points
-
-### Implementation
-
-- Install VACDS core package: `@department-of-veterans-affairs/component-library`
-- Use CSS variables provided by the system
-- Never use color as the sole method of communication
-- Ensure accessibility compliance (508 standards)
-
-## Utilities
-
-- Simple HTML classes scoped to single CSS properties
-- Can override existing component styles
-- Use for rapid prototyping or edge cases
-
-## Components
-
-- 40+ reusable UI components
-- Available through React component library
-- Explore in Storybook for implementation details
-- Components range from Accordion to Tooltip
-
-## Best Practices
-
-1. **Always use VACDS tokens** instead of custom values
-2. **Prioritize accessibility** - Support all users including those with visual impairments
-3. **Follow the design principles** - Don't deviate from established patterns
-4. **Use semantic HTML** - Proper structure for screen readers
-5. **Test with assistive technologies** - Ensure full accessibility
-
-## CSS Implementation
-
-- Use CSS modules for component-specific styles
-- Import VACDS CSS variables and utilities
-- Avoid inline styles or Tailwind classes
-- Follow BEM naming convention when creating custom classes
-
-## React Integration
-
-```tsx
-import { Button, Card, Alert } from '@department-of-veterans-affairs/clinical-design-system';
-import '@department-of-veterans-affairs/clinical-design-system/dist/main.css';
-import styles from './Component.module.css';
-```
-
-## Package Setup
-
-- VACDS is published to GitHub Package Registry (not npm)
-- Requires GitHub Personal Access Token with `read:packages` scope
-- Package name: `@department-of-veterans-affairs/clinical-design-system`
-
-## React Router v7 Setup
-
-- Use `createBrowserRouter` and `RouterProvider` (not BrowserRouter)
-- Import from 'react-router' (not 'react-router-dom')
-- Enable data APIs with loaders and actions
-- Use proper route configuration with children
-
-## Remember
-
-- VACDS is specifically for clinical interfaces, not general VA.gov
-- Focus on reducing cognitive load for busy clinicians
-- Consistency across all clinical applications is critical
-- Always consider accessibility from the start
-
-## IMPORTANT: Before Committing Code
-
-**ALWAYS run these commands after making changes:**
-
+### Development
 ```bash
-# Using mise (preferred)
-mise run format    # Format all code
-mise run lint      # Check for linting issues
-mise run typecheck # Check types
-mise run check     # Or just run all checks
+# Start both frontend and backend
+pnpm dev
 
-# Without mise
-pnpm format
-pnpm lint
-pnpm typecheck
-pnpm check
+# Frontend only (port 3000)
+pnpm dev:web
+
+# Backend only (port 8001)
+pnpm dev:api
+
+# Run with Docker
+pnpm docker:all
 ```
 
-**This is MANDATORY before suggesting any commits!**
+### Code Quality - MANDATORY before suggesting commits
+```bash
+# Format all code
+pnpm format
+
+# Lint all code
+pnpm lint
+
+# Type check all code
+pnpm typecheck
+
+# Run all checks
+pnpm check
+
+# Auto-fix issues
+pnpm fix
+```
+
+### Frontend-specific commands
+```bash
+cd apps/web
+pnpm format      # Format with ultracite
+pnpm lint        # Lint with ultracite
+pnpm typecheck   # TypeScript validation
+pnpm build       # Production build
+```
+
+### Backend-specific commands
+```bash
+cd apps/api
+uv run ruff format .           # Format Python code
+uv run ruff check .            # Lint Python code
+uv run ruff check . --fix      # Auto-fix linting issues
+uv run basedpyright            # Type check Python
+uv run pytest                  # Run tests
+uv run pytest --cov            # Run tests with coverage
+```
+
+### Testing
+```bash
+# Backend unit tests
+cd apps/api && uv run pytest
+
+# Run specific test
+cd apps/api && uv run pytest tests/test_health.py::test_health_endpoint
+
+# Tests with coverage
+cd apps/api && uv run pytest --cov --cov-report=html
+```
+
+## Architecture Overview
+
+### Frontend Architecture (apps/web)
+
+**Technology Stack**:
+- React 19 with functional components and TypeScript
+- VA Clinical Design System (VACDS) for UI components
+- Vite for build tooling with HMR
+- CSS Modules for component-specific styles
+- Ultracite (Biome-based) for formatting/linting
+
+**Key Patterns**:
+- VACDS components are imported directly from `@department-of-veterans-affairs/clinical-design-system`
+- Styling uses VACDS utility classes combined with CSS Modules
+- NO arbitrary colors - only VACDS design tokens
+- Components follow this pattern:
+  ```typescript
+  // Use CSS Modules for layout only
+  import styles from './component.module.css';
+  
+  // Combine with VACDS utilities
+  <div className={`${styles.layout} margin-bottom-3 bg-base-lightest`}>
+  ```
+
+**API Integration**:
+- Vite proxies `/api` requests to `http://localhost:8001`
+- Use `fetch` or preferred HTTP client for API calls
+
+### Backend Architecture (apps/api)
+
+**Technology Stack**:
+- FastAPI with Python 3.13
+- Pydantic for data validation and settings
+- uv for fast package management
+- Ruff for linting/formatting
+- BasedPyright for type checking
+
+**Project Structure**:
+```
+app/
+├── config.py      # Pydantic settings management
+├── main.py        # FastAPI app initialization
+├── models/        # Pydantic models for requests/responses
+├── routers/       # API endpoints grouped by feature
+└── services/      # Business logic separated from routes
+```
+
+**Key Patterns**:
+- Configuration via environment variables and `.env` files
+- Routers handle HTTP concerns, services handle business logic
+- All models use Pydantic for validation
+- Async/await for all I/O operations
+- Proper error handling with appropriate HTTP status codes
+
+### VACDS Design Principles
+
+**8 Clinical Design Principles** (must follow):
+1. Complement & supplement EHR, don't replace it
+2. Maximize clarity; minimize noise
+3. Provide guidance with non-obtrusive feedback loops
+4. Facilitate insights over raw information
+5. Bridge clinical decisions & clinical actions
+6. Support clinicians' sense of control
+7. Configuration, not customization
+8. Deliver consistency through total system approach
+
+**Implementation Guidelines**:
+- Ease cognitive burden
+- Reduce noise
+- Make interfaces actionable
+- Provide useful context
+- Train the user
+- Empower clinicians
+
+### VACDS Setup
+
+**GitHub Package Registry Authentication**:
+```bash
+# ~/.npmrc
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+
+# ./.npmrc (project root)
+@department-of-veterans-affairs:registry=https://npm.pkg.github.com/
+```
+
+**Available VACDS Components**:
+- Accordion, Alert, Button, Card, Chart
+- Clinician Initials Button, Data Grid
+- Form Controls, Modal, Toast, Tooltip
+- 40+ clinical-specific components
+
+**VACDS Resources**:
+- [Developer Guide](https://department-of-veterans-affairs.github.io/clinical-design/how-to-use/getting-started-for-developers)
+- [Design Principles](https://department-of-veterans-affairs.github.io/clinical-design/design-principles/)
+- [Component Library](https://department-of-veterans-affairs.github.io/clinical-design/components/)
+- [Storybook](https://crispy-succotash-9k23jen.pages.github.io/)
+
+## Development Workflow
+
+1. **Feature Development**:
+   - Create feature branch
+   - Implement changes following architecture patterns
+   - Run `pnpm check` before commits
+   - Write tests for new functionality
+
+2. **Adding New API Endpoints**:
+   - Create router module in `app/routers/`
+   - Define Pydantic models in `app/models/`
+   - Implement business logic in `app/services/`
+   - Register router in `app/main.py`
+   - Add tests in `tests/`
+
+3. **Adding New UI Components**:
+   - Create component in `src/components/`
+   - Use VACDS components and utilities
+   - Create CSS Module only for layout needs
+   - Follow TypeScript strict mode requirements
+
+## Environment Setup
+
+The project uses mise for version management. Key versions:
+- Node.js: 22.x LTS
+- Python: 3.13
+- pnpm: Latest
+- uv: Latest
+
+Environment variables:
+- `ENVIRONMENT`: development, staging, production, test
+- `CORS_ORIGINS`: Comma-separated list of allowed origins
+- `LOG_LEVEL`: info, debug, warning, error
+
+## Critical Rules
+
+1. **Always run code quality checks before commits**: `pnpm check`
+2. **Use VACDS design tokens only** - no custom colors or spacing
+3. **Follow established patterns** - check existing code first
+4. **Maintain TypeScript strict mode** - no `any` types
+5. **Keep components small and focused**
+6. **Separate API concerns**: routes, models, services
+7. **Write tests for new functionality**
+8. **Use semantic commit messages**
+
+## API Documentation
+
+- FastAPI automatic docs: http://localhost:8001/docs
+- ReDoc alternative: http://localhost:8001/redoc
+- OpenAPI schema: http://localhost:8001/openapi.json
+
+## Common Tasks
+
+### Add a new VACDS component
+```typescript
+import { Button, Alert } from '@department-of-veterans-affairs/clinical-design-system';
+```
+
+### Create an API endpoint
+```python
+# In app/routers/feature.py
+@router.get("/items/{item_id}", response_model=ItemResponse)
+async def get_item(item_id: int) -> ItemResponse:
+    item = await item_service.get_item(item_id)
+    return ItemResponse.from_orm(item)
+```
+
+### Handle API errors
+```python
+from fastapi import HTTPException, status
+
+if not item:
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Item not found"
+    )
+```
