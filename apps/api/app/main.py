@@ -18,7 +18,7 @@ app = FastAPI(
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_url="/openapi.json"
+    openapi_url="/openapi.json",
 )
 
 # CORS middleware
@@ -31,4 +31,4 @@ app.add_middleware(
 )
 
 # Include routers with proper tags
-app.include_router(health.router, prefix="/api", tags=["health"])
+app.include_router(router=health.router, prefix="/api", tags=["health"])
