@@ -1,0 +1,26 @@
+{
+	"name": "ai-assist",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"setup": "pnpm install && cd apps/api && uv venv && uv pip install fastapi uvicorn[standard] pydantic pydantic-settings httpx ruff basedpyright pytest pytest-asyncio pytest-cov && cd ../..",
+		"dev:web": "cd apps/web && pnpm dev",
+		"dev:api": "cd apps/api && uv run python main.py",
+		"dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
+		"format": "npm run format:web && npm run format:api",
+		"format:web": "cd apps/web && pnpm format",
+		"format:api": "cd apps/api && uv run ruff format .",
+		"lint": "npm run lint:web && npm run lint:api",
+		"lint:web": "cd apps/web && pnpm lint",
+		"lint:api": "cd apps/api && uv run ruff check .",
+		"typecheck": "npm run typecheck:web && npm run typecheck:api",
+		"typecheck:web": "cd apps/web && pnpm typecheck",
+		"typecheck:api": "cd apps/api && uv run basedpyright",
+		"check": "npm run lint && npm run typecheck",
+		"fix": "npm run format && cd apps/api && uv run ruff check . --fix",
+		"docker:all": "docker-compose up"
+	},
+	"devDependencies": {
+		"concurrently": "^9.1.2"
+	}
+}

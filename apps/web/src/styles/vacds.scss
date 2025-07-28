@@ -1,0 +1,13 @@
+/* 
+ * VACDS Utility Classes and Typography
+ * 
+ * This file imports the essential VACDS styles:
+ * - Utility classes for spacing, colors, typography
+ * - Typography system for consistent fonts
+ */
+
+/* VACDS Utility Classes - includes colors, spacing, typography utilities */
+@import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/utility-classes.css";
+
+/* VACDS Typography System */
+@import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/typography.css";

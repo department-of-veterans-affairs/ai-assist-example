@@ -1,0 +1,96 @@
+[tools]
+node = "22.12.0"  # LTS 'Jod'
+python = "3.13.1"
+uv = "latest"
+pnpm = "latest"
+
+[env]
+# Python optimization flags
+PYTHON_CONFIGURE_OPTS = "--enable-optimizations"
+
+# uv settings - it manages its own venvs
+UV_PYTHON_PREFERENCE = "managed"
+UV_COMPILE_BYTECODE = "true"
+UV_PROJECT_ENVIRONMENT = ".venv"
+
+[tasks.setup]
+description = "Install all project dependencies"
+run = """
+echo "📦 Installing root dependencies..."
+pnpm install
+
+echo "📦 Installing frontend dependencies..."
+cd "$MISE_PROJECT_ROOT/apps/web" && pnpm install && cd "$MISE_PROJECT_ROOT"
+
+echo "📦 Installing backend dependencies..."
+cd "$MISE_PROJECT_ROOT/apps/api" && uv venv && uv pip install fastapi uvicorn[standard] pydantic pydantic-settings httpx ruff basedpyright pytest pytest-asyncio pytest-cov && cd "$MISE_PROJECT_ROOT"
+
+echo "✅ Setup complete!"
+"""
+
+[tasks.dev]
+description = "Run all development servers"
+run = "pnpm dev"
+
+[tasks."dev:web"]
+description = "Run frontend development server"
+run = "pnpm dev:web"
+
+[tasks."dev:api"]
+description = "Run backend development server"
+run = "pnpm dev:api"
+
+[tasks.format]
+description = "Format code in both apps"
+run = """
+echo "🎨 Formatting frontend..."
+cd "$MISE_PROJECT_ROOT/apps/web" && pnpm format && cd "$MISE_PROJECT_ROOT"
+
+echo "🎨 Formatting backend..."
+cd "$MISE_PROJECT_ROOT/apps/api" && uv run ruff format . && cd "$MISE_PROJECT_ROOT"
+
+echo "✅ Formatting complete!"
+"""
+
+[tasks.lint]
+description = "Lint code in both apps"
+run = """
+echo "🔍 Linting frontend..."
+cd "$MISE_PROJECT_ROOT/apps/web" && pnpm lint && cd "$MISE_PROJECT_ROOT"
+
+echo "🔍 Linting backend..."
+cd "$MISE_PROJECT_ROOT/apps/api" && uv run ruff check . && cd "$MISE_PROJECT_ROOT"
+
+echo "✅ Linting complete!"
+"""
+
+[tasks.typecheck]
+description = "Type check code in both apps"
+run = """
+echo "📝 Type checking frontend..."
+cd "$MISE_PROJECT_ROOT/apps/web" && pnpm typecheck && cd "$MISE_PROJECT_ROOT"
+
+echo "📝 Type checking backend..."
+cd "$MISE_PROJECT_ROOT/apps/api" && uv run basedpyright && cd "$MISE_PROJECT_ROOT"
+
+echo "✅ Type checking complete!"
+"""
+
+[tasks.check]
+description = "Run all code quality checks (lint + typecheck)"
+run = """
+mise run lint
+mise run typecheck
+"""
+
+[tasks.fix]
+description = "Format and fix auto-fixable issues"
+run = """
+echo "🔧 Fixing frontend..."
+cd "$MISE_PROJECT_ROOT/apps/web" && pnpm format && pnpm lint && cd "$MISE_PROJECT_ROOT"
+
+echo "🔧 Fixing backend..."
+cd "$MISE_PROJECT_ROOT/apps/api" && uv run ruff format . && uv run ruff check . --fix && cd "$MISE_PROJECT_ROOT"
+
+echo "✅ Auto-fixes applied!"
+"""

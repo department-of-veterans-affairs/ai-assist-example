@@ -1,0 +1,18 @@
+/* 
+ * VA Clinical Design System Integration
+ * 
+ * Pure CSS approach - no SCSS needed!
+ * 1. VACDS React components (imported directly - includes styles)
+ * 2. VACDS utility classes for colors, spacing, typography
+ * 3. CSS modules for custom layouts (no arbitrary colors)
+ * 4. Direct CSS imports (no Sass required)
+ * 
+ * Color Guidelines:
+ * - Use VACDS color utilities: bg-*, text-*, border-*
+ * - No arbitrary hex values or custom colors
+ * - Follow VA design system for accessibility compliance
+ * 
+ * VACDS styles imported directly in main.tsx
+ */
+
+/* Your custom global styles can go here (spacing/layout only) */
