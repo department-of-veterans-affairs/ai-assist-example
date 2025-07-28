@@ -150,6 +150,33 @@ app/
 - Train the user
 - Empower clinicians
 
+### VACDS Design Tokens
+
+**CRITICAL: Always use VACDS design tokens - NEVER use arbitrary CSS values!**
+
+**Import VACDS styles in App.scss:**
+```scss
+@use '@department-of-veterans-affairs/clinical-design-system/dist/core/tokens/colors' as colors;
+@use '@department-of-veterans-affairs/clinical-design-system/dist/core/tokens/breakpoints' as breakpoints;
+@use '@department-of-veterans-affairs/clinical-design-system/dist/core/tokens/fonts' as fonts;
+```
+
+**Color Tokens (use these, not hex values):**
+- Base: `$base-lightest` (#f0f0f0), `$base-lighter`, `$base-light`, `$base`, `$base-dark`, `$base-darker`, `$base-darkest`
+- Primary: `$primary-lighter`, `$primary-light`, `$primary` (#005ea2), `$primary-dark` (#1a4480), `$primary-darker`
+- Secondary: `$secondary-lighter`, `$secondary-light`, `$secondary` (#d83933), `$secondary-dark`, `$secondary-darker`
+- Accent Cool: `$accent-cool-lighter`, `$accent-cool-light`, `$accent-cool`, `$accent-cool-dark`, `$accent-cool-darker`
+- Accent Warm: `$accent-warm-lighter`, `$accent-warm-light`, `$accent-warm`, `$accent-warm-dark`, `$accent-warm-darker`
+- Emergency: `$emergency` (#9c3d10), `$emergency-dark`
+
+**Usage in SCSS:**
+```scss
+.header {
+  background-color: colors.$primary-darker;
+  color: colors.$base-lightest;
+}
+```
+
 ### VACDS Setup
 
 **GitHub Package Registry Authentication**:
@@ -168,10 +195,10 @@ app/
 - 40+ clinical-specific components
 
 **VACDS Resources**:
+- **[Storybook](https://crispy-succotash-9k23jen.pages.github.io/) - PRIMARY REFERENCE for React components**
 - [Developer Guide](https://department-of-veterans-affairs.github.io/clinical-design/how-to-use/getting-started-for-developers)
 - [Design Principles](https://department-of-veterans-affairs.github.io/clinical-design/design-principles/)
 - [Component Library](https://department-of-veterans-affairs.github.io/clinical-design/components/)
-- [Storybook](https://crispy-succotash-9k23jen.pages.github.io/)
 
 ## Development Workflow
 
@@ -217,6 +244,7 @@ Environment variables:
 6. **Separate API concerns**: routes, models, services
 7. **Write tests for new functionality**
 8. **Use semantic commit messages**
+9. **Use double quotes for imports and strings in TypeScript/JavaScript** - project uses Biome formatter (via Ultracite) with double quotes
 
 ## API Documentation
 
