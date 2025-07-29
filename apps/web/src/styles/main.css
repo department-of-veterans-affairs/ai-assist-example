@@ -13,7 +13,7 @@
  * - Follow VA design system for accessibility compliance
  */
 
-/* VACDS Core Styles */
+/* VACDS Core Styles - Use clinical-design-system for utility classes */
 @import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/utility-classes.css";
 @import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/typography.css";
 
@@ -21,6 +21,7 @@
 body {
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 html,

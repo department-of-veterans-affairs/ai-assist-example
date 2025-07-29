@@ -10,6 +10,9 @@
             "filenameCases": ["kebab-case"]
           }
         }
+      },
+      "correctness": {
+        "noUnusedImports": "error"
       }
     }
   }
