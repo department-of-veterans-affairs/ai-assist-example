@@ -271,6 +271,7 @@ Environment variables:
 8. **Use semantic commit messages**
 9. **Use double quotes for imports and strings in TypeScript/JavaScript** - project uses Ultracite (Biome preset) which enforces double quotes
 10. **Trust the formatter** - Ultracite will automatically fix quote styles, import organization, and code formatting
+11. **Always use clsx for conditional classes** - Never use template literals or string concatenation for className conditionals. Always import and use clsx.
 
 ## API Documentation
 
