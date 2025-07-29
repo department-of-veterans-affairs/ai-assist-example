@@ -28,20 +28,23 @@ pnpm docker:all
 
 ### Code Quality - MANDATORY before suggesting commits
 ```bash
-# Format all code
-pnpm format
+# Run all checks at once (format + lint + typecheck)
+mise check
 
-# Lint all code
-pnpm lint
-
-# Type check all code
-pnpm typecheck
-
-# Run all checks
-pnpm check
+# Or run individually:
+mise format      # Format all code
+mise lint        # Lint all code
+mise typecheck   # Type check all code
 
 # Auto-fix issues
-pnpm fix
+mise fix
+
+# Using pnpm directly (alternative):
+pnpm check       # Runs format + lint + typecheck
+pnpm format      # Format only
+pnpm lint        # Lint only
+pnpm typecheck   # Type check only
+pnpm fix         # Auto-fix issues
 ```
 
 ### Frontend-specific commands
@@ -89,15 +92,18 @@ cd apps/api && uv run pytest --cov --cov-report=html
 
 **Key Patterns**:
 - VACDS components are imported directly from `@department-of-veterans-affairs/clinical-design-system`
-- Styling uses VACDS utility classes combined with CSS Modules
-- NO arbitrary colors - only VACDS design tokens
+- Styling uses VACDS utility classes ONLY - NO CSS Modules, NO SCSS
+- NO arbitrary values - only VACDS components and utilities
 - Components follow this pattern:
   ```typescript
-  // Use CSS Modules for layout only
-  import styles from './component.module.css';
+  import { Card, Button } from '@department-of-veterans-affairs/clinical-design-system';
   
-  // Combine with VACDS utilities
-  <div className={`${styles.layout} margin-bottom-3 bg-base-lightest`}>
+  // Use only utility classes for spacing/layout
+  <Card className="margin-bottom-3">
+    <CardBody className="padding-3">
+      <Button primary>Action</Button>
+    </CardBody>
+  </Card>
   ```
 
 **API Integration**:
@@ -150,31 +156,33 @@ app/
 - Train the user
 - Empower clinicians
 
-### VACDS Design Tokens
+### VACDS Component-First Approach
 
-**CRITICAL: Always use VACDS design tokens - NEVER use arbitrary CSS values!**
+**CRITICAL: Use VACDS React components and utility classes - NO custom CSS!**
 
-**Import VACDS styles in App.scss:**
-```scss
-@use '@department-of-veterans-affairs/clinical-design-system/dist/core/tokens/colors' as colors;
-@use '@department-of-veterans-affairs/clinical-design-system/dist/core/tokens/breakpoints' as breakpoints;
-@use '@department-of-veterans-affairs/clinical-design-system/dist/core/tokens/fonts' as fonts;
+**Import VACDS styles in main.css:**
+```css
+@import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/utility-classes.css";
+@import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/typography.css";
 ```
 
-**Color Tokens (use these, not hex values):**
-- Base: `$base-lightest` (#f0f0f0), `$base-lighter`, `$base-light`, `$base`, `$base-dark`, `$base-darker`, `$base-darkest`
-- Primary: `$primary-lighter`, `$primary-light`, `$primary` (#005ea2), `$primary-dark` (#1a4480), `$primary-darker`
-- Secondary: `$secondary-lighter`, `$secondary-light`, `$secondary` (#d83933), `$secondary-dark`, `$secondary-darker`
-- Accent Cool: `$accent-cool-lighter`, `$accent-cool-light`, `$accent-cool`, `$accent-cool-dark`, `$accent-cool-darker`
-- Accent Warm: `$accent-warm-lighter`, `$accent-warm-light`, `$accent-warm`, `$accent-warm-dark`, `$accent-warm-darker`
-- Emergency: `$emergency` (#9c3d10), `$emergency-dark`
+**Available Utility Classes:**
+- Spacing: `padding-[1-5]`, `margin-[0-5]`, `margin-bottom-[1-5]`, `margin-x-auto`
+- Typography: `font-heading-[1-5]`, `font-body-[xs|sm|md|lg]`, `text-bold`
+- Colors: `text-primary`, `text-base-dark`, `bg-base-lightest`, `border-primary`
+- Layout: `display-flex`, `flex-gap-2`, `flex-justify-end`, `max-width-[mobile|tablet|desktop]`
 
-**Usage in SCSS:**
-```scss
-.header {
-  background-color: colors.$primary-darker;
-  color: colors.$base-lightest;
-}
+**Usage Pattern:**
+```tsx
+// Always prefer VACDS components
+<Alert status="info" className="margin-bottom-3">
+  Important information
+</Alert>
+
+// Use utilities for layout only
+<div className="padding-4 max-width-tablet margin-x-auto">
+  <Card>...</Card>
+</div>
 ```
 
 ### VACDS Setup
@@ -217,8 +225,9 @@ app/
 
 3. **Adding New UI Components**:
    - Create component in `src/components/`
-   - Use VACDS components and utilities
-   - Create CSS Module only for layout needs
+   - Use VACDS components from Storybook
+   - Use utility classes for spacing/layout
+   - NO CSS Modules, NO SCSS, NO custom styles
    - Follow TypeScript strict mode requirements
 
 ## Environment Setup
@@ -234,9 +243,25 @@ Environment variables:
 - `CORS_ORIGINS`: Comma-separated list of allowed origins
 - `LOG_LEVEL`: info, debug, warning, error
 
+## Code Formatting and Linting
+
+**Frontend uses Ultracite (Biome preset):**
+- Configuration: `apps/web/biome.jsonc` extends `["ultracite"]`
+- Enforces double quotes for all strings and imports
+- Automatically removes unused imports via `noUnusedImports` rule
+- VS Code automatically formats on save via Biome extension
+- Run `pnpm format` or `mise fix` to format code manually
+
+**Key Ultracite Behaviors:**
+- Converts single quotes to double quotes automatically
+- Organizes imports alphabetically
+- Removes unused imports on save (if VS Code configured properly)
+- Enforces strict equality (`===` over `==`)
+- Template literal conversions for string concatenation
+
 ## Critical Rules
 
-1. **Always run code quality checks before commits**: `pnpm check`
+1. **Always run code quality checks before commits**: `mise check` or `pnpm check`
 2. **Use VACDS design tokens only** - no custom colors or spacing
 3. **Follow established patterns** - check existing code first
 4. **Maintain TypeScript strict mode** - no `any` types
@@ -244,7 +269,8 @@ Environment variables:
 6. **Separate API concerns**: routes, models, services
 7. **Write tests for new functionality**
 8. **Use semantic commit messages**
-9. **Use double quotes for imports and strings in TypeScript/JavaScript** - project uses Biome formatter (via Ultracite) with double quotes
+9. **Use double quotes for imports and strings in TypeScript/JavaScript** - project uses Ultracite (Biome preset) which enforces double quotes
+10. **Trust the formatter** - Ultracite will automatically fix quote styles, import organization, and code formatting
 
 ## API Documentation
 

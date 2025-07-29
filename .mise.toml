@@ -77,17 +77,25 @@ echo "✅ Type checking complete!"
 """
 
 [tasks.check]
-description = "Run all code quality checks (lint + typecheck)"
+description = "Run all code quality checks (format + lint + typecheck)"
 run = """
+echo "🔍 Running all code quality checks..."
+mise run format
 mise run lint
 mise run typecheck
+
+# Additional validation
+echo "🧪 Running build validation..."
+cd "$MISE_PROJECT_ROOT/apps/web" && pnpm build && cd "$MISE_PROJECT_ROOT"
+
+echo "✅ All checks passed!"
 """
 
 [tasks.fix]
 description = "Format and fix auto-fixable issues"
 run = """
 echo "🔧 Fixing frontend..."
-cd "$MISE_PROJECT_ROOT/apps/web" && pnpm format && pnpm lint && cd "$MISE_PROJECT_ROOT"
+cd "$MISE_PROJECT_ROOT/apps/web" && pnpm format && cd "$MISE_PROJECT_ROOT"
 
 echo "🔧 Fixing backend..."
 cd "$MISE_PROJECT_ROOT/apps/api" && uv run ruff format . && uv run ruff check . --fix && cd "$MISE_PROJECT_ROOT"
