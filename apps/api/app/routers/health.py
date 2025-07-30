@@ -1,6 +1,5 @@
 import time
 from datetime import UTC, datetime
-from typing import Any
 
 from fastapi import APIRouter
 from openai import AsyncAzureOpenAI
@@ -26,7 +25,7 @@ async def health_check() -> HealthResponse:
 
 
 @router.get("/health/azure-openai")
-async def check_azure_openai() -> dict[str, Any]:
+async def check_azure_openai() -> dict[str, str | bool]:
     """Check Azure OpenAI connection and quota status"""
     try:
         client = AsyncAzureOpenAI(
@@ -36,7 +35,7 @@ async def check_azure_openai() -> dict[str, Any]:
         )
 
         # Try a minimal completion to test the connection
-        await client.chat.completions.create(
+        _ = await client.chat.completions.create(
             model=settings.azure_openai_deployment_name,
             messages=[{"role": "user", "content": "test"}],
             max_tokens=1,
