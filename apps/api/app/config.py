@@ -25,6 +25,16 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
+    # Azure OpenAI Configuration
+    azure_openai_endpoint: str = Field(default="", alias="AZURE_OPENAI_ENDPOINT")
+    azure_openai_api_key: str = Field(default="", alias="AZURE_OPENAI_API_KEY")
+    azure_openai_deployment_name: str = Field(
+        default="gpt-4o", alias="AZURE_OPENAI_DEPLOYMENT_NAME"
+    )
+    azure_openai_api_version: str = Field(
+        default="2025-03-01-preview", alias="AZURE_OPENAI_API_VERSION"
+    )
+
     @property
     def cors_origins(self) -> list[str]:
         """Parse CORS origins from string or return defaults for development."""

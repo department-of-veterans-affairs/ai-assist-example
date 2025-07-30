@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import health
+from .routers import chat, health
 
 # Enhanced FastAPI app with proper OpenAPI configuration
 app = FastAPI(
@@ -32,3 +32,4 @@ app.add_middleware(
 
 # Include routers with proper tags
 app.include_router(router=health.router, prefix="/api", tags=["health"])
+app.include_router(router=chat.router, prefix="/api", tags=["chat"])
