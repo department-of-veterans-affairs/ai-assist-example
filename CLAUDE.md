@@ -166,11 +166,28 @@ app/
 @import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/typography.css";
 ```
 
-**Available Utility Classes:**
-- Spacing: `padding-[1-5]`, `margin-[0-5]`, `margin-bottom-[1-5]`, `margin-x-auto`
-- Typography: `font-heading-[1-5]`, `font-body-[xs|sm|md|lg]`, `text-bold`
-- Colors: `text-primary`, `text-base-dark`, `bg-base-lightest`, `border-primary`
-- Layout: `display-flex`, `flex-gap-2`, `flex-justify-end`, `max-width-[mobile|tablet|desktop]`
+**IMPORTANT: Utility Class Reference**
+VACDS utilities are based on USWDS (U.S. Web Design System). When looking for utility classes:
+- **Primary Reference**: https://designsystem.digital.gov/utilities/
+- The VACDS CSS includes most USWDS utilities but not all
+- Some utilities like `overflow-*`, `cursor-*`, and hover states may need custom CSS
+
+**Common USWDS/VACDS Utility Classes:**
+- **Display**: `display-block`, `display-flex`, `display-none`, `display-inline`
+- **Flex**: `flex-1` through `flex-12`, `flex-column`, `flex-row`, `flex-align-center`, `flex-justify-center`
+- **Spacing**: `padding-[0-5]`, `margin-[0-5]`, `margin-bottom-[1-5]`, `margin-x-auto`
+- **Typography**: `font-heading-[1-5]`, `font-body-[xs|sm|md|lg]`, `text-bold`, `text-underline`
+- **Colors**: `text-[color]`, `bg-[color]`, `border-[color]` (e.g., `text-primary`, `bg-base-lightest`)
+- **Borders**: `border`, `border-1px`, `border-2px`, `border-[side]-[width]`, `radius-[sm|md|lg]`
+- **Height/Width**: `height-full`, `width-full`, `height-[1-15]`, `width-[1-15]`
+- **Font families**: `font-family-sans`, `font-family-serif`, `font-family-mono`
+
+**Custom CSS Requirements:**
+Some utilities not available in VACDS/USWDS are defined in `main.css`:
+- `overflow-hidden`, `overflow-y-auto` - For scrollable regions
+- `cursor-pointer` - For interactive elements
+- `outline-0` - For form focus states
+- `hover:bg-base-lighter`, `hover:text-primary` - For hover states
 
 **Usage Pattern:**
 ```tsx
