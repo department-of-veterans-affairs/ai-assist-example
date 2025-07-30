@@ -27,7 +27,7 @@ export function Sidebar() {
       >
         {!leftCollapsed && (
           <div className="flex-1">
-            <div className="margin-0 font-family-sans font-weight-bold text-base-darkest text-lg">
+            <div className="font-body-lg font-family-sans text-base-darkest text-bold">
               VA | AI assist
             </div>
           </div>
