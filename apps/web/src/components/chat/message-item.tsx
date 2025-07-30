@@ -10,10 +10,11 @@ export function MessageItem({ message }: MessageItemProps) {
   const isUser = message.role === 'user';
 
   // Extract text content from message parts
-  const messageContent = message.parts
-    .filter((part) => part.type === 'text')
-    .map((part) => part.text)
-    .join('\n');
+  const messageContent =
+    message.parts
+      ?.filter((part) => part.type === 'text')
+      .map((part) => part.text)
+      .join('\n') || '';
 
   return (
     <div

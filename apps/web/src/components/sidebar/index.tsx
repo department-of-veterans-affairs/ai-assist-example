@@ -32,7 +32,7 @@ export function Sidebar() {
             </div>
           </div>
         )}
-        <div className={leftCollapsed ? '' : 'margin-left-2'}>
+        <div className={clsx(!leftCollapsed && 'margin-left-2')}>
           <Button
             aria-label={leftCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             className="padding-1 display-flex flex-align-center text-base-dark hover:text-primary"

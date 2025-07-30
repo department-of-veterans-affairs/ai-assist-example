@@ -1,5 +1,6 @@
 import type { Message } from '@ai-sdk/react';
 import { Alert } from '@department-of-veterans-affairs/clinical-design-system';
+import clsx from 'clsx';
 import { useChatScroll } from '@/hooks/use-chat-scroll';
 import { LoadingIndicator } from './loading-indicator';
 import { MessageItem } from './message-item';
@@ -41,7 +42,10 @@ export function MessageThread({
         ) : (
           <div className="display-flex flex-column">
             {messages.map((message, index) => (
-              <div className={index > 0 ? 'margin-top-2' : ''} key={message.id}>
+              <div
+                className={clsx(index > 0 && 'margin-top-2')}
+                key={message.id}
+              >
                 <MessageItem message={message} />
               </div>
             ))}
