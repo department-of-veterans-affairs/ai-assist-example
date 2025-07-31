@@ -5,6 +5,9 @@ uv = "latest"
 pnpm = "latest"
 
 [env]
+# Load environment variables from .env file
+_.file = ".env"
+
 # Python optimization flags
 PYTHON_CONFIGURE_OPTS = "--enable-optimizations"
 
