@@ -1,6 +1,0 @@
-# This file configures the GitHub Package Registry for VACDS
-# It's safe to commit this file as it contains no secrets
-@department-of-veterans-affairs:registry=https://npm.pkg.github.com/
-
-# Your authentication token should go in ~/.npmrc (home directory), NOT here
-# See docs/development.md for setup instructions
