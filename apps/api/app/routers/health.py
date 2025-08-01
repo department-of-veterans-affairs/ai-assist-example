@@ -35,10 +35,11 @@ async def check_azure_openai() -> dict[str, str | bool]:
         )
 
         # Try a minimal completion to test the connection
-        _ = await client.chat.completions.create(
+        response = await client.chat.completions.create(
             model=settings.azure_openai_deployment_name,
-            messages=[{"role": "user", "content": "test"}],
+            messages=[{"role": "user", "content": "ping"}],
             max_tokens=1,
+            stream=False,
         )
 
         return {
@@ -46,7 +47,7 @@ async def check_azure_openai() -> dict[str, str | bool]:
             "endpoint": settings.azure_openai_endpoint,
             "deployment": settings.azure_openai_deployment_name,
             "api_version": settings.azure_openai_api_version,
-            "test_response": "success",
+            "test_response": response.choices[0].message.content or "no content",
         }
     except Exception as e:
         error_msg = str(e)

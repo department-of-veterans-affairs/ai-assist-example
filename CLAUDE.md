@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 AI Assist is a VA Clinical Tool built as a modern monorepo with:
+
 - **Frontend**: React 19 with VA Clinical Design System (VACDS)
 - **Backend**: FastAPI with Python 3.13
 - **Infrastructure**: Docker Compose, pnpm workspaces, mise for version management
@@ -12,6 +13,7 @@ AI Assist is a VA Clinical Tool built as a modern monorepo with:
 ## Essential Commands
 
 ### Development
+
 ```bash
 # Start both frontend and backend
 pnpm dev
@@ -22,16 +24,23 @@ pnpm dev:web
 # Backend only (port 8001)
 pnpm dev:api
 
-# Run with Docker
-pnpm docker:all
+# Build all projects
+pnpm build
+
+# Run backend tests
+pnpm test
+
+# Initial setup
+pnpm setup
 ```
 
 ### Code Quality - MANDATORY before suggesting commits
-```bash
-# Run all checks at once (format + lint + typecheck)
-mise check
 
-# Or run individually:
+```bash
+# Run all checks at once (format + lint + typecheck + build)
+pnpm check:all  # or: mise check
+
+# Or run individually with mise:
 mise format      # Format all code
 mise lint        # Lint all code
 mise typecheck   # Type check all code
@@ -39,15 +48,12 @@ mise typecheck   # Type check all code
 # Auto-fix issues
 mise fix
 
-# Using pnpm directly (alternative):
-pnpm check       # Runs format + lint + typecheck
-pnpm format      # Format only
-pnpm lint        # Lint only
-pnpm typecheck   # Type check only
-pnpm fix         # Auto-fix issues
+# Root-level biome check
+pnpm check       # Runs biome check on root files
 ```
 
 ### Frontend-specific commands
+
 ```bash
 cd apps/web
 pnpm format      # Format with ultracite
@@ -57,6 +63,7 @@ pnpm build       # Production build
 ```
 
 ### Backend-specific commands
+
 ```bash
 cd apps/api
 uv run ruff format .           # Format Python code
@@ -68,6 +75,7 @@ uv run pytest --cov            # Run tests with coverage
 ```
 
 ### Testing
+
 ```bash
 # Backend unit tests
 cd apps/api && uv run pytest
@@ -84,6 +92,7 @@ cd apps/api && uv run pytest --cov --cov-report=html
 ### Frontend Architecture (apps/web)
 
 **Technology Stack**:
+
 - React 19 with functional components and TypeScript
 - VA Clinical Design System (VACDS) for UI components
 - Vite for build tooling with HMR
@@ -91,10 +100,12 @@ cd apps/api && uv run pytest --cov --cov-report=html
 - Ultracite (Biome-based) for formatting/linting
 
 **Key Patterns**:
+
 - VACDS components are imported directly from `@department-of-veterans-affairs/clinical-design-system`
 - Styling uses VACDS utility classes ONLY - NO CSS Modules, NO SCSS
 - NO arbitrary values - only VACDS components and utilities
 - Components follow this pattern:
+
   ```typescript
   import { Card, Button } from '@department-of-veterans-affairs/clinical-design-system';
   
@@ -107,12 +118,14 @@ cd apps/api && uv run pytest --cov --cov-report=html
   ```
 
 **API Integration**:
+
 - Vite proxies `/api` requests to `http://localhost:8001`
 - Use `fetch` or preferred HTTP client for API calls
 
 ### Backend Architecture (apps/api)
 
 **Technology Stack**:
+
 - FastAPI with Python 3.13
 - Pydantic for data validation and settings
 - uv for fast package management
@@ -120,6 +133,7 @@ cd apps/api && uv run pytest --cov --cov-report=html
 - BasedPyright for type checking
 
 **Project Structure**:
+
 ```
 app/
 ├── config.py      # Pydantic settings management
@@ -130,100 +144,22 @@ app/
 ```
 
 **Key Patterns**:
+
 - Configuration via environment variables and `.env` files
 - Routers handle HTTP concerns, services handle business logic
 - All models use Pydantic for validation
 - Async/await for all I/O operations
 - Proper error handling with appropriate HTTP status codes
 
-### VACDS Design Principles
+### VACDS Implementation
 
-**8 Clinical Design Principles** (must follow):
-1. Complement & supplement EHR, don't replace it
-2. Maximize clarity; minimize noise
-3. Provide guidance with non-obtrusive feedback loops
-4. Facilitate insights over raw information
-5. Bridge clinical decisions & clinical actions
-6. Support clinicians' sense of control
-7. Configuration, not customization
-8. Deliver consistency through total system approach
+The frontend uses VA Clinical Design System (VACDS) components and utilities. For detailed implementation guidelines, see [VACDS Implementation Guide](../docs/vacds-guide.md).
 
-**Implementation Guidelines**:
-- Ease cognitive burden
-- Reduce noise
-- Make interfaces actionable
-- Provide useful context
-- Train the user
-- Empower clinicians
-
-### VACDS Component-First Approach
-
-**CRITICAL: Use VACDS React components and utility classes - NO custom CSS!**
-
-**Import VACDS styles in main.css:**
-```css
-@import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/utility-classes.css";
-@import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/typography.css";
-```
-
-**IMPORTANT: Utility Class Reference**
-VACDS utilities are based on USWDS (U.S. Web Design System). When looking for utility classes:
-- **Primary Reference**: https://designsystem.digital.gov/utilities/
-- The VACDS CSS includes most USWDS utilities but not all
-- Some utilities like `overflow-*`, `cursor-*`, and hover states may need custom CSS
-
-**Common USWDS/VACDS Utility Classes:**
-- **Display**: `display-block`, `display-flex`, `display-none`, `display-inline`
-- **Flex**: `flex-1` through `flex-12`, `flex-column`, `flex-row`, `flex-align-center`, `flex-justify-center`
-- **Spacing**: `padding-[0-5]`, `margin-[0-5]`, `margin-bottom-[1-5]`, `margin-x-auto`
-- **Typography**: `font-heading-[1-5]`, `font-body-[xs|sm|md|lg]`, `text-bold`, `text-underline`
-- **Colors**: `text-[color]`, `bg-[color]`, `border-[color]` (e.g., `text-primary`, `bg-base-lightest`)
-- **Borders**: `border`, `border-1px`, `border-2px`, `border-[side]-[width]`, `radius-[sm|md|lg]`
-- **Height/Width**: `height-full`, `width-full`, `height-[1-15]`, `width-[1-15]`
-- **Font families**: `font-family-sans`, `font-family-serif`, `font-family-mono`
-
-**Custom CSS Requirements:**
-Some utilities not available in VACDS/USWDS are defined in `main.css`:
-- `overflow-hidden`, `overflow-y-auto` - For scrollable regions
-- `cursor-pointer` - For interactive elements
-- `outline-0` - For form focus states
-- `hover:bg-base-lighter`, `hover:text-primary` - For hover states
-
-**Usage Pattern:**
-```tsx
-// Always prefer VACDS components
-<Alert status="info" className="margin-bottom-3">
-  Important information
-</Alert>
-
-// Use utilities for layout only
-<div className="padding-4 max-width-tablet margin-x-auto">
-  <Card>...</Card>
-</div>
-```
-
-### VACDS Setup
-
-**GitHub Package Registry Authentication**:
-```bash
-# ~/.npmrc
-//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
-
-# ./.npmrc (project root)
-@department-of-veterans-affairs:registry=https://npm.pkg.github.com/
-```
-
-**Available VACDS Components**:
-- Accordion, Alert, Button, Card, Chart
-- Clinician Initials Button, Data Grid
-- Form Controls, Modal, Toast, Tooltip
-- 40+ clinical-specific components
-
-**VACDS Resources**:
-- **[Storybook](https://crispy-succotash-9k23jen.pages.github.io/) - PRIMARY REFERENCE for React components**
-- [Developer Guide](https://department-of-veterans-affairs.github.io/clinical-design/how-to-use/getting-started-for-developers)
-- [Design Principles](https://department-of-veterans-affairs.github.io/clinical-design/design-principles/)
-- [Component Library](https://department-of-veterans-affairs.github.io/clinical-design/components/)
+**Key Points**:
+- Use VACDS components only - no custom CSS
+- Follow the 8 Clinical Design Principles
+- Reference the Storybook for component usage
+- Use utility classes for layout and spacing
 
 ## Development Workflow
 
@@ -250,12 +186,14 @@ Some utilities not available in VACDS/USWDS are defined in `main.css`:
 ## Environment Setup
 
 The project uses mise for version management. Key versions:
+
 - Node.js: 22.x LTS
 - Python: 3.13
 - pnpm: Latest
 - uv: Latest
 
 Environment variables:
+
 - `ENVIRONMENT`: development, staging, production, test
 - `CORS_ORIGINS`: Comma-separated list of allowed origins
 - `LOG_LEVEL`: info, debug, warning, error
@@ -263,47 +201,47 @@ Environment variables:
 ## Code Formatting and Linting
 
 **Frontend uses Ultracite (Biome preset):**
-- Configuration: `apps/web/biome.jsonc` extends `["ultracite"]`
-- Enforces double quotes for all strings and imports
+
+- Configuration: `biome.jsonc` extends `["ultracite"]`
 - Automatically removes unused imports via `noUnusedImports` rule
 - VS Code automatically formats on save via Biome extension
 - Run `pnpm format` or `mise fix` to format code manually
 
 **Key Ultracite Behaviors:**
-- Converts single quotes to double quotes automatically
+
 - Organizes imports alphabetically
 - Removes unused imports on save (if VS Code configured properly)
 - Enforces strict equality (`===` over `==`)
-- Template literal conversions for string concatenation
 
 ## Critical Rules
 
-1. **Always run code quality checks before commits**: `mise check` or `pnpm check`
+1. **Always run code quality checks before commits**: `mise check` or `pnpm check:all`
 2. **Use VACDS design tokens only** - no custom colors or spacing
 3. **Follow established patterns** - check existing code first
 4. **Maintain TypeScript strict mode** - no `any` types
 5. **Keep components small and focused**
 6. **Separate API concerns**: routes, models, services
 7. **Write tests for new functionality**
-8. **Use semantic commit messages**
-9. **Use double quotes for imports and strings in TypeScript/JavaScript** - project uses Ultracite (Biome preset) which enforces double quotes
-10. **Trust the formatter** - Ultracite will automatically fix quote styles, import organization, and code formatting
-11. **Always use clsx for conditional classes** - Never use template literals or string concatenation for className conditionals. Always import and use clsx.
+8. **Use conventional commits** - Format: `type(scope?): subject` (e.g., `feat(web): add dark mode`)
+9. **Trust the formatter** - Ultracite will automatically fix quote styles, import organization, and code formatting
+10. **Always use clsx for conditional classes** - Never use template literals or string concatenation for className conditionals. Always import and use clsx.
 
 ## API Documentation
 
-- FastAPI automatic docs: http://localhost:8001/docs
-- ReDoc alternative: http://localhost:8001/redoc
-- OpenAPI schema: http://localhost:8001/openapi.json
+- FastAPI automatic docs: <http://localhost:8001/docs>
+- ReDoc alternative: <http://localhost:8001/redoc>
+- OpenAPI schema: <http://localhost:8001/openapi.json>
 
 ## Common Tasks
 
 ### Add a new VACDS component
+
 ```typescript
 import { Button, Alert } from '@department-of-veterans-affairs/clinical-design-system';
 ```
 
 ### Create an API endpoint
+
 ```python
 # In app/routers/feature.py
 @router.get("/items/{item_id}", response_model=ItemResponse)
@@ -313,6 +251,7 @@ async def get_item(item_id: int) -> ItemResponse:
 ```
 
 ### Handle API errors
+
 ```python
 from fastapi import HTTPException, status
 

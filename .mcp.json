@@ -1,8 +1,8 @@
 {
-	"mcpServers": {
-		"vista-api-sse": {
-			"type": "sse",
-			"url": "http://localhost:8000/sse"
-		}
-	}
+  "mcpServers": {
+    "vista-api-sse": {
+      "type": "sse",
+      "url": "http://localhost:8000/sse"
+    }
+  }
 }

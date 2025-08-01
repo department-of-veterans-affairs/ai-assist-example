@@ -1,26 +1,44 @@
 {
-	"name": "ai-assist",
-	"version": "0.1.0",
-	"private": true,
-	"scripts": {
-		"setup": "pnpm install && cd apps/api && uv venv && uv pip install fastapi uvicorn[standard] pydantic pydantic-settings httpx ruff basedpyright pytest pytest-asyncio pytest-cov && cd ../..",
-		"dev:web": "cd apps/web && pnpm dev",
-		"dev:api": "cd apps/api && uv run python main.py",
-		"dev": "concurrently \"pnpm run dev:web\" \"pnpm run dev:api\"",
-		"format": "pnpm run format:web && pnpm run format:api",
-		"format:web": "cd apps/web && pnpm format",
-		"format:api": "cd apps/api && uv run ruff format .",
-		"lint": "pnpm run lint:web && pnpm run lint:api",
-		"lint:web": "cd apps/web && pnpm lint",
-		"lint:api": "cd apps/api && uv run ruff check .",
-		"typecheck": "pnpm run typecheck:web && pnpm run typecheck:api",
-		"typecheck:web": "cd apps/web && pnpm typecheck",
-		"typecheck:api": "cd apps/api && uv run basedpyright",
-		"check": "pnpm run format && pnpm run lint && pnpm run typecheck",
-		"fix": "pnpm run format && cd apps/api && uv run ruff check . --fix",
-		"docker:all": "docker-compose up"
-	},
-	"devDependencies": {
-		"concurrently": "^9.1.2"
-	}
+  "name": "ai-assist",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "biome check --write .",
+    "check:all": "mise run check",
+    "dev": "concurrently \"pnpm dev:web\" \"pnpm dev:api\"",
+    "dev:web": "pnpm -r dev --filter web",
+    "dev:api": "cd apps/api && uv run python main.py",
+    "build": "pnpm -r build",
+    "test": "cd apps/api && uv run pytest",
+    "setup": "mise run setup",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.1.2",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "concurrently": "^9.1.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "ultracite": "5.1.1"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "workspaces": [
+    "apps/*"
+  ],
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
+      "npx ultracite format"
+    ],
+    "*.py": [
+      "cd apps/api && uv run ruff format",
+      "cd apps/api && uv run ruff check --fix"
+    ]
+  },
+  "pnpm": {
+    "overrides": {
+      "focus-trap-react": "^11.0.4"
+    }
+  }
 }

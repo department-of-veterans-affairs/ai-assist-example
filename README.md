@@ -83,8 +83,8 @@ uv run basedpyright
 - [Quick Start](./docs/quick-start.md) - Get started in 5 minutes
 - [Development Guide](./docs/development.md) - Comprehensive setup and workflows
 - [Code Quality](./docs/code-quality.md) - Formatting, linting, and type checking
-- [VACDS Implementation](./CLAUDE.md) - VA Clinical Design System guidelines
+- [VACDS Implementation](./docs/vacds-guide.md) - VA Clinical Design System guidelines
 
 ## Contributing
 
-Please follow the established patterns and use the provided tooling for consistent code quality.
+Please follow the established patterns and use the provided tooling for consistent code quality. See the [Development Guide](./docs/development.md) for detailed contribution guidelines.

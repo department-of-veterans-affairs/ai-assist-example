@@ -4,7 +4,7 @@ Get up and running in 5 minutes!
 
 ## Prerequisites
 
-- Node.js (v22.12.0 LTS recommended)
+- Node.js (v22.18.0 LTS recommended)
 - Python (v3.13.1+ recommended)
 - Git
 - GitHub account with personal access token
@@ -84,12 +84,17 @@ All files in the frontend (`apps/web`) must use kebab-case:
 pnpm dev          # Run both apps
 pnpm dev:web      # Frontend only
 pnpm dev:api      # Backend only
+pnpm build        # Build all projects
+pnpm test         # Run backend tests
 
 # Code Quality
-pnpm format       # Format code
-pnpm lint         # Lint code
-pnpm typecheck    # Type check
-pnpm check        # Run all checks
-```
+pnpm check        # Biome check for root files
+pnpm check:all    # Run all quality checks (format + lint + typecheck + build)
 
-> **Note**: If using mise, you can also use `mise run <command>` for any of these commands.
+# With mise (comprehensive operations)
+mise format       # Format all code
+mise lint         # Lint all code
+mise typecheck    # Type check all code
+mise check        # Run all checks
+mise fix          # Auto-fix issues
+```

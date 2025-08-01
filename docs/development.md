@@ -20,7 +20,7 @@ Comprehensive guide for AI Assist development setup and workflows.
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| Node.js | 22.12.0 LTS | Frontend runtime |
+| Node.js | 22.18.0 LTS | Frontend runtime |
 | Python | 3.13.1+ | Backend runtime |
 | pnpm | Latest | Node package manager |
 | uv | Latest | Python package manager |
@@ -163,6 +163,45 @@ cp apps/api/.env.example apps/api/.env
 - `CORS_ORIGINS` - Allowed origins (comma-separated)
 - `ENVIRONMENT` - development/staging/production
 - `DEBUG` - Enable debug mode
+
+## Commit Conventions
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) to ensure consistent and meaningful commit messages. All commits are automatically validated using commitlint.
+
+### Commit Message Format
+
+**Format**: `type(scope?): subject`
+
+**Types allowed**:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code refactoring
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks
+- `perf`: Performance improvements
+- `ci`: CI/CD changes
+- `build`: Build system changes
+- `revert`: Revert a previous commit
+
+**Examples**:
+```bash
+git commit -m "feat(web): add dark mode toggle"
+git commit -m "fix(api): resolve authentication issue"
+git commit -m "docs: update README with new setup instructions"
+git commit -m "chore(deps): update dependencies"
+```
+
+**Breaking Changes**:
+For breaking changes, add `BREAKING CHANGE:` in the commit body:
+```bash
+git commit -m "feat(api): change authentication method" -m "BREAKING CHANGE: JWT tokens now required for all endpoints"
+```
+
+### Validation
+
+Commits are automatically validated by husky's commit-msg hook. Invalid commits will be rejected with helpful error messages.
 
 ## Common Tasks
 

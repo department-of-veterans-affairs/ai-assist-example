@@ -27,7 +27,6 @@ lerna-debug.log*
 .pnpm-debug.log*
 
 # Editor
-.vscode
 .idea
 *.swp
 *.swo

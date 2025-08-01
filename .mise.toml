@@ -1,5 +1,5 @@
 [tools]
-node = "22.12.0"  # LTS 'Jod'
+node = "22.18.0"  # LTS 'Jod'
 python = "3.13.1"
 uv = "latest"
 pnpm = "latest"
@@ -71,7 +71,7 @@ echo "✅ Linting complete!"
 description = "Type check code in both apps"
 run = """
 echo "📝 Type checking frontend..."
-cd "$MISE_PROJECT_ROOT/apps/web" && pnpm lint && pnpm typecheck && cd "$MISE_PROJECT_ROOT"
+cd "$MISE_PROJECT_ROOT/apps/web" && pnpm typecheck && cd "$MISE_PROJECT_ROOT"
 
 echo "📝 Type checking backend..."
 cd "$MISE_PROJECT_ROOT/apps/api" && uv run basedpyright && cd "$MISE_PROJECT_ROOT"
