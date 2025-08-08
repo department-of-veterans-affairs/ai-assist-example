@@ -1,11 +1,17 @@
 import { useChat } from '@ai-sdk/react';
 import { ChatInput } from '@/components/chat/chat-input';
 import { MessageThread } from '@/components/chat/message-thread';
+import { usePatientStore } from '@/stores';
 
 export default function ChatPage() {
+  const patient = usePatientStore((state) => state.patient);
+
   const { messages, input, handleInputChange, handleSubmit, error, isLoading } =
     useChat({
       api: '/api/chat',
+      body: {
+        patient_dfn: patient?.dfn,
+      },
     });
 
   return (

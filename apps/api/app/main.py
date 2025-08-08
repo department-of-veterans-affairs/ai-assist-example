@@ -1,8 +1,22 @@
+import logging
+
+from agents import enable_verbose_stdout_logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .routers import chat, health
+
+# Enable verbose logging for OpenAI Agents SDK
+enable_verbose_stdout_logging()
+
+# Configure the OpenAI Agents SDK logger specifically
+agents_logger = logging.getLogger("openai.agents")
+agents_logger.setLevel(logging.DEBUG)  # Show all agent activity
+
+# Also configure the tracing logger if needed
+tracing_logger = logging.getLogger("openai.agents.tracing")
+tracing_logger.setLevel(logging.DEBUG)
 
 # Enhanced FastAPI app with proper OpenAPI configuration
 app = FastAPI(

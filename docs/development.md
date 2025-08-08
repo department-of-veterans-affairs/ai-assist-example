@@ -93,7 +93,7 @@ mise run dev
 
 # Start individually
 mise run dev:web    # Frontend at http://localhost:3000
-mise run dev:api    # Backend at http://localhost:8001
+mise run dev:api    # Backend at http://localhost:8080
 ```
 
 ### Without mise
@@ -104,7 +104,7 @@ pnpm dev
 
 # Start individually
 pnpm dev:web    # Frontend at http://localhost:3000
-pnpm dev:api    # Backend at http://localhost:8001
+pnpm dev:api    # Backend at http://localhost:8080
 ```
 
 ### With Docker
@@ -156,7 +156,7 @@ cp apps/api/.env.example apps/api/.env
 
 **Frontend** (`apps/web/.env.local`):
 
-- `VITE_API_URL` - Backend URL (default: <http://localhost:8001>)
+- `VITE_API_URL` - Backend URL (default: <http://localhost:8080>)
 
 **Backend** (`apps/api/.env`):
 

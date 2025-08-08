@@ -14,3 +14,4 @@ class ChatRequest(BaseModel):
     """Chat request payload"""
 
     messages: list[ChatMessage]
+    patient_dfn: str | None = None  # Optional patient DFN for Vista queries

@@ -21,7 +21,7 @@ pnpm dev
 # Frontend only (port 3000)
 pnpm dev:web
 
-# Backend only (port 8001)
+# Backend only (port 8080)
 pnpm dev:api
 
 # Build all projects
@@ -119,7 +119,7 @@ cd apps/api && uv run pytest --cov --cov-report=html
 
 **API Integration**:
 
-- Vite proxies `/api` requests to `http://localhost:8001`
+- Vite proxies `/api` requests to `http://localhost:8080`
 - Use `fetch` or preferred HTTP client for API calls
 
 ### Backend Architecture (apps/api)
@@ -228,9 +228,9 @@ Environment variables:
 
 ## API Documentation
 
-- FastAPI automatic docs: <http://localhost:8001/docs>
-- ReDoc alternative: <http://localhost:8001/redoc>
-- OpenAPI schema: <http://localhost:8001/openapi.json>
+- FastAPI automatic docs: <http://localhost:8080/docs>
+- ReDoc alternative: <http://localhost:8080/redoc>
+- OpenAPI schema: <http://localhost:8080/openapi.json>
 
 ## Common Tasks
 

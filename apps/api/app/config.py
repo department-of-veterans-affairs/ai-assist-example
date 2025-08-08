@@ -34,6 +34,27 @@ class Settings(BaseSettings):
     azure_openai_api_version: str = Field(
         default="2025-03-01-preview", alias="AZURE_OPENAI_API_VERSION"
     )
+    azure_client_id: str = Field(
+        default="", alias="AZURE_CLIENT_ID"
+    )  # For managed identity
+
+    # Vista MCP Configuration
+    vista_mcp_server_url: str = Field(
+        default="http://localhost:8000/sse", alias="VISTA_MCP_SERVER_URL"
+    )
+    vista_api_token: str = Field(default="", alias="VISTA_API_TOKEN")
+
+    # Rate limiting configuration (environment-specific)
+    rate_limit_delay_ms: int = Field(
+        default=0,
+        alias="RATE_LIMIT_DELAY_MS",
+        description="Delay in milliseconds between requests (0 = no delay)",
+    )
+    enable_retry_on_rate_limit: bool = Field(
+        default=True,
+        alias="ENABLE_RETRY_ON_RATE_LIMIT",
+        description="Whether to automatically retry on rate limit errors",
+    )
 
     @property
     def cors_origins(self) -> list[str]:

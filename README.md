@@ -31,7 +31,7 @@ pnpm dev
 ```
 
 - Frontend: <http://localhost:3000>
-- Backend: <http://localhost:8001>
+- Backend: <http://localhost:8080>
 
 ## Technology Stack
 

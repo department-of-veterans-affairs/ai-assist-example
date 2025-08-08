@@ -59,7 +59,7 @@ pnpm dev
 ## 4. Access the Apps
 
 - **Frontend**: <http://localhost:3000>
-- **Backend**: <http://localhost:8001>
+- **Backend**: <http://localhost:8080>
 
 ## Next Steps
 

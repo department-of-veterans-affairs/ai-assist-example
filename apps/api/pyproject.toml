@@ -12,6 +12,7 @@ dependencies = [
     "httpx>=0.28.1",
     "openai-agents>=0.1.0",
     "python-dotenv>=1.0.0",
+    "azure-identity>=1.19.0",
 ]
 
 [project.optional-dependencies]
@@ -67,14 +68,14 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.basedpyright]
-typeCheckingMode = "basic"
+typeCheckingMode = "strict"
 pythonVersion = "3.13"
 pythonPlatform = "Linux"
 reportMissingImports = true
-reportMissingTypeStubs = false
-reportUnknownParameterType = false
-reportUnknownArgumentType = false
-reportUnknownVariableType = false
-reportUnknownMemberType = false
-reportCallInDefaultInitializer = false
+reportMissingTypeStubs = true
+reportUnknownParameterType = true
+reportUnknownArgumentType = true
+reportUnknownVariableType = true
+reportUnknownMemberType = true
+reportCallInDefaultInitializer = true
 reportUnnecessaryTypeIgnoreComment = true

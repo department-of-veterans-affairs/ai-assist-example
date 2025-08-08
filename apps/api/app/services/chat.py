@@ -1,18 +1,20 @@
 """Chat service using OpenAI Agents SDK with Azure OpenAI"""
 
+import asyncio
+import contextlib
 import json
 import logging
+import re
 from collections.abc import AsyncGenerator
 
-from agents import Agent, Runner, set_default_openai_client, set_tracing_disabled
-from openai import AsyncAzureOpenAI
+from agents import RunConfig, Runner
 from openai.types.responses import ResponseTextDeltaEvent
 
+from ..agents.orchestrator import get_orchestrator_agent
 from ..config import settings
 from ..models.chat import ChatMessage
-
-# Disable OpenAI telemetry/tracing
-set_tracing_disabled(True)
+from ..services.azure_openai import create_azure_openai_client
+from ..services.mcp_client import get_vista_mcp_client
 
 logger = logging.getLogger(__name__)
 
@@ -20,35 +22,14 @@ logger = logging.getLogger(__name__)
 class ChatService:
     """Service for handling chat interactions using OpenAI Agents SDK"""
 
-    agent: Agent
-
     def __init__(self):
-        """Initialize chat service with Azure OpenAI client and agent"""
-        # Create Azure OpenAI client with proper retry configuration
-        openai_client = AsyncAzureOpenAI(
-            api_key=settings.azure_openai_api_key,
-            api_version=settings.azure_openai_api_version,
-            azure_endpoint=settings.azure_openai_endpoint,
-            max_retries=5,  # Default is 2, increased for better resilience
-            timeout=30.0,  # 30 seconds timeout per request
-        )
+        """Initialize chat service with Azure OpenAI client"""
+        # Create and set Azure OpenAI client
+        _ = create_azure_openai_client()
 
-        # Set as default client for Agents SDK
-        set_default_openai_client(openai_client)
-
-        # Create a simple assistant agent
-        self.agent = Agent(
-            name="Assistant",
-            model=settings.azure_openai_deployment_name,
-            instructions=(
-                "You are a helpful assistant. "
-                "Provide clear, concise, and accurate responses."
-            ),
-            # No tools to prevent multiple API calls
-            tools=[],
-        )
-
-    async def generate_stream(self, messages: list[ChatMessage]) -> AsyncGenerator[str]:
+    async def generate_stream(
+        self, messages: list[ChatMessage], patient_dfn: str | None = None
+    ) -> AsyncGenerator[str]:
         """Generate a streaming response"""
         last_user_message = ""
         for msg in reversed(messages):
@@ -56,16 +37,44 @@ class ChatService:
                 last_user_message = msg.content
                 break
 
-        logger.info(f"Processing message: {last_user_message[:50]}...")
-        logger.info(f"Total messages in history: {len(messages)}")
+        # Enhance message with patient context if provided
+        if patient_dfn:
+            enhanced_message = f"Patient DFN: {patient_dfn}\n{last_user_message}"
+        else:
+            enhanced_message = last_user_message
 
+        # Agent SDK will log its own activity
+
+        vista_mcp = None
         try:
-            # Run with max_turns=1 to prevent multiple API calls
-            # The OpenAI SDK will handle retries automatically
+            # Apply rate limit delay if configured (environment-specific)
+            if settings.rate_limit_delay_ms > 0:
+                await asyncio.sleep(settings.rate_limit_delay_ms / 1000)
+
+            # Get orchestrator (will initialize MCP if needed)
+            orchestrator = get_orchestrator_agent(with_mcp=True)
+
+            # Get MCP client for connection
+            vista_mcp = get_vista_mcp_client()
+            # Connect MCP server before using it
+            await vista_mcp.connect()
+
+            # Configure run settings
+            run_config = RunConfig(
+                # Enable workflow tracing with a name
+                workflow_name="vista_patient_query",
+                # Include model data in logs (since we removed DONT_LOG_MODEL_DATA)
+                trace_include_sensitive_data=False,  # Don't include in traces
+                # Add patient DFN as metadata
+                trace_metadata={"patient_dfn": patient_dfn} if patient_dfn else {},
+            )
+
+            # Use orchestrator agent with MCP tools
             result = Runner.run_streamed(
-                self.agent,
-                input=last_user_message,
-                max_turns=1,  # Only one API call per request
+                orchestrator,
+                input=enhanced_message,
+                max_turns=3,  # Allow multiple turns for MCP tool calls
+                run_config=run_config,
             )
 
             async for event in result.stream_events():
@@ -77,14 +86,54 @@ class ChatService:
                     yield f"0:{content}\n"
 
         except Exception as e:
-            logger.error(f"Stream error: {e!s}")
+            logger.error(f"Stream error: {e!s}", exc_info=True)
             # Check if it's a rate limit or Azure service error
             error_message = str(e)
-            if "Azure support request" in error_message or "429" in error_message:
+            if "429" in error_message or "rate limit" in error_message.lower():
+                # This is often a token limit issue with Azure OpenAI when
+                # using many tools
+                logger.warning(
+                    "Azure rate/token limit hit - likely due to large number "
+                    + "of MCP tools"
+                )
                 error_message = (
-                    "The AI service is temporarily unavailable. "
-                    "Please try again in a moment."
+                    "Azure OpenAI limit exceeded. This often happens when "
+                    "too many tools "
+                    "are registered. The Vista MCP server provides 15+ tools which may "
+                    "exceed Azure's token limits. Try a simpler query or "
+                    "contact your admin "
+                    "to increase Azure OpenAI quotas."
+                )
+            elif (
+                "Azure support request" in error_message
+                or "An error occurred while processing your request" in error_message
+            ):
+                # Extract request ID if available
+
+                request_id_match = re.search(r"request ID ([a-f0-9-]+)", error_message)
+                request_id = (
+                    request_id_match.group(1) if request_id_match else "unknown"
+                )
+
+                logger.error(f"Azure service error - Request ID: {request_id}")
+                error_message = (
+                    "Azure OpenAI service error. This often occurs when the "
+                    "model is overloaded "
+                    "with too many tools or complex requests. Try disabling "
+                    "Vista MCP tools or "
+                    "use a simpler query. If the issue persists, contact support with "
+                    f"Request ID: {request_id}"
+                )
+            else:
+                # For all other errors, do not expose internal details to the client
+                error_message = (
+                    "An internal server error occurred. Please try again later."
                 )
 
             # Format error for Vercel AI SDK - it expects the error as a direct string
             yield f"3:{json.dumps(error_message)}\n"
+        finally:
+            # Cleanup MCP connection
+            if vista_mcp is not None:
+                with contextlib.suppress(Exception):
+                    await vista_mcp.cleanup()

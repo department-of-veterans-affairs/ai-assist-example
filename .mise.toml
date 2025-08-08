@@ -46,11 +46,17 @@ run = "pnpm dev:api"
 [tasks.format]
 description = "Format code in both apps"
 run = """
+set -e  # Exit on any error
+
 echo "🎨 Formatting frontend..."
-cd "$MISE_PROJECT_ROOT/apps/web" && pnpm format && cd "$MISE_PROJECT_ROOT"
+cd "$MISE_PROJECT_ROOT/apps/web"
+pnpm format
+cd "$MISE_PROJECT_ROOT"
 
 echo "🎨 Formatting backend..."
-cd "$MISE_PROJECT_ROOT/apps/api" && uv run ruff format . && cd "$MISE_PROJECT_ROOT"
+cd "$MISE_PROJECT_ROOT/apps/api"
+uv run ruff format .
+cd "$MISE_PROJECT_ROOT"
 
 echo "✅ Formatting complete!"
 """
@@ -58,11 +64,17 @@ echo "✅ Formatting complete!"
 [tasks.lint]
 description = "Lint code in both apps"
 run = """
+set -e  # Exit on any error
+
 echo "🔍 Linting frontend..."
-cd "$MISE_PROJECT_ROOT/apps/web" && pnpm lint && cd "$MISE_PROJECT_ROOT"
+cd "$MISE_PROJECT_ROOT/apps/web"
+pnpm lint
+cd "$MISE_PROJECT_ROOT"
 
 echo "🔍 Linting backend..."
-cd "$MISE_PROJECT_ROOT/apps/api" && uv run ruff check . && cd "$MISE_PROJECT_ROOT"
+cd "$MISE_PROJECT_ROOT/apps/api"
+uv run ruff check .
+cd "$MISE_PROJECT_ROOT"
 
 echo "✅ Linting complete!"
 """
@@ -70,11 +82,17 @@ echo "✅ Linting complete!"
 [tasks.typecheck]
 description = "Type check code in both apps"
 run = """
+set -e  # Exit on any error
+
 echo "📝 Type checking frontend..."
-cd "$MISE_PROJECT_ROOT/apps/web" && pnpm typecheck && cd "$MISE_PROJECT_ROOT"
+cd "$MISE_PROJECT_ROOT/apps/web"
+pnpm typecheck
+cd "$MISE_PROJECT_ROOT"
 
 echo "📝 Type checking backend..."
-cd "$MISE_PROJECT_ROOT/apps/api" && uv run basedpyright && cd "$MISE_PROJECT_ROOT"
+cd "$MISE_PROJECT_ROOT/apps/api"
+uv run basedpyright
+cd "$MISE_PROJECT_ROOT"
 
 echo "✅ Type checking complete!"
 """
@@ -82,14 +100,24 @@ echo "✅ Type checking complete!"
 [tasks.check]
 description = "Run all code quality checks (format + lint + typecheck)"
 run = """
+set -e  # Exit on any error
+
 echo "🔍 Running all code quality checks..."
+
+# Run format check
 mise run format
+
+# Run linting - this should fail if there are lint errors
 mise run lint
+
+# Run type checking
 mise run typecheck
 
 # Additional validation
 echo "🧪 Running build validation..."
-cd "$MISE_PROJECT_ROOT/apps/web" && pnpm build && cd "$MISE_PROJECT_ROOT"
+cd "$MISE_PROJECT_ROOT/apps/web"
+pnpm build
+cd "$MISE_PROJECT_ROOT"
 
 echo "✅ All checks passed!"
 """

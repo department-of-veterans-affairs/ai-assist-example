@@ -28,7 +28,9 @@ async def chat(request: ChatRequest):
         chat_service = ChatService()
 
         return StreamingResponse(
-            content=chat_service.generate_stream(messages=request.messages),
+            content=chat_service.generate_stream(
+                messages=request.messages, patient_dfn=request.patient_dfn
+            ),
             media_type="text/event-stream",
             headers={
                 "Cache-Control": "no-cache",
@@ -39,4 +41,7 @@ async def chat(request: ChatRequest):
 
     except Exception as e:
         logger.error(f"Chat error: {e!s}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(
+            status_code=500,
+            detail="An internal server error occurred. Please try again later.",
+        ) from e
