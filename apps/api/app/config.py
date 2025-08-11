@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     # Vista MCP Configuration
     vista_mcp_server_url: str = Field(
-        default="http://localhost:8000/sse", alias="VISTA_MCP_SERVER_URL"
+        default="http://localhost:8000/mcp", alias="VISTA_MCP_SERVER_URL"
     )
     vista_api_token: str = Field(default="", alias="VISTA_API_TOKEN")
 
@@ -54,6 +54,30 @@ class Settings(BaseSettings):
         default=True,
         alias="ENABLE_RETRY_ON_RATE_LIMIT",
         description="Whether to automatically retry on rate limit errors",
+    )
+
+    # LangSmith Configuration
+    langsmith_tracing: bool = Field(
+        default=False,
+        alias="LANGSMITH_TRACING",
+        description="Enable LangSmith tracing for agent execution",
+    )
+    langsmith_api_key: str = Field(
+        default="",
+        alias="LANGSMITH_API_KEY",
+        description="LangSmith API key for tracing",
+    )
+    langsmith_project: str = Field(
+        default="ai-assist",
+        alias="LANGSMITH_PROJECT",
+        description="LangSmith project name for organizing traces",
+    )
+
+    # Tracing configuration
+    trace_include_sensitive_data: bool = Field(
+        default=False,
+        alias="TRACE_INCLUDE_SENSITIVE_DATA",
+        description="Include sensitive data in traces (False for production with PHI)",
     )
 
     @property

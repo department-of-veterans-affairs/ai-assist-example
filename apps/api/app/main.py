@@ -1,22 +1,40 @@
 import logging
+from contextlib import asynccontextmanager
 
-from agents import enable_verbose_stdout_logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .routers import chat, health
+from .services.tracing import initialize_langsmith_tracing
 
-# Enable verbose logging for OpenAI Agents SDK
-enable_verbose_stdout_logging()
+# Initialize LangSmith tracing if enabled
+initialize_langsmith_tracing()
 
-# Configure the OpenAI Agents SDK logger specifically
-agents_logger = logging.getLogger("openai.agents")
-agents_logger.setLevel(logging.DEBUG)  # Show all agent activity
 
-# Also configure the tracing logger if needed
-tracing_logger = logging.getLogger("openai.agents.tracing")
-tracing_logger.setLevel(logging.DEBUG)
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Manage application lifecycle events"""
+    # Startup
+    logger = logging.getLogger(__name__)
+    logger.info("Starting VA AI Assist API")
+
+    # LangSmith tracing is already initialized above
+    if settings.langsmith_tracing and settings.langsmith_api_key:
+        logger.info(
+            f"LangSmith tracing active for project: {settings.langsmith_project}"
+        )
+    else:
+        logger.info("LangSmith tracing is disabled")
+
+    logger.info(f"Environment: {settings.environment}")
+    logger.info(f"CORS origins: {settings.cors_origins}")
+
+    yield
+
+    # Shutdown
+    logger.info("Shutting down VA AI Assist API")
+
 
 # Enhanced FastAPI app with proper OpenAPI configuration
 app = FastAPI(
@@ -33,6 +51,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 # CORS middleware

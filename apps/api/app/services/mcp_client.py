@@ -2,29 +2,22 @@
 
 import logging
 
-from agents.mcp import (
-    MCPServerSse,
-    MCPServerSseParams,
-    MCPServerStreamableHttp,
-    MCPServerStreamableHttpParams,
-)
+from agents.mcp import MCPServerStreamableHttp, MCPServerStreamableHttpParams
 
 from ..config import settings
 
 logger = logging.getLogger(__name__)
 
 # Global instance, initialized on first use
-_vista_mcp_instance: MCPServerStreamableHttp | MCPServerSse | None = None
+_vista_mcp_instance: MCPServerStreamableHttp | None = None
 
 
-def get_vista_mcp_client() -> MCPServerStreamableHttp | MCPServerSse:
+def get_vista_mcp_client() -> MCPServerStreamableHttp:
     """
-    Get Vista MCP client with auto-discovery of tools.
-
-    Prefers StreamableHttp over SSE as SSE is being deprecated.
+    Get Vista MCP client configured to use Streamable HTTP transport.
 
     Returns:
-        MCP server instance configured for Vista
+        MCPServerStreamableHttp: Configured MCP server instance
     """
     global _vista_mcp_instance
 
@@ -36,41 +29,20 @@ def get_vista_mcp_client() -> MCPServerStreamableHttp | MCPServerSse:
             f"Initializing Vista MCP client with URL: {settings.vista_mcp_server_url}"
         )
 
-        # Check if we should use StreamableHttp (preferred) or SSE
-        if "streamable" in settings.vista_mcp_server_url.lower():
-            # Use StreamableHttp transport
-            params: MCPServerStreamableHttpParams = {
-                "url": settings.vista_mcp_server_url,
-            }
+        params: MCPServerStreamableHttpParams = {
+            "url": settings.vista_mcp_server_url,
+        }
 
-            if settings.vista_api_token:
-                params["headers"] = {
-                    "Authorization": f"Bearer {settings.vista_api_token}"
-                }
+        if settings.vista_api_token:
+            params["headers"] = {"Authorization": f"Bearer {settings.vista_api_token}"}
 
-            _vista_mcp_instance = MCPServerStreamableHttp(
-                params=params,
-                name="vista-mcp",
-                cache_tools_list=True,  # Cache for performance
-            )
-        else:
-            # Fallback to SSE for backward compatibility
-            params_sse: MCPServerSseParams = {
-                "url": settings.vista_mcp_server_url,
-            }
+        _vista_mcp_instance = MCPServerStreamableHttp(
+            params=params,
+            name="vista-mcp",
+            cache_tools_list=True,
+        )
 
-            if settings.vista_api_token:
-                params_sse["headers"] = {
-                    "Authorization": f"Bearer {settings.vista_api_token}"
-                }
-
-            _vista_mcp_instance = MCPServerSse(
-                params=params_sse,
-                name="vista-mcp",
-                cache_tools_list=True,  # Cache for performance
-            )
-
-        logger.info("Vista MCP client initialized successfully")
+        logger.info("Vista MCP client initialized successfully (Streamable HTTP)")
         return _vista_mcp_instance
 
     except Exception as e:

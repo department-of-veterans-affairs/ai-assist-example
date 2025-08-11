@@ -63,8 +63,9 @@ class ChatService:
             run_config = RunConfig(
                 # Enable workflow tracing with a name
                 workflow_name="vista_patient_query",
-                # Include model data in logs (since we removed DONT_LOG_MODEL_DATA)
-                trace_include_sensitive_data=False,  # Don't include in traces
+                # Include input/output data in traces (controlled by environment)
+                # NOTE: Set to False in production if handling PHI/sensitive data
+                trace_include_sensitive_data=settings.trace_include_sensitive_data,
                 # Add patient DFN as metadata
                 trace_metadata={"patient_dfn": patient_dfn} if patient_dfn else {},
             )
