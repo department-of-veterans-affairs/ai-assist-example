@@ -1,8 +1,35 @@
-# AI Assist - VA Clinical Tool
+# Welcome to VA AI Assist
+This repository contains documentation about a generative AI-enabled chat tool that helps VA clinical staff with summarizing clinical documentation from the electronic health record (EHR) to support pre-encounter chart review and drafting of documentation.
+## Project description
+### Overview
+VA AI Assist empowers physicians to streamline their workflows by leveraging a Large Language Models (LLM). Our application connects to patient data through a [Model Context Protocol (MCP) server](add link) that interfaces with VA's VistA EHR system, enabling safe and intelligent summarization and chat-based queries about patient information.
+<br>
+<br>
+VA physicians, nurses, and other clinical staff have expressed interest in using AI to conduct tasks like:
+- Summarize large volumes of patient information
+- Summarize prior cardiac testing procedures and clinical visits
+- Improve accuracy and completeness in coding
+- Identify social work service needs through chart review when evaluating a new patient
 
-A modern monorepo project with React 19 frontend using VA Clinical Design System (VACDS) and FastAPI backend.
+Learn more about our solution narrative in our [initiative brief](add link).
 
-## Project Structure
+### Timeline
+
+We are currently building a proof of concept through end of September 2025.
+
+Learn more about our phases of work in our [initiative brief](add link).
+
+### Roadmap
+
+Our roadmap provides an overview of how we plan to build this generative AI-enabled clinical tool.
+
+![roadmap](path/to/roadmap-august-2025.jpg)
+
+Review our roadmap in [VA Mural](https://app.mural.co/t/departmentofveteransaffairs9999/m/departmentofveteransaffairs9999/1750882921059/550b745268addb245a7f73287ec7645b6fa0d2c7?sender=u65f0a75fc7c68f2a5a2a9545).
+
+## Get to know our code
+
+### Project structure
 
 ```
 root/
@@ -14,77 +41,37 @@ root/
 └─ docker-compose.yml # api service
 ```
 
-## Quick Start
+### Our tech stack
 
-See [Quick Start Guide](./docs/quick-start.md) to get running in 5 minutes!
+This is a modern monorepo project with a React 19 frontend using [VA Clinical Design System (VACDS)](./docs/vacds-guide.md)  and FastAPI backend.
 
-```bash
-# Clone
-git clone <repository-url> && cd ai-assist
+#### Frontend
 
-# Setup (choose one)
-mise install && mise run setup  # With mise (recommended)
-pnpm setup                      # Without mise
+- `React 19` with `React Router v7`
+- [VA Clinical Design System (VACDS)](./docs/vacds-guide.md) 
+- `TypeScript` with strict mode
+- `Ultracite` an AI-ready formatter based on `Biome`
+- `Vite` for fast development
+- `CSS Modules` for styling
+- `Node.js 22.x LTS` or 'Jod'
 
-# Run
-pnpm dev
-```
+#### Backend
 
-- Frontend: <http://localhost:3000>
-- Backend: <http://localhost:8080>
+- `FastAPI` with `Python 3.13`
+- `uv` for package management
+- `Ruff` for linting/formatting
+- `BasedPyright` for type checking
 
-## Technology Stack
+#### Developer tools
 
-### Frontend
+- `mise` for version management
+- `pnpm` for Node.js packages
+- `Docker Compose` for local services
 
-- React 19 with React Router v7
-- VA Clinical Design System (VACDS)
-- TypeScript with strict mode
-- Ultracite (AI-ready formatter based on Biome)
-- Vite for fast development
-- CSS Modules for styling
-- Node.js 22.x LTS 'Jod'
+### Installation instructions
 
-### Backend
+Our [quick start guide](./docs/quick-start.md) will help you get up and running. And our [development guide](./docs/development.md) includes comprehensive setup and workflows.
 
-- FastAPI with Python 3.13
-- uv for package management
-- Ruff for linting/formatting
-- BasedPyright for type checking
+## Connect with us
 
-### Tools
-
-- mise for version management
-- pnpm for Node.js packages
-- Docker Compose for local services
-
-## Development Workflow
-
-1. Frontend formatting/linting:
-
-```bash
-cd apps/web
-pnpm format
-pnpm lint
-pnpm typecheck
-```
-
-2. Backend formatting/linting:
-
-```bash
-cd apps/api
-uv run ruff format .
-uv run ruff check . --fix
-uv run basedpyright
-```
-
-## Documentation
-
-- [Quick Start](./docs/quick-start.md) - Get started in 5 minutes
-- [Development Guide](./docs/development.md) - Comprehensive setup and workflows
-- [Code Quality](./docs/code-quality.md) - Formatting, linting, and type checking
-- [VACDS Implementation](./docs/vacds-guide.md) - VA Clinical Design System guidelines
-
-## Contributing
-
-Please follow the established patterns and use the provided tooling for consistent code quality. See the [Development Guide](./docs/development.md) for detailed contribution guidelines.
+Reach out on Office of CTO Slack: [#va-ai-chat-public](https://dsva.slack.com/archives/C099YJ3ESJ0)
