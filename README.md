@@ -1,8 +1,9 @@
 # Welcome to VA AI Assist
-This repository contains documentation about a generative AI-enabled chat tool that helps VA clinical staff with summarizing clinical documentation from the electronic health record (EHR) to support pre-encounter chart review and drafting of documentation.
+This repository contains documentation about a generative AI-enabled chat tool that helps VA clinical staff with summarizing clinical documentation from the electronic health record (EHR) to support pre-encounter chart review.
+
 ## Project description
 ### Overview
-VA AI Assist empowers physicians to streamline their workflows by leveraging a Large Language Models (LLM). Our application connects to patient data through a [Model Context Protocol (MCP) server](add link) that interfaces with VA's VistA EHR system, enabling safe and intelligent summarization and chat-based queries about patient information.
+VA AI Assist empowers physicians to streamline their workflows by leveraging a Large Language Models (LLM). Our application connects to patient data through a [Model Context Protocol (MCP) server](https://github.com/department-of-veterans-affairs/octo-vista-api-x-mcp-server) that interfaces with VA's VistA EHR system, enabling safe and intelligent summarization and chat-based queries about patient information.
 <br>
 <br>
 VA physicians, nurses, and other clinical staff have expressed interest in using AI to conduct tasks like:
@@ -11,19 +12,19 @@ VA physicians, nurses, and other clinical staff have expressed interest in using
 - Improve accuracy and completeness in coding
 - Identify social work service needs through chart review when evaluating a new patient
 
-Learn more about our solution narrative in our [initiative brief](add link).
+Learn more about our solution narrative in our [initiative brief](https://github.com/department-of-veterans-affairs/ai-assist/blob/main/docs/initiative-brief.md).
 
 ### Timeline
 
 We are currently building a proof of concept through end of September 2025.
 
-Learn more about our phases of work in our [initiative brief](add link).
+Learn more about our phases of work in our [initiative brief](https://github.com/department-of-veterans-affairs/ai-assist/blob/main/docs/initiative-brief.md).
 
 ### Roadmap
 
 Our roadmap provides an overview of how we plan to build this generative AI-enabled clinical tool.
 
-![roadmap](path/to/roadmap-august-2025.jpg)
+![roadmap](path/to/ai-assist-roadmap-august-2025.jpg)
 
 Review our roadmap in [VA Mural](https://app.mural.co/t/departmentofveteransaffairs9999/m/departmentofveteransaffairs9999/1750882921059/550b745268addb245a7f73287ec7645b6fa0d2c7?sender=u65f0a75fc7c68f2a5a2a9545).
 
