@@ -12,6 +12,8 @@ interface Patient extends PatientContextProps {
   description: string;
   keyConditions: string[];
   ssn: string;
+  dob?: string;
+  mrn?: string;
 }
 
 interface PatientStore {
@@ -28,6 +30,8 @@ const TEST_PATIENT: Patient = {
   description: 'Female Gulf War Veteran',
   keyConditions: ['Fibromyalgia', 'Depression', 'MST'],
   ssn: '123-45-6789',
+  dob: '01/15/1975',
+  mrn: 'MRN: 123456',
 };
 
 export const usePatientStore = create<PatientStore>((set) => ({

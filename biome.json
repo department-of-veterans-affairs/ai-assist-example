@@ -35,6 +35,9 @@
           "level": "error",
           "fix": "safe"
         }
+      },
+      "performance": {
+        "noImgElement": "off"
       }
     }
   }
