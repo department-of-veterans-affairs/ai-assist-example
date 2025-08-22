@@ -1,4 +1,3 @@
-import ArrowBackIcon from '@/assets/icons/arrow_back.svg';
 import VertIcon from '@/assets/icons/vert.svg';
 import { usePatientStore } from '@/stores';
 import { formatSSN } from '@/utils/text';
@@ -45,8 +44,8 @@ export function PatientContextHeader() {
             </div>
           </div>
         </div>
-
-        <button
+        {/* TODO: Implement patient change functionality */}
+        {/* <button
           className="display-flex margin-right-4 padding-1 flex-align-center flex-shrink-0 cursor-pointer gap-1 border-0 bg-transparent font-body-sm text-bold text-primary hover:opacity-70 active:opacity-50"
           onClick={() => {
             // TODO: Implement patient change functionality
@@ -59,7 +58,7 @@ export function PatientContextHeader() {
             src={ArrowBackIcon}
           />
           <span>Change Patient</span>
-        </button>
+        </button> */}
       </div>
     </div>
   );
