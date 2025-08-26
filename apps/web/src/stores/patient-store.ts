@@ -7,11 +7,15 @@ export type PatientContextProps = NonNullable<
   ComponentProps<typeof VACDSHeader>['patientContextProps']
 >;
 
-interface Patient extends PatientContextProps {
+export interface Patient extends PatientContextProps {
   dfn: string;
   description: string;
   keyConditions: string[];
   ssn: string;
+  // SMART on FHIR context
+  icn?: string;
+  sta3n?: string;
+  duz?: string;
   dob?: string;
   mrn?: string;
 }
