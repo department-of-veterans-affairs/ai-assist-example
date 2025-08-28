@@ -27,18 +27,21 @@ export function MessageItem({ message }: MessageItemProps) {
         <div className="display-flex max-width-tablet flex-column">
           <div
             className={clsx(
-              'padding-3 radius-md',
+              'padding-3 radius-md shadow-2',
               isUser
                 ? 'bg-primary text-white'
-                : 'bg-base-lightest text-base-darkest'
+                : 'border-1px border-base-lighter bg-white'
             )}
           >
-            <div className="font-body-md">
+            <div
+              className={clsx('font-body-md', !isUser && 'text-base-darkest')}
+            >
               <MessageContent content={messageContent} isUser={isUser} />
             </div>
           </div>
           {!isUser && (
             <MessageFeedback
+              className="margin-top-1"
               messageId={message.id}
               onCopy={() => {
                 navigator.clipboard.writeText(messageContent);

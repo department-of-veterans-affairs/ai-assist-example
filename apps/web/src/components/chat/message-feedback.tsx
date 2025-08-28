@@ -2,9 +2,11 @@ import {
   Button,
   Icon,
 } from '@department-of-veterans-affairs/clinical-design-system';
+import clsx from 'clsx';
 
 interface MessageFeedbackProps {
   messageId: string;
+  className?: string;
   onCopy?: () => void;
   onThumbsUp?: () => void;
   onThumbsDown?: () => void;
@@ -12,6 +14,7 @@ interface MessageFeedbackProps {
 
 export function MessageFeedback({
   messageId: _messageId,
+  className,
   onCopy,
   onThumbsUp,
   onThumbsDown,
@@ -29,7 +32,12 @@ export function MessageFeedback({
   };
 
   return (
-    <div className="display-flex padding-top-2 flex-align-center flex-justify-end">
+    <div
+      className={clsx(
+        'display-flex padding-top-2 flex-align-center flex-justify-end',
+        className
+      )}
+    >
       <Button
         aria-label="Copy message"
         className="padding-1 text-base-dark"

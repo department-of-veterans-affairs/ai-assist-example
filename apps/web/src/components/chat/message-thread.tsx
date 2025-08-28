@@ -33,13 +33,7 @@ export function MessageThread({
   return (
     <div className="flex-1 overflow-y-auto" ref={scrollRef}>
       <div className="max-width-desktop margin-x-auto padding-3">
-        {messages.length === 0 ? (
-          <div className="padding-8 text-center">
-            <p className="font-body-lg text-base-dark">
-              Start a conversation by typing a message below.
-            </p>
-          </div>
-        ) : (
+        {messages.length > 0 && (
           <div className="display-flex flex-column">
             {messages.map((message, index) => (
               <div
