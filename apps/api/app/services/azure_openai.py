@@ -23,7 +23,6 @@ def create_azure_openai_client() -> AsyncAzureOpenAI:
             azure_ad_token=token.token,
             api_version=settings.azure_openai_api_version,
             azure_endpoint=settings.azure_openai_endpoint,
-            azure_deployment=settings.azure_openai_deployment_name,
         )
     # Local development with API key
     else:
@@ -31,7 +30,6 @@ def create_azure_openai_client() -> AsyncAzureOpenAI:
             api_key=settings.azure_openai_api_key,
             api_version=settings.azure_openai_api_version,
             azure_endpoint=settings.azure_openai_endpoint,
-            azure_deployment=settings.azure_openai_deployment_name,
         )
 
     # Set as default for all agents

@@ -2,7 +2,9 @@
 
 from typing import TYPE_CHECKING
 
-from agents import Agent
+from agents import Agent, OpenAIChatCompletionsModel
+
+from ..config import settings
 
 if TYPE_CHECKING:
     from agents.mcp import MCPServer
@@ -65,6 +67,10 @@ def get_orchestrator_agent(with_mcp: bool = True) -> Agent:
     else:
         mcp_servers = []
 
+    from ..services.azure_openai import create_azure_openai_client
+    
+    client = create_azure_openai_client()
+    
     agent = Agent(
         name="Vista Clinical Assistant",
         instructions=ORCHESTRATOR_INSTRUCTIONS
@@ -73,6 +79,10 @@ def get_orchestrator_agent(with_mcp: bool = True) -> Agent:
             + "I cannot fetch patient data directly."
             if not mcp_servers
             else ""
+        ),
+        model=OpenAIChatCompletionsModel(
+            model=settings.azure_openai_deployment_name,
+            openai_client=client,
         ),
         mcp_servers=mcp_servers,
     )
