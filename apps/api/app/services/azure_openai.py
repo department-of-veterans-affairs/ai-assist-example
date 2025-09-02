@@ -1,6 +1,6 @@
 """Azure OpenAI client service with managed identity support."""
 
-from agents import set_default_openai_client
+from agents import set_default_openai_api, set_default_openai_client, set_tracing_disabled
 from azure.identity import ManagedIdentityCredential
 from openai import AsyncAzureOpenAI
 
@@ -33,5 +33,9 @@ def create_azure_openai_client() -> AsyncAzureOpenAI:
         )
 
     # Set as default for all agents
-    set_default_openai_client(client)
+    # set_default_openai_client(client)
+    set_default_openai_client(client=client, use_for_tracing=False)
+    set_default_openai_api("chat_completions")
+    set_tracing_disabled(disabled=True)
+    
     return client
