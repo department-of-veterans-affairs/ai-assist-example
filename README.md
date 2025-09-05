@@ -24,7 +24,7 @@ Learn more about our phases of work in our [initiative brief](https://github.com
 
 Our roadmap provides an overview of how we plan to build this generative AI-enabled clinical tool.
 
-![ai-assist-roadmap-august-2025](https://github.com/department-of-veterans-affairs/ai-assist/blob/main/docs/ai-assist-roadmap-august-2025.jpg)
+![roadmap](https://github.com/department-of-veterans-affairs/ai-assist/blob/main/docs/roadmap-september-2025.jpg)
 
 Review our roadmap in [VA Mural](https://app.mural.co/t/departmentofveteransaffairs9999/m/departmentofveteransaffairs9999/1750882921059/550b745268addb245a7f73287ec7645b6fa0d2c7?sender=u65f0a75fc7c68f2a5a2a9545).
 
