@@ -148,7 +148,7 @@ jobs:
     uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
     with:
       appName: ai-assist
-      repositoryName: ai-assist
+      repositoryName: ai-assist-web
       imageTagToDeploy: ${{ github.sha }}
       environmentToDeployTo: dev
       copyConfigToS3: true
@@ -165,7 +165,7 @@ jobs:
     uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
     with:
       appName: ai-assist
-      repositoryName: ai-assist
+      repositoryName: ai-assist-api
       imageTagToDeploy: ${{ github.sha }}
       environmentToDeployTo: dev
       copyConfigToS3: false  # API uses SSM parameters, not S3 config
@@ -179,7 +179,7 @@ jobs:
       cancel-in-progress: true
     uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
     with:
-      appName: ai-assist-web
+      appName: ai-assist
       repositoryName: ai-assist-web
       imageTagToDeploy: ${{ github.sha }}
       environmentToDeployTo: stage
@@ -196,7 +196,7 @@ jobs:
       cancel-in-progress: true
     uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
     with:
-      appName: ai-assist-api
+      appName: ai-assist
       repositoryName: ai-assist-api
       imageTagToDeploy: ${{ github.sha }}
       environmentToDeployTo: stage
