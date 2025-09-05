@@ -5,10 +5,10 @@ WORKDIR /app
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Copy dependency files
-COPY pyproject.toml ./
+# Copy dependency files and README (needed for editable install)
+COPY pyproject.toml README.md ./
 
-# Install dependencies
+# Install dependencies in editable mode
 RUN uv pip install --system -e .
 
 # Copy application code
