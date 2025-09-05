@@ -147,8 +147,8 @@ jobs:
       cancel-in-progress: true
     uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
     with:
-      appName: ai-assist-web
-      repositoryName: ai-assist-web
+      appName: ai-assist
+      repositoryName: ai-assist
       imageTagToDeploy: ${{ github.sha }}
       environmentToDeployTo: dev
       copyConfigToS3: true
@@ -164,8 +164,8 @@ jobs:
       cancel-in-progress: true
     uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
     with:
-      appName: ai-assist-api
-      repositoryName: ai-assist-api
+      appName: ai-assist
+      repositoryName: ai-assist
       imageTagToDeploy: ${{ github.sha }}
       environmentToDeployTo: dev
       copyConfigToS3: false  # API uses SSM parameters, not S3 config
