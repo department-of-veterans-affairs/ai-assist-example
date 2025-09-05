@@ -11,6 +11,9 @@
     "dev:api": "cd apps/api && uv run python main.py",
     "build": "pnpm -r build",
     "test": "cd apps/api && uv run pytest",
+    "check:ci": "pnpm check:web && pnpm check:api",
+    "check:web": "cd apps/web && pnpm format && pnpm lint && pnpm typecheck && pnpm build",
+    "check:api": "cd apps/api && uv run ruff format . && uv run ruff check . && uv run basedpyright",
     "setup": "mise run setup",
     "prepare": "husky"
   },

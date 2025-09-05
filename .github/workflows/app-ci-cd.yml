@@ -1,0 +1,157 @@
+name: AI Assist CI/CD
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'terraform/**'
+      - '.github/**'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'terraform/**'
+      - '.github/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write # This is required for requesting the OIDC JWT
+  contents: write  # This is required for actions/checkout
+  actions: read
+  security-events: write
+  packages: read  # This is required for reading platform base Docker image
+  deployments: read
+
+env:
+  GITHUB_PACKAGE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  continuous-integration:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-gov-east-1
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+          cache: 'pnpm'
+          registry-url: 'https://npm.pkg.github.com'
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.1'
+      
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          
+      - name: Configure npm for GitHub packages
+        run: |
+          echo "@department-of-veterans-affairs:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+          cd apps/api && uv sync
+
+      - name: Run linting and type checking
+        run: pnpm check:ci
+
+      # - name: Run tests
+      #   run: pnpm test
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Build and Publish Web Docker Image to ECR
+        if: github.event.ref == 'refs/heads/main'
+        id: docker_build_web
+        uses: department-of-veterans-affairs/cds-gha-workflows/.github/actions/docker-publish@main
+        with:
+          appName: ai-assist-web
+          repositoryName: ai-assist-web
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          dockerFile: apps/web/Dockerfile
+
+      - name: Build and Publish API Docker Image to ECR  
+        if: github.event.ref == 'refs/heads/main'
+        id: docker_build_api
+        uses: department-of-veterans-affairs/cds-gha-workflows/.github/actions/docker-publish@main
+        with:
+          appName: ai-assist-api
+          repositoryName: ai-assist-api
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          dockerFile: apps/api/Dockerfile
+
+  dev-deployment-web:
+    name: Deploy Web to Dev
+    if: github.event.ref == 'refs/heads/main'
+    needs: [continuous-integration]
+    concurrency:
+      group: dev-deployment-web-${{ github.ref }}
+      cancel-in-progress: true
+    uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
+    with:
+      appName: ai-assist-web
+      repositoryName: ai-assist-web
+      imageTagToDeploy: ${{ github.sha }}
+      environmentToDeployTo: dev
+      copyConfigToS3: true
+      configFilePath: config/web-config-dev.js
+      s3Destination: s3://ai-assist-example-config/config.js
+
+  dev-deployment-api:
+    name: Deploy API to Dev
+    if: github.event.ref == 'refs/heads/main'
+    needs: [continuous-integration]
+    concurrency:
+      group: dev-deployment-api-${{ github.ref }}
+      cancel-in-progress: true
+    uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
+    with:
+      appName: ai-assist-api
+      repositoryName: ai-assist-api
+      imageTagToDeploy: ${{ github.sha }}
+      environmentToDeployTo: dev
+      copyConfigToS3: false  # API uses SSM parameters, not S3 config
+
+  stage-deployment-web:
+    name: Deploy Web to Stage
+    if: github.event.ref == 'refs/heads/main'
+    needs: [dev-deployment-web, dev-deployment-api]
+    concurrency:
+      group: stage-deployment-web-${{ github.ref }}
+      cancel-in-progress: true
+    uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
+    with:
+      appName: ai-assist-web
+      repositoryName: ai-assist-web
+      imageTagToDeploy: ${{ github.sha }}
+      environmentToDeployTo: stage
+      copyConfigToS3: true
+      configFilePath: config/web-config-stage.js
+      s3Destination: s3://ai-assist-example-config/config.js
+
+  stage-deployment-api:
+    name: Deploy API to Stage
+    if: github.event.ref == 'refs/heads/main'
+    needs: [dev-deployment-web, dev-deployment-api]
+    concurrency:
+      group: stage-deployment-api-${{ github.ref }}
+      cancel-in-progress: true
+    uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
+    with:
+      appName: ai-assist-api
+      repositoryName: ai-assist-api
+      imageTagToDeploy: ${{ github.sha }}
+      environmentToDeployTo: stage
+      copyConfigToS3: false  # API uses SSM parameters

@@ -8,6 +8,8 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Load environment configuration from S3 (production) or fallback to local -->
+    <script src="/config.js" onerror="console.warn('No config.js found - using local environment')"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

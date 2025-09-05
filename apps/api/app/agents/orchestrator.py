@@ -68,9 +68,9 @@ def get_orchestrator_agent(with_mcp: bool = True) -> Agent:
         mcp_servers = []
 
     from ..services.azure_openai import create_azure_openai_client
-    
+
     client = create_azure_openai_client()
-    
+
     agent = Agent(
         name="Vista Clinical Assistant",
         instructions=ORCHESTRATOR_INSTRUCTIONS

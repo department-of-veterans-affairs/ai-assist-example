@@ -1,0 +1,30 @@
+name: Infra - create app config storage
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'terraform/s3/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+  actions: read
+  security-events: write
+
+jobs:
+  infra:
+    name: Plan and Apply Infrastructure Changes with Terraform
+    uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/infra-common.yml@v7
+    with:
+      appName: ai-assist
+      awsRoleArn: arn:aws:iam::123456789012:role/project/project-ai-assist-infra-role
+      gitHubEnvironment: main
+      terraformVersion: 1.9.5
+      terraformWorkingDir: "terraform/s3"
+      terraformWorkspace: main
