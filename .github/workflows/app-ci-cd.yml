@@ -138,66 +138,106 @@ jobs:
         run: |
           docker push 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }}
 
-  dev-deployment-web:
-    name: Deploy Web to Dev
+  dev-deployment:
+    name: Deploy to Dev
     if: github.event.ref == 'refs/heads/main'
     needs: [continuous-integration]
-    concurrency:
-      group: dev-deployment-web-${{ github.ref }}
-      cancel-in-progress: true
-    uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
-    with:
-      appName: ai-assist
-      repositoryName: ai-assist-web
-      imageTagToDeploy: ${{ github.sha }}
-      environmentToDeployTo: dev
-      copyConfigToS3: true
-      configFilePath: config/web-config-dev.js
-      s3Destination: s3://ai-assist-example-config/config.js
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      AWS_REGION: us-gov-east-1
+      IMAGE_TAG: ${{ github.sha }}
+      ENVIRONMENT: dev
+    steps:
+      - uses: actions/checkout@v4
 
-  dev-deployment-api:
-    name: Deploy API to Dev
-    if: github.event.ref == 'refs/heads/main'
-    needs: [continuous-integration]
-    concurrency:
-      group: dev-deployment-api-${{ github.ref }}
-      cancel-in-progress: true
-    uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
-    with:
-      appName: ai-assist
-      repositoryName: ai-assist-api
-      imageTagToDeploy: ${{ github.sha }}
-      environmentToDeployTo: dev
-      copyConfigToS3: false  # API uses SSM parameters, not S3 config
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-session-name: ai-assist-deployment-role-pipeline
+          role-duration-seconds: 1800
+          role-to-assume: arn:aws:iam::123456789012:role/project/project-ai-assist-deployment-role
+          aws-region: us-gov-east-1
 
-  stage-deployment-web:
-    name: Deploy Web to Stage
-    if: github.event.ref == 'refs/heads/main'
-    needs: [dev-deployment-web, dev-deployment-api]
-    concurrency:
-      group: stage-deployment-web-${{ github.ref }}
-      cancel-in-progress: true
-    uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
-    with:
-      appName: ai-assist
-      repositoryName: ai-assist-web
-      imageTagToDeploy: ${{ github.sha }}
-      environmentToDeployTo: stage
-      copyConfigToS3: true
-      configFilePath: config/web-config-stage.js
-      s3Destination: s3://ai-assist-example-config/config.js
+      - name: Copy web config to S3
+        run: |
+          echo "Copying web config to S3"
+          aws s3 cp config/web-config-dev.js s3://ai-assist-example-config/config.js
 
-  stage-deployment-api:
-    name: Deploy API to Stage
+      - name: Tag and deploy web service
+        run: |
+          echo "Tagging web image for deployment"
+          MANIFEST=$(aws ecr batch-get-image --repository-name cds/ai-assist-web --image-ids imageTag=${{ github.sha }} --query 'images[].imageManifest' --output text)
+          aws ecr put-image --repository-name cds/ai-assist-web --image-tag dev --image-manifest "$MANIFEST" || true
+          
+          echo "Deploying web service"
+          aws ecs update-service --cluster dev-fargate-cluster --service dev-ai-assist-web --force-new-deployment
+
+      - name: Tag and deploy API service  
+        run: |
+          echo "Tagging API image for deployment"
+          MANIFEST=$(aws ecr batch-get-image --repository-name cds/ai-assist-api --image-ids imageTag=${{ github.sha }} --query 'images[].imageManifest' --output text)
+          aws ecr put-image --repository-name cds/ai-assist-api --image-tag dev --image-manifest "$MANIFEST" || true
+          
+          echo "Deploying API service" 
+          aws ecs update-service --cluster dev-fargate-cluster --service dev-ai-assist-api --force-new-deployment
+
+      - name: Wait for services to stabilize
+        run: |
+          echo "Waiting for web service to stabilize"
+          aws ecs wait services-stable --cluster dev-fargate-cluster --service dev-ai-assist-web
+          
+          echo "Waiting for API service to stabilize"
+          aws ecs wait services-stable --cluster dev-fargate-cluster --service dev-ai-assist-api
+
+  stage-deployment:
+    name: Deploy to Stage
     if: github.event.ref == 'refs/heads/main'
-    needs: [dev-deployment-web, dev-deployment-api]
-    concurrency:
-      group: stage-deployment-api-${{ github.ref }}
-      cancel-in-progress: true
-    uses: department-of-veterans-affairs/cds-gha-workflows/.github/workflows/application-ecs-deploy.yml@v7
-    with:
-      appName: ai-assist
-      repositoryName: ai-assist-api
-      imageTagToDeploy: ${{ github.sha }}
-      environmentToDeployTo: stage
-      copyConfigToS3: false  # API uses SSM parameters
+    needs: [dev-deployment]
+    runs-on: ubuntu-latest
+    environment: stage
+    env:
+      AWS_REGION: us-gov-east-1
+      IMAGE_TAG: ${{ github.sha }}
+      ENVIRONMENT: stage
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-session-name: ai-assist-deployment-role-pipeline
+          role-duration-seconds: 1800
+          role-to-assume: arn:aws:iam::123456789012:role/project/project-ai-assist-deployment-role
+          aws-region: us-gov-east-1
+
+      - name: Copy web config to S3
+        run: |
+          echo "Copying web config to S3"
+          aws s3 cp config/web-config-stage.js s3://ai-assist-example-config/config.js
+
+      - name: Tag and deploy web service
+        run: |
+          echo "Tagging web image for deployment"
+          MANIFEST=$(aws ecr batch-get-image --repository-name cds/ai-assist-web --image-ids imageTag=${{ github.sha }} --query 'images[].imageManifest' --output text)
+          aws ecr put-image --repository-name cds/ai-assist-web --image-tag stage --image-manifest "$MANIFEST" || true
+          
+          echo "Deploying web service"
+          aws ecs update-service --cluster stage-fargate-cluster --service stage-ai-assist-web --force-new-deployment
+
+      - name: Tag and deploy API service  
+        run: |
+          echo "Tagging API image for deployment"
+          MANIFEST=$(aws ecr batch-get-image --repository-name cds/ai-assist-api --image-ids imageTag=${{ github.sha }} --query 'images[].imageManifest' --output text)
+          aws ecr put-image --repository-name cds/ai-assist-api --image-tag stage --image-manifest "$MANIFEST" || true
+          
+          echo "Deploying API service" 
+          aws ecs update-service --cluster stage-fargate-cluster --service stage-ai-assist-api --force-new-deployment
+
+      - name: Wait for services to stabilize
+        run: |
+          echo "Waiting for web service to stabilize"
+          aws ecs wait services-stable --cluster stage-fargate-cluster --service stage-ai-assist-web
+          
+          echo "Waiting for API service to stabilize"
+          aws ecs wait services-stable --cluster stage-fargate-cluster --service stage-ai-assist-api
