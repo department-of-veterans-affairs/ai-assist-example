@@ -18,8 +18,8 @@ RUN --mount=type=secret,id=GITHUB_PACKAGE_TOKEN \
     echo "@department-of-veterans-affairs:registry=https://npm.pkg.github.com" >> .npmrc && \
     echo "//npm.pkg.github.com/:_authToken=$(cat /run/secrets/GITHUB_PACKAGE_TOKEN)" >> .npmrc
 
-# Install dependencies with increased timeout
-RUN pnpm install --frozen-lockfile --network-timeout 150000
+# Install dependencies (frozen lockfile automatically used with pnpm-lock.yaml)
+RUN pnpm install
 
 # Copy source code
 COPY apps/web ./apps/web
