@@ -72,25 +72,71 @@ jobs:
       - name: Build application
         run: pnpm build
 
-      - name: Build and Publish Web Docker Image to ECR
+      - name: Log in to GH Container registry
+        if: github.event.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        if: github.event.ref == 'refs/heads/main'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Web Docker Image
         if: github.event.ref == 'refs/heads/main'
         id: docker_build_web
-        uses: department-of-veterans-affairs/cds-gha-workflows/.github/actions/docker-publish@main
+        uses: docker/build-push-action@v6
         with:
-          appName: ai-assist-web
-          repositoryName: ai-assist-web
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          dockerFile: apps/web/Dockerfile
+          context: .
+          file: apps/web/Dockerfile
+          push: false
+          load: true
+          build-args: |
+            GIT_HASH=${{ github.sha }}
+          tags: |
+            016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-web:${{ github.sha }}
+          secrets: |
+            "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+            "GITHUB_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Build and Publish API Docker Image to ECR  
+      - name: Build API Docker Image
         if: github.event.ref == 'refs/heads/main'
         id: docker_build_api
-        uses: department-of-veterans-affairs/cds-gha-workflows/.github/actions/docker-publish@main
+        uses: docker/build-push-action@v6
         with:
-          appName: ai-assist-api
-          repositoryName: ai-assist-api
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          dockerFile: apps/api/Dockerfile
+          context: apps/api
+          file: apps/api/Dockerfile
+          push: false
+          load: true
+          build-args: |
+            GIT_HASH=${{ github.sha }}
+          tags: |
+            016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }}
+
+      - name: Configure AWS Credentials
+        if: github.event.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-session-name: ai-assist-deployment-role-pipeline
+          role-duration-seconds: 1800
+          role-to-assume: arn:aws:iam::123456789012:role/project/project-ai-assist-deployment-role
+          aws-region: us-gov-east-1
+
+      - name: Login to Amazon ECR
+        if: github.event.ref == 'refs/heads/main'
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push Web Docker Image to ECR
+        if: github.event.ref == 'refs/heads/main'
+        run: |
+          docker push 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-web:${{ github.sha }}
+
+      - name: Push API Docker Image to ECR
+        if: github.event.ref == 'refs/heads/main'
+        run: |
+          docker push 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }}
 
   dev-deployment-web:
     name: Deploy Web to Dev
