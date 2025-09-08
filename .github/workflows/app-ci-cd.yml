@@ -162,7 +162,7 @@ jobs:
       - name: Copy web config to S3
         run: |
           echo "Copying web config to S3"
-          aws s3 cp config/web-config-dev.js s3://ai-assist-example-config/config.js
+          aws s3 cp config/web-config-dev.js s3://ai-assist-example-config/web-config-dev.js
 
       - name: Tag and deploy web service
         run: |
@@ -202,21 +202,6 @@ jobs:
             echo "Latest failed API task: $API_TASK"
             aws ecs describe-tasks --cluster dev-fargate-cluster --tasks $API_TASK --query 'tasks[0].{StoppedReason:stoppedReason,ExitCode:containers[0].exitCode,LastStatus:lastStatus}'
           fi
-
-      - name: Get container logs
-        run: |
-          echo "=== WEB CONTAINER LOGS ==="
-          WEB_TASK=$(aws ecs list-tasks --cluster dev-fargate-cluster --service-name dev-ai-assist-web --desired-status STOPPED --query 'taskArns[0]' --output text)
-          if [ "$WEB_TASK" != "None" ]; then
-            aws logs get-log-events --log-group-name dev-ai-assist-web --log-stream-name "ecs/ai-assist-web/$(echo $WEB_TASK | cut -d'/' -f3)" --limit 50 --query 'events[*].[timestamp,message]' --output table || echo "No web logs found"
-          fi
-          
-          echo "=== API CONTAINER LOGS ==="
-          API_TASK=$(aws ecs list-tasks --cluster dev-fargate-cluster --service-name dev-ai-assist-api --desired-status STOPPED --query 'taskArns[0]' --output text)
-          if [ "$API_TASK" != "None" ]; then
-            aws logs get-log-events --log-group-name dev-ai-assist-api --log-stream-name "ecs/ai-assist-api/$(echo $API_TASK | cut -d'/' -f3)" --limit 50 --query 'events[*].[timestamp,message]' --output table || echo "No API logs found"
-          fi
-
       - name: Wait for services to stabilize (with timeout)
         run: |
           echo "Waiting for web service to stabilize (max 10 minutes)"
@@ -249,7 +234,7 @@ jobs:
       - name: Copy web config to S3
         run: |
           echo "Copying web config to S3"
-          aws s3 cp config/web-config-stage.js s3://ai-assist-example-config/config.js
+          aws s3 cp config/web-config-stage.js s3://ai-assist-example-config/web-config-stage.js
 
       - name: Tag and deploy web service
         run: |
