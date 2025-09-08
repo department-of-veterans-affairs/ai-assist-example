@@ -9,7 +9,13 @@ const script_dir = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, script_dir);
+
+  // Use base path only for production builds, not local development
+  const isProduction = mode === 'production';
+  const base = isProduction ? env.VITE_PUBLIC_URL || '/ai-assist/' : '/';
+
   return {
+    base,
     plugins: [react(), tsconfigPaths()],
     server: {
       port: Number(env.VITE_DEV_SERVER_PORT) || 3000,

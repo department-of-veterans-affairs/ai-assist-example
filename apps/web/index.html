@@ -8,8 +8,18 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Load environment configuration from S3 (production) or fallback to local -->
-    <script src="/config.js" onerror="console.warn('No config.js found - using local environment')"></script>
+    <!-- Load environment configuration from S3 (production only) -->
+    <script>
+      // Only load config.js in production (not localhost)
+      if (window.location.hostname !== 'localhost') {
+        const script = document.createElement('script');
+        script.src = '/config/config.js';
+        script.onerror = () => console.warn('No config.js found - using local environment');
+        document.head.appendChild(script);
+      } else {
+        console.log('Local development - skipping config.js load');
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
