@@ -182,13 +182,48 @@ jobs:
           echo "Deploying API service" 
           aws ecs update-service --cluster dev-fargate-cluster --service dev-ai-assist-api --force-new-deployment
 
-      - name: Wait for services to stabilize
+      - name: Debug service status
         run: |
-          echo "Waiting for web service to stabilize"
-          aws ecs wait services-stable --cluster dev-fargate-cluster --service dev-ai-assist-web
+          echo "=== WEB SERVICE STATUS ==="
+          aws ecs describe-services --cluster dev-fargate-cluster --services dev-ai-assist-web --query 'services[0].{Status:status,RunningCount:runningCount,PendingCount:pendingCount,FailedTasks:deployments[0].failedTasks,LastEvent:events[0].message}'
           
-          echo "Waiting for API service to stabilize"
-          aws ecs wait services-stable --cluster dev-fargate-cluster --service dev-ai-assist-api
+          echo "=== API SERVICE STATUS ==="
+          aws ecs describe-services --cluster dev-fargate-cluster --services dev-ai-assist-api --query 'services[0].{Status:status,RunningCount:runningCount,PendingCount:pendingCount,FailedTasks:deployments[0].failedTasks,LastEvent:events[0].message}'
+          
+          echo "=== RECENT FAILED TASKS ==="
+          WEB_TASK=$(aws ecs list-tasks --cluster dev-fargate-cluster --service-name dev-ai-assist-web --desired-status STOPPED --query 'taskArns[0]' --output text)
+          if [ "$WEB_TASK" != "None" ]; then
+            echo "Latest failed web task: $WEB_TASK"
+            aws ecs describe-tasks --cluster dev-fargate-cluster --tasks $WEB_TASK --query 'tasks[0].{StoppedReason:stoppedReason,ExitCode:containers[0].exitCode,LastStatus:lastStatus}'
+          fi
+          
+          API_TASK=$(aws ecs list-tasks --cluster dev-fargate-cluster --service-name dev-ai-assist-api --desired-status STOPPED --query 'taskArns[0]' --output text)
+          if [ "$API_TASK" != "None" ]; then
+            echo "Latest failed API task: $API_TASK"
+            aws ecs describe-tasks --cluster dev-fargate-cluster --tasks $API_TASK --query 'tasks[0].{StoppedReason:stoppedReason,ExitCode:containers[0].exitCode,LastStatus:lastStatus}'
+          fi
+
+      - name: Get container logs
+        run: |
+          echo "=== WEB CONTAINER LOGS ==="
+          WEB_TASK=$(aws ecs list-tasks --cluster dev-fargate-cluster --service-name dev-ai-assist-web --desired-status STOPPED --query 'taskArns[0]' --output text)
+          if [ "$WEB_TASK" != "None" ]; then
+            aws logs get-log-events --log-group-name dev-ai-assist-web --log-stream-name "ecs/ai-assist-web/$(echo $WEB_TASK | cut -d'/' -f3)" --limit 50 --query 'events[*].[timestamp,message]' --output table || echo "No web logs found"
+          fi
+          
+          echo "=== API CONTAINER LOGS ==="
+          API_TASK=$(aws ecs list-tasks --cluster dev-fargate-cluster --service-name dev-ai-assist-api --desired-status STOPPED --query 'taskArns[0]' --output text)
+          if [ "$API_TASK" != "None" ]; then
+            aws logs get-log-events --log-group-name dev-ai-assist-api --log-stream-name "ecs/ai-assist-api/$(echo $API_TASK | cut -d'/' -f3)" --limit 50 --query 'events[*].[timestamp,message]' --output table || echo "No API logs found"
+          fi
+
+      - name: Wait for services to stabilize (with timeout)
+        run: |
+          echo "Waiting for web service to stabilize (max 10 minutes)"
+          timeout 600 aws ecs wait services-stable --cluster dev-fargate-cluster --service dev-ai-assist-web || echo "Web service failed to stabilize within 10 minutes"
+          
+          echo "Waiting for API service to stabilize (max 10 minutes)"
+          timeout 600 aws ecs wait services-stable --cluster dev-fargate-cluster --service dev-ai-assist-api || echo "API service failed to stabilize within 10 minutes"
 
   stage-deployment:
     name: Deploy to Stage
