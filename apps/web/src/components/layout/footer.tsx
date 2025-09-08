@@ -1,3 +1,5 @@
+import FooterLogo from '../../assets/icons/va-footer-logo.svg';
+
 export function Footer() {
   return (
     <footer className="padding-3 width-full bg-primary-darker">
@@ -6,7 +8,7 @@ export function Footer() {
           <img
             alt="U.S. Department of Veterans Affairs"
             className="height-6"
-            src="/images/va-footer-logo.svg"
+            src={FooterLogo}
           />
         </div>
         <a

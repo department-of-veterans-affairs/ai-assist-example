@@ -13,7 +13,7 @@
       // Only load config.js in production (not localhost)
       if (window.location.hostname !== 'localhost') {
         const script = document.createElement('script');
-        script.src = '/config/config.js';
+        script.src = '/ai-assist/config/config.js';
         script.onerror = () => console.warn('No config.js found - using local environment');
         document.head.appendChild(script);
       } else {

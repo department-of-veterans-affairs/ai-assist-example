@@ -9,6 +9,7 @@ function App() {
       <RootLayout>
         <Routes>
           <Route element={<ChatPage />} path="/" />
+          <Route element={<ChatPage />} path="/index.html" />
         </Routes>
       </RootLayout>
     </AppProviders>

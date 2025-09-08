@@ -63,6 +63,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.get("/")
+async def root():
+    """Root endpoint for basic API info"""
+    return {"message": "AI Assist API", "status": "running", "docs": "/docs"}
+
+
 # Include routers with proper tags
 app.include_router(router=health.router, prefix="/api", tags=["health"])
 app.include_router(router=chat.router, prefix="/api", tags=["chat"])
