@@ -32,21 +32,24 @@ If no patient DFN is provided, ask for it first."""
 _orchestrator_instance: Agent | None = None
 
 
-def get_orchestrator_agent(with_mcp: bool = True) -> Agent:
+def get_orchestrator_agent(
+    with_mcp: bool = True, jwt_token: str | None = None
+) -> Agent:
     """
     Get or create the main orchestrator agent.
 
     Args:
         with_mcp: Whether to include MCP server connection.
             Set to False for testing without MCP.
+        jwt_token: Optional JWT token for MCP authentication.
 
     Returns:
         Agent: Configured orchestrator agent with or without Vista MCP tools
     """
     global _orchestrator_instance
 
-    # Return existing instance only if MCP requirement matches
-    if _orchestrator_instance is not None and with_mcp:
+    # Return existing instance only if MCP requirement matches and no JWT
+    if _orchestrator_instance is not None and with_mcp and not jwt_token:
         return _orchestrator_instance
 
     mcp_servers: list[MCPServer]
@@ -54,9 +57,16 @@ def get_orchestrator_agent(with_mcp: bool = True) -> Agent:
         try:
             from ..services.mcp_client import get_vista_mcp_client
 
-            # Get MCP client (will be created if needed)
-            vista_mcp = get_vista_mcp_client()
+            # Get MCP client with JWT if provided
+            vista_mcp = get_vista_mcp_client(jwt_token)
             mcp_servers = [vista_mcp]
+        except ImportError as e:
+            import logging
+
+            logging.getLogger(__name__).warning(
+                f"MCP module import failed: {e}. Running without MCP tools."
+            )
+            mcp_servers = []
         except Exception as e:
             import logging
 
@@ -87,7 +97,8 @@ def get_orchestrator_agent(with_mcp: bool = True) -> Agent:
         mcp_servers=mcp_servers,
     )
 
-    if with_mcp and mcp_servers:
+    # Only cache if no JWT (static config)
+    if with_mcp and mcp_servers and not jwt_token:
         _orchestrator_instance = agent
 
     return agent

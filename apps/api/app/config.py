@@ -42,7 +42,6 @@ class Settings(BaseSettings):
     vista_mcp_server_url: str = Field(
         default="http://localhost:8000/mcp", alias="VISTA_MCP_SERVER_URL"
     )
-    vista_api_token: str = Field(default="", alias="VISTA_API_TOKEN")
 
     # Rate limiting configuration (environment-specific)
     rate_limit_delay_ms: int = Field(
@@ -54,6 +53,23 @@ class Settings(BaseSettings):
         default=True,
         alias="ENABLE_RETRY_ON_RATE_LIMIT",
         description="Whether to automatically retry on rate limit errors",
+    )
+
+    # SSO Authentication Configuration
+    sso_auth_url: str = Field(
+        default="",
+        alias="SSO_AUTH_URL",
+        description="SSO authentication endpoint URL for token exchange",
+    )
+    sso_auth_referrer: str = Field(
+        default="",
+        alias="SSO_AUTH_REFERRER",
+        description="Referrer header for SSO authentication requests",
+    )
+    sso_auth_token_ttl: int = Field(
+        default=15,
+        alias="SSO_AUTH_TOKEN_TTL",
+        description="SSO token cache time-to-live in minutes",
     )
 
     # LangSmith Configuration

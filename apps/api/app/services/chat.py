@@ -8,6 +8,7 @@ import re
 from collections.abc import AsyncGenerator
 
 from agents import RunConfig, Runner
+from fastapi import Request
 from openai.types.responses import ResponseTextDeltaEvent
 
 from ..agents.orchestrator import get_orchestrator_agent
@@ -28,7 +29,10 @@ class ChatService:
         _ = create_azure_openai_client()
 
     async def generate_stream(
-        self, messages: list[ChatMessage], patient_dfn: str | None = None
+        self,
+        messages: list[ChatMessage],
+        patient_dfn: str | None = None,
+        request: Request | None = None,
     ) -> AsyncGenerator[str]:
         """Generate a streaming response"""
         last_user_message = ""
@@ -46,16 +50,34 @@ class ChatService:
         # Agent SDK will log its own activity
 
         vista_mcp = None
+        jwt_token = None
+
+        # Extract JWT token if request provided
+        if request and settings.sso_auth_url:
+            try:
+                from ..services.jwt_auth import jwt_auth_service
+
+                jwt_token_obj = await jwt_auth_service.get_jwt_from_request(request)
+                if jwt_token_obj:
+                    jwt_token = jwt_token_obj.access_token
+                    logger.info(
+                        f"Using JWT auth for user: {jwt_token_obj.user_info.email}"
+                    )
+            except ImportError as e:
+                logger.warning(f"JWT auth module import failed: {e}")
+            except Exception as e:
+                logger.warning(f"JWT auth failed, continuing without: {e}")
+
         try:
             # Apply rate limit delay if configured (environment-specific)
             if settings.rate_limit_delay_ms > 0:
                 await asyncio.sleep(settings.rate_limit_delay_ms / 1000)
 
-            # Get orchestrator (will initialize MCP if needed)
-            orchestrator = get_orchestrator_agent(with_mcp=True)
+            # Get orchestrator with JWT if available
+            orchestrator = get_orchestrator_agent(with_mcp=True, jwt_token=jwt_token)
 
             # Get MCP client for connection
-            vista_mcp = get_vista_mcp_client()
+            vista_mcp = get_vista_mcp_client(jwt_token)
             # Connect MCP server before using it
             await vista_mcp.connect()
 
