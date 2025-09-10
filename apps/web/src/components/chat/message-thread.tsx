@@ -2,7 +2,7 @@ import type { Message } from '@ai-sdk/react';
 import { Alert } from '@department-of-veterans-affairs/clinical-design-system';
 import clsx from 'clsx';
 import { useChatScroll } from '@/hooks/use-chat-scroll';
-import { LoadingIndicator } from './loading-indicator';
+import { LoadingIndicator } from '../loading-indicator';
 import { MessageItem } from './message-item';
 
 interface MessageThreadProps {
