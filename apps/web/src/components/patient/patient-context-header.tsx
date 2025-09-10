@@ -9,11 +9,7 @@ export function PatientContextHeader() {
   const [showSelector, setShowSelector] = useState(false);
 
   if (!patient) {
-    return (
-      <div className="padding-x-2 padding-y-2">
-        <PatientSelector />
-      </div>
-    );
+    return null;
   }
 
   return (
