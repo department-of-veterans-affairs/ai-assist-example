@@ -27,8 +27,17 @@ pnpm dev:api
 # Build all projects
 pnpm build
 
-# Run backend tests
+# Run all tests (frontend + backend)
 pnpm test
+
+# Run frontend tests only
+pnpm test:web
+
+# Run backend tests only
+pnpm test:api
+
+# Run frontend tests in watch mode
+pnpm test:watch
 
 # Initial setup
 pnpm setup
@@ -47,6 +56,12 @@ mise typecheck   # Type check all code
 
 # Auto-fix issues
 mise fix
+
+# Run tests with mise
+mise test        # Run all tests (frontend + backend)
+mise test:web    # Frontend tests only
+mise test:api    # Backend tests only
+mise test:watch  # Frontend tests in watch mode
 
 # Root-level biome check
 pnpm check       # Runs biome check on root files

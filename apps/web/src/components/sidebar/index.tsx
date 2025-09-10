@@ -6,7 +6,6 @@ import FirstPage from '@/assets/icons/first_page.svg';
 import HistoryIcon from '@/assets/icons/history.svg';
 import { useLayoutStore } from '@/stores/layout-store';
 import { RecentSection } from './recent-section';
-import { SummarySection } from './summary-section';
 
 export function Sidebar() {
   const leftCollapsed = useLayoutStore((state) => state.leftCollapsed);
@@ -84,7 +83,6 @@ export function Sidebar() {
       {/* Expanded sidebar content */}
       {!leftCollapsed && (
         <div className="flex-1 overflow-y-auto">
-          <SummarySection />
           <RecentSection />
         </div>
       )}

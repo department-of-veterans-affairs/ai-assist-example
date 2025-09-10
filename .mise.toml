@@ -122,6 +122,45 @@ cd "$MISE_PROJECT_ROOT"
 echo "✅ All checks passed!"
 """
 
+[tasks.test]
+description = "Run all tests"
+run = """
+set -e  # Exit on any error
+
+echo "🧪 Running frontend tests..."
+cd "$MISE_PROJECT_ROOT/apps/web"
+pnpm test --run
+cd "$MISE_PROJECT_ROOT"
+
+echo "🧪 Running backend tests..."
+cd "$MISE_PROJECT_ROOT/apps/api"
+uv run pytest
+cd "$MISE_PROJECT_ROOT"
+
+echo "✅ All tests passed!"
+"""
+
+[tasks."test:web"]
+description = "Run frontend tests"
+run = """
+cd "$MISE_PROJECT_ROOT/apps/web"
+pnpm test --run
+"""
+
+[tasks."test:api"]
+description = "Run backend tests"
+run = """
+cd "$MISE_PROJECT_ROOT/apps/api"
+uv run pytest
+"""
+
+[tasks."test:watch"]
+description = "Run frontend tests in watch mode"
+run = """
+cd "$MISE_PROJECT_ROOT/apps/web"
+pnpm test
+"""
+
 [tasks.fix]
 description = "Format and fix auto-fixable issues"
 run = """

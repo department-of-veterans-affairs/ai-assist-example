@@ -27,6 +27,7 @@
     "clsx": "^2.1.1",
     "fhirclient": "^2.6.0",
     "focus-trap-react": "^11.0.4",
+    "js-base64": "^3.7.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",

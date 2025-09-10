@@ -26,21 +26,9 @@ interface PatientStore {
   clearPatient: () => void;
 }
 
-// Hardcoded test patient: MARTINEZ, MARIA ELENA
-const TEST_PATIENT: Patient = {
-  dfn: '100023',
-  firstName: 'MARIA ELENA',
-  lastName: 'MARTINEZ',
-  description: 'Female Gulf War Veteran',
-  keyConditions: ['Fibromyalgia', 'Depression', 'MST'],
-  ssn: '123-45-6789',
-  dob: '01/15/1975',
-  mrn: 'MRN: 123456',
-};
-
 export const usePatientStore = create<PatientStore>((set) => ({
-  // Initialize with test patient
-  patient: TEST_PATIENT,
+  // Initialize with null - patient will be set by SMART launch or manually
+  patient: null,
 
   setPatient: (patient) => set({ patient }),
 

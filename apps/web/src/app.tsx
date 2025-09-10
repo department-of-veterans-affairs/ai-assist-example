@@ -1,18 +1,18 @@
 import { Route, Routes } from 'react-router';
 import { RootLayout } from '@/components/layout/root-layout';
 import ChatPage from '@/pages/chat';
-import { AppProviders } from '@/providers';
+import { SmartLaunchProvider } from '@/providers/smart-launch-provider';
 
 function App() {
   return (
-    <AppProviders>
+    <SmartLaunchProvider>
       <RootLayout>
         <Routes>
           <Route element={<ChatPage />} path="/" />
           <Route element={<ChatPage />} path="/index.html" />
         </Routes>
       </RootLayout>
-    </AppProviders>
+    </SmartLaunchProvider>
   );
 }
 

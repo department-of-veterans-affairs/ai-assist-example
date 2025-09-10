@@ -1,2 +1,4 @@
 echo "Running pre-push checks..."
 pnpm check:all
+echo "Running tests..."
+pnpm test

@@ -1,30 +1,19 @@
+import { useUpdatePatient } from '@department-of-veterans-affairs/cds-patient-context-lib';
 import type { ReactNode } from 'react';
-import { useSmartLaunch } from '@/hooks/use-smart-launch';
+import { usePatientFromFhir } from '@/hooks/use-patient-from-fhir';
+import { getEnvVar } from '@/utils/helpers';
 
 interface SmartLaunchProviderProps {
   children: ReactNode;
 }
 
 export function SmartLaunchProvider({ children }: SmartLaunchProviderProps) {
-  const { loading, error } = useSmartLaunch();
+  // Initialize CDS Patient Context Library for bidirectional updates
+  const smartContainerUrl = getEnvVar('VITE_SMART_CONTAINER_URL');
+  useUpdatePatient(smartContainerUrl);
 
-  if (loading) {
-    return (
-      <div className="padding-3 text-center">
-        <p>Initializing SMART on FHIR</p>
-      </div>
-    );
-  }
-
-  if (error && process.env.NODE_ENV === 'development') {
-    // SMART launch error handled - continuing with app for local dev
-    // biome-ignore lint/suspicious/noConsole: Intentional console.warn for debugging SMART launch errors in development
-    console.warn(
-      'SMART launch error:',
-      error,
-      '- continuing with app for local development'
-    );
-  }
+  // Load patient data if we have a FHIR client
+  usePatientFromFhir();
 
   return <>{children}</>;
 }
