@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import chat, health
+from .routers import chat, health, summary
 from .services.tracing import initialize_langsmith_tracing
 
 # Initialize LangSmith tracing if enabled
@@ -80,3 +80,4 @@ async def root():
 # Include routers with proper tags
 app.include_router(router=health.router, prefix="/api", tags=["health"])
 app.include_router(router=chat.router, prefix="/api", tags=["chat"])
+app.include_router(router=summary.router, prefix="/api/summary", tags=["summary"])

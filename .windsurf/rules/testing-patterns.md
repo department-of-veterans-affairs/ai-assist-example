@@ -1,0 +1,111 @@
+---
+trigger: glob
+description:
+globs: *.test.ts,*.test.tsx,*.spec.ts,*.spec.tsx,**/tests/**/*.py,test_*.py
+---
+
+# Testing Patterns
+
+Guidelines for testing in both frontend and backend applications.
+
+## Frontend Testing (React/TypeScript)
+
+### Test File Naming
+- Component tests: `component-name.test.tsx`
+- Utility tests: `utility-name.test.ts`
+- Place tests next to components or in `__tests__` directories
+
+### Test Structure
+```typescript
+import { render, screen } from '@testing-library/react';
+import { ComponentName } from './component-name';
+
+describe('ComponentName', () => {
+  it('should render correctly', () => {
+    render(<ComponentName prop="value" />);
+    expect(screen.getByText('Expected Text')).toBeInTheDocument();
+  });
+  
+  it('should handle user interactions', async () => {
+    const user = userEvent.setup();
+    render(<ComponentName />);
+    
+    await user.click(screen.getByRole('button'));
+    expect(/* assertion */).toBeTruthy();
+  });
+});
+```
+
+## Backend Testing (Python/FastAPI)
+
+### Test File Naming  
+- Test modules: `test_module_name.py`
+- Place in [apps/api/tests/](mdc:apps/api/tests/) directory
+
+### Test Structure
+```python
+import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+
+client = TestClient(app)
+
+class TestEndpoint:
+    def test_get_endpoint_success(self):
+        response = client.get("/api/v1/endpoint")
+        assert response.status_code == 200
+        assert response.json()["status"] == "success"
+    
+    @pytest.mark.asyncio
+    async def test_async_function(self):
+        result = await async_function()
+        assert result is not None
+```
+
+## Test Commands
+
+### Frontend
+```bash
+cd apps/web
+pnpm test           # Run all tests
+pnpm test:watch     # Watch mode
+pnpm test:coverage  # With coverage
+```
+
+### Backend  
+```bash
+cd apps/api
+uv run pytest                    # Run all tests
+uv run pytest -v                # Verbose output
+uv run pytest --cov=app         # With coverage
+uv run pytest tests/test_specific.py  # Specific test
+```
+
+## Testing Best Practices
+
+1. **Test Behavior**: Test what the component/function does, not how it does it
+2. **User-Centric**: Frontend tests should focus on user interactions
+3. **Fast Tests**: Keep unit tests fast, separate integration tests
+4. **Clear Names**: Test names should describe the scenario being tested
+5. **Arrange-Act-Assert**: Structure tests clearly with setup, action, and verification
+
+## Mock Patterns
+
+### Frontend Mocking
+```typescript
+// Mock external dependencies
+jest.mock('./api-client', () => ({
+  fetchData: jest.fn().mockResolvedValue({ data: 'test' })
+}));
+```
+
+### Backend Mocking
+```python
+from unittest.mock import patch, MagicMock
+
+@patch('app.services.external_service')
+def test_with_mock(mock_service):
+    mock_service.return_value = {"data": "test"}
+    result = function_under_test()
+    assert result["data"] == "test"
+```

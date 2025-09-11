@@ -1,0 +1,47 @@
+---
+trigger: always_on
+description:
+globs:
+---
+
+# AI Assist Project Structure
+
+This is a **monorepo** using **pnpm workspaces** with a Python FastAPI backend and React TypeScript frontend.
+
+## Main Entry Points
+
+- **Frontend**: [apps/web/src/main.tsx](mdc:apps/web/src/main.tsx) - React app entry point
+- **Backend**: [apps/api/main.py](mdc:apps/api/main.py) - FastAPI server entry point
+
+## Project Layout
+
+```
+ai-assist/
+├── apps/
+│   ├── web/          # React TypeScript frontend
+│   └── api/          # Python FastAPI backend
+├── docs/             # Project documentation
+└── scripts/          # Utility scripts
+```
+
+## Key Configuration Files
+
+- **Root**: [package.json](mdc:package.json) - Workspace scripts and dev dependencies
+- **Frontend**: [apps/web/biome.jsonc](mdc:apps/web/biome.jsonc) - Biome/Ultracite linting config
+- **Backend**: [apps/api/pyproject.toml](mdc:apps/api/pyproject.toml) - Python dependencies and tool configs
+- **Development**: [docker-compose.yml](mdc:docker-compose.yml) - Local development environment
+
+## Development Commands
+
+Run from project root:
+- `pnpm dev` - Start both frontend and backend
+- `pnpm dev:web` - Frontend only 
+- `pnpm dev:api` - Backend only
+- `pnpm check` - Run all linting and type checking
+- `pnpm format` - Format all code
+
+## Package Management
+
+- **Frontend**: pnpm (Node.js/TypeScript packages)
+- **Backend**: uv (Python packages and virtual environment)
+- **Root**: pnpm workspaces for orchestration
