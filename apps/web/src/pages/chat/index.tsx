@@ -6,13 +6,15 @@ import { usePatientStore } from '@/stores';
 export default function ChatPage() {
   const patient = usePatientStore((state) => state.patient);
 
-  const { messages, input, handleInputChange, handleSubmit, error, isLoading } =
+  const { messages, input, handleInputChange, handleSubmit, error, status } =
     useChat({
       api: '/api/chat',
       body: {
         patient_dfn: patient?.dfn,
       },
     });
+
+  const isLoading = status === 'streaming';
 
   return (
     <div className="display-flex height-full flex-column">

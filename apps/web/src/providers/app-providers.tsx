@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { QueryProvider } from './query-provider';
 import { SmartLaunchProvider } from './smart-launch-provider';
 
 interface AppProvidersProps {
@@ -9,5 +10,9 @@ interface AppProvidersProps {
  * Central composition of all application providers.
  */
 export function AppProviders({ children }: AppProvidersProps) {
-  return <SmartLaunchProvider>{children}</SmartLaunchProvider>;
+  return (
+    <QueryProvider>
+      <SmartLaunchProvider>{children}</SmartLaunchProvider>
+    </QueryProvider>
+  );
 }
