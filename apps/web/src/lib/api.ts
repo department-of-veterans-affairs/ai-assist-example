@@ -1,15 +1,15 @@
 /**
  * Get the API base URL based on the current environment
  * - Local development: '/api' (proxied by Vite dev server)
- * - Deployed environments: Uses VITE_API_URL from environment
+ * - Deployed environments: Uses VITE_API_URL + '/api'
  */
 function getApiBaseUrl(): string {
   // Use Vite's built-in environment variable access
   const apiUrl = import.meta.env.VITE_API_URL;
 
   if (apiUrl) {
-    // In deployed environments, use the full API service URL
-    return apiUrl;
+    // In deployed environments, append /api to the service URL
+    return `${apiUrl}/api`;
   }
 
   // Local development: use relative path that gets proxied
