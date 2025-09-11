@@ -1,6 +1,7 @@
 import { useChat } from '@ai-sdk/react';
 import { ChatInput } from '@/components/chat/chat-input';
 import { MessageThread } from '@/components/chat/message-thread';
+import { createApiUrl } from '@/lib/api';
 import { usePatientStore } from '@/stores';
 
 export default function ChatPage() {
@@ -8,7 +9,7 @@ export default function ChatPage() {
 
   const { messages, input, handleInputChange, handleSubmit, error, status } =
     useChat({
-      api: '/api/chat',
+      api: createApiUrl('chat'),
       body: {
         patient_dfn: patient?.dfn,
       },

@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
+import { fetchApi } from '@/lib/api';
 import type { CurrentUser } from '@/types/user';
 
 /**
  * Fetch current user information from the /me endpoint
  */
 async function fetchCurrentUser(): Promise<CurrentUser> {
-  const response = await fetch('/api/me');
+  const response = await fetchApi('me');
 
   if (!response.ok) {
     throw new Error('Failed to fetch current user');
