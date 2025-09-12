@@ -39,18 +39,15 @@ export function usePatientFromFhir() {
   useEffect(() => {
     const loadPatient = async () => {
       if (!client) {
-        // biome-ignore lint/suspicious/noConsole: Debugging patient loading
         console.log('No FHIR client available - not loading patient data');
         return;
       }
 
       try {
-        // biome-ignore lint/suspicious/noConsole: Debugging patient loading
         console.log('Loading patient data from FHIR client...');
 
         const fhirPatient: FHIRPatient = await client.patient.read();
 
-        // biome-ignore lint/suspicious/noConsole: Debugging patient data
         console.log('FHIR Patient data:', fhirPatient);
 
         const { firstName, lastName } = parsePatientName(fhirPatient);
@@ -70,12 +67,10 @@ export function usePatientFromFhir() {
           duz: '12345', // Default for SMART launcher
         };
 
-        // biome-ignore lint/suspicious/noConsole: Debugging patient data transformation
         console.log('Setting patient in store:', patientData);
 
         setPatient(patientData);
       } catch (error) {
-        // biome-ignore lint/suspicious/noConsole: Debugging patient loading errors
         console.error('Failed to load patient from FHIR:', error);
       }
     };

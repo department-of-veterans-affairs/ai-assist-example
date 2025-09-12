@@ -1,5 +1,5 @@
 ## Task
-Given an input JSON with medication grouping in the `data` field and a PatientDFN in the `patient_dfn` field, use the provided PatientDFN and an MCP Server with tools to retrieve up to 1825 days of labs and vitals, and the `n_most_recent` flag to request the 3 most recent labd and vitals per type. Integrate relevant labs and vitals into the input json.
+Given an input JSON with medication grouping in the `data` field and a PatientDFN in the `patient_dfn` field, use the provided PatientDFN and an MCP Server with tools to retrieve up to 1825 days of labs and vitals, and the `n_most_recent` flag to request the 3 most recent labs and vitals per type. Integrate relevant labs and vitals into the input json.
 
  Return a valid JSON with labs and vitals added to each medication group.
 
@@ -58,7 +58,7 @@ Use this to guide when linking lab and vital results to indication groups. Use l
       "reasoning": "string",
       "relevant_labs": [
         {
-          "lab_name": "string",
+          "name": "string",
           "values": [
             {
               "value": "string - preserve exact format from input",
@@ -70,9 +70,14 @@ Use this to guide when linking lab and vital results to indication groups. Use l
       ],
       "relevant_vitals": [
         {
-          "vital_name": "string",
-          "value": "string - preserve exact format from input", 
-          "date": "string - YYYY-MM-DD format"
+          "name": "string",
+          "values": [
+            {
+              "value": "string - preserve exact format from input",
+              "date": "string - YYYY-MM-DD format"
+            }
+          ],
+          "trend": "string - describe trend over time (e.g., 'last 3 blood pressure values uptrending', 'last 3 weight values stable')"
         }
       ]
     }

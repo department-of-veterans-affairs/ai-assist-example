@@ -11,7 +11,15 @@ import printIcon from '@/assets/icons/print.svg';
 import thumbsDownIcon from '@/assets/icons/thumbs-down.svg';
 import thumbsUpIcon from '@/assets/icons/thumbs-up.svg';
 import { LoadingIndicator } from '@/components/loading-indicator';
+import { fetchApi } from '@/lib/api';
 import { usePatientStore } from '@/stores';
+import type { MedicationSummary as MedicationSummaryType } from '@/types/medication-summary';
+import { MedicationSummary } from './medication-summary';
+
+type SummaryEnvelope = {
+  summary: MedicationSummaryType;
+  timestamp: Date;
+};
 
 /**
  * Clinical Summary Modal with trigger button
@@ -19,7 +27,7 @@ import { usePatientStore } from '@/stores';
  */
 export function ClinicalSummaryModal() {
   const modalRef = useRef<ModalRef>(null);
-  const [summaryContent, setSummaryContent] = useState<string>('');
+  const [summary, setSummary] = useState<SummaryEnvelope | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const patient = usePatientStore((state) => state.patient);
@@ -35,23 +43,20 @@ export function ClinicalSummaryModal() {
       // Simulate API call with delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Mock summary content
-      const mockSummary = `Mr. Anderson's care over the past six months has focused on the initial diagnosis and management of Hypertension and Type 2 Diabetes. His visits were centered on establishing a medication regimen, monitoring key health metrics, and providing education on lifestyle modifications.
+      const response = await fetchApi('summary/medications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ dfn: patient.dfn }),
+      });
 
-January: During his annual physical, Mr. Anderson's blood pressure was elevated at 155/92 mmHg, and routine blood work revealed a high A1c of 7.2%. Given these results, we initiated a new care plan. He was prescribed Lisinopril for his blood pressure and Metformin to manage his blood sugar. We also provided a referral to a VA nutritionist and an educational packet on managing newly diagnosed conditions. The importance of daily monitoring was stressed, and he was given a home blood pressure cuff.
-
-February: A follow-up telehealth call was scheduled to check on his progress. Mr. Anderson reported some mild dizziness in the first week, which he said had since resolved. He confirmed he was taking his medications as prescribed and was beginning to track his blood pressure readings at home. We encouraged him to continue with the new habits and noted the need for consistency.
-
-May: Mr. Anderson's follow-up lab results were reviewed during a visit. His A1c had improved to 6.7%, and his in-office blood pressure was 138/85 mmHg. We discussed the positive impact of his efforts and provided additional resources on exercise programs available through the VA. We also adjusted his Lisinopril dosage slightly to help him reach his target blood pressure goals.
-
-June: The final visit of this period was a check-in to confirm Mr. Anderson's new medication dosage was not causing any side effects. He reported no issues and expressed confidence in his ability to manage his conditions. We reviewed his progress and scheduled his next full check-up for a quarter from now.
-
-Mr. Anderson has demonstrated excellent adherence to his treatment plan, with significant progress in managing his newly diagnosed conditions.`;
-
-      setSummaryContent(mockSummary);
+      setSummary({
+        summary: JSON.parse(await response.text()),
+        timestamp: new Date(),
+      });
       setHasLoaded(true);
     } catch (error) {
-      // biome-ignore lint/suspicious/noConsole: Error logging
       console.error('Failed to fetch summary:', error);
     } finally {
       setIsLoading(false);
@@ -59,9 +64,9 @@ Mr. Anderson has demonstrated excellent adherence to his treatment plan, with si
   };
 
   const handleCopy = () => {
-    if (summaryContent) {
-      navigator.clipboard.writeText(summaryContent);
-      // biome-ignore lint/suspicious/noConsole: User feedback
+    if (summary?.summary) {
+      // todo: grab rendered content
+      navigator.clipboard.writeText(JSON.stringify(summary.summary));
       console.log('Copied to clipboard');
     }
   };
@@ -71,7 +76,6 @@ Mr. Anderson has demonstrated excellent adherence to his treatment plan, with si
   };
 
   const handleFeedback = (isPositive: boolean) => {
-    // biome-ignore lint/suspicious/noConsole: Placeholder for feedback
     console.log(isPositive ? 'Positive feedback' : 'Negative feedback');
   };
 
@@ -92,7 +96,7 @@ Mr. Anderson has demonstrated excellent adherence to his treatment plan, with si
         type="button"
       >
         <span className="line-height-3 flex-1 font-body-sm text-primary">
-          Process the past 6 months of patient history + medical notes
+          Generate Patient Medication-Problem Summary
         </span>
         <img
           alt="Launch"
@@ -119,12 +123,13 @@ Mr. Anderson has demonstrated excellent adherence to his treatment plan, with si
         <div className="display-flex height-full flex-column">
           {/* Modal Header - larger font to match Figma */}
           <div className="padding-3 border-base-light border-bottom-1px">
-            <h1
+            <h2
               className="margin-0 font-heading-xl"
               id="clinical-summary-heading"
             >
-              Process the past 6 months of patient history + medical notes
-            </h1>
+              Patient Medication Summary
+            </h2>
+            <div>Grouped by Problem with relevant Vitals and Labs</div>
           </div>
 
           {/* Patient Info Section - adjusted formatting */}
@@ -137,10 +142,10 @@ Mr. Anderson has demonstrated excellent adherence to his treatment plan, with si
                   {patient.dfn}, DOB {patient.dob || 'Unknown'})
                 </span>
               </div>
-              <div>
-                <strong className="font-body-md">Patient History:</strong>{' '}
-                <span className="font-body-md">March - May, 2025</span>
-              </div>
+              <span className="text-bold">
+                Generated:{' '}
+                {summary?.timestamp ? summary.timestamp.toLocaleString() : ''}
+              </span>
             </div>
           )}
 
@@ -152,14 +157,13 @@ Mr. Anderson has demonstrated excellent adherence to his treatment plan, with si
                 </div>
               )}
 
-              {!isLoading && summaryContent && (
-                <div className="line-height-body-3 font-body-md text-base-darker">
-                  {/* The summary content should go here */}
-                  {summaryContent}
+              {!isLoading && summary?.summary && (
+                <div className="line-height-body-3 font-body-md text-base-darker`">
+                  <MedicationSummary summary={summary.summary} />
                 </div>
               )}
 
-              {!(isLoading || summaryContent || hasLoaded) && (
+              {!(isLoading || summary?.summary || hasLoaded) && (
                 <div className="padding-5 text-center text-base">
                   Click to load patient summary
                 </div>

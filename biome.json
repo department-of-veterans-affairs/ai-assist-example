@@ -32,6 +32,13 @@
       },
       "performance": {
         "noImgElement": "off"
+      },
+      "suspicious": {
+        "noConsole": {
+          "options": {
+            "allow": ["assert", "error", "info", "warn"]
+          }
+        }
       }
     }
   }

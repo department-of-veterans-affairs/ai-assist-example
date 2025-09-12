@@ -27,6 +27,16 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          // uncomment to strip console and debugger statements in production builds
+          /*
+          drop_console: true,
+          drop_debugger: true,
+          */
+        },
+      },
       chunkSizeWarningLimit: 2100, // Increase to 2.1MB to accommodate VACDS
       rollupOptions: {
         output: {

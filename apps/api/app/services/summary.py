@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import json
 import logging
+import re
 from enum import Enum
 from types import MappingProxyType
 
@@ -84,7 +85,10 @@ class SummaryService:
                     detail="An internal server error occurred. Please try again later.",
                 )
 
-            return agent_result.final_output
+            # model often wants to return MD style quotes, strip if they are there
+            return re.sub(
+                r"^```json|```$", "", agent_result.final_output, flags=re.MULTILINE
+            ).strip()
 
         except Exception as e:
             logger.error(f"Stream error: {e!s}", exc_info=True)

@@ -7,5 +7,5 @@ class SummaryRequest(BaseModel):
     """Summary request payload"""
 
     patient_dfn: str | None = Field(
-        alias="patientDFN"
+        alias="dfn"
     )  # Optional patient DFN for Vista queries

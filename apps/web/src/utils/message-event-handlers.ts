@@ -21,7 +21,6 @@ export const messageEventListener =
           decode(event.data.smartOnFhirEvent)
         );
 
-        // biome-ignore lint/suspicious/noConsole: Needed for debugging CDS Console communication
         console.log('Received incoming CDS Console message:', parsedMessage);
 
         // Clear session storage to avoid refreshed page picking up existing SMART client from cache
@@ -36,7 +35,6 @@ export const messageEventListener =
         // Navigate to the new app URL with patient context
         window.location.href = parsedMessage.appUrlToLoad;
       } catch (error) {
-        // biome-ignore lint/suspicious/noConsole: Needed for debugging CDS Console errors
         console.error('Failed to parse SMART on FHIR message:', error);
       }
     }

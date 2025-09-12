@@ -46,16 +46,14 @@ async function initializeApp() {
   const code = urlParams.get('code');
   const state = urlParams.get('state');
 
-  // biome-ignore lint/suspicious/noConsole: Debugging URL parameters
   console.log('Full URL:', window.location.href);
-  // biome-ignore lint/suspicious/noConsole: Debugging URL parameters
+
   console.log('All URL params:', Object.fromEntries(urlParams));
-  // biome-ignore lint/suspicious/noConsole: Debugging URL parameters
+
   console.log('SMART params:', { launch, iss, code, state });
 
   // Handle both initial SMART launch and OAuth callback
   if ((launch && iss) || (code && state)) {
-    // biome-ignore lint/suspicious/noConsole: Debugging SMART flow
     console.log('Detected SMART flow - initializing FHIR client...');
 
     // Let FHIR client handle the OAuth flow automatically
@@ -74,19 +72,17 @@ async function initializeApp() {
       })
       .then(
         (client: Client) => {
-          // biome-ignore lint/suspicious/noConsole: Debugging SMART launch success
           console.log('SMART OAuth successful, client ready:', client);
           renderApp(client);
         },
         (error) => {
-          // biome-ignore lint/suspicious/noConsole: Debugging SMART launch errors
           console.error('SMART OAuth failed:', error);
           renderApp(undefined);
         }
       );
   } else {
     // No SMART parameters - render app normally
-    // biome-ignore lint/suspicious/noConsole: Debugging local development
+
     console.log('No SMART parameters - running in local development mode');
     renderApp(undefined);
   }

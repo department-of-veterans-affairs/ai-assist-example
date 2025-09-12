@@ -27,7 +27,7 @@ async def medications_summary(request: SummaryRequest):
             content=await summary_service.generate_summary(
                 SummaryService.SummaryType.MEDICATIONS, patient_dfn=request.patient_dfn
             ),
-            media_type="text/event-stream",
+            media_type="application/json",
             headers={
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",

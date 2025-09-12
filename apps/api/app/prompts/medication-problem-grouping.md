@@ -58,7 +58,6 @@ Exclude generic medical supplies such as:
 
 **You must return ONLY valid JSON in exactly this structure:**
 
-```json
 {
   "groups": [
     {
@@ -78,7 +77,7 @@ Exclude generic medical supplies such as:
       "reasoning": "string - explanation of the problem list matching"
     }
   ]
-}```
+}
 
 **DO NOT PREFACE THE JSON STRUCTURE WITH ANYTHING ELSE.**
 **DO NOT FOLLOW THE JSON STRUCTURE WITH ANYTHING ELSE.**
