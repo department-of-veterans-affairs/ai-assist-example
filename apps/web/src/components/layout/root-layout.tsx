@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
+import { SummarySection } from '@/components/clinical-summary';
+import { RecentSection } from '@/components/patient/recent-section';
 import { Sidebar } from '@/components/sidebar';
 import { Footer } from './footer';
 import { Header } from './header';
 
-interface RootLayoutProps {
-  children: ReactNode;
-}
+type RootLayoutProps = PropsWithChildren;
 
 export function RootLayout({ children }: RootLayoutProps) {
   return (
@@ -13,7 +13,12 @@ export function RootLayout({ children }: RootLayoutProps) {
       <Header />
       <div className="display-flex flex-1 overflow-hidden">
         <main className="flex-1 overflow-y-auto bg-white">{children}</main>
-        <Sidebar />
+
+        {/* Sidebar */}
+        <Sidebar>
+          <SummarySection />
+          <RecentSection />
+        </Sidebar>
       </div>
       <Footer />
     </div>

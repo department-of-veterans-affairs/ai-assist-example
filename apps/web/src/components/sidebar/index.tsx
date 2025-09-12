@@ -1,14 +1,15 @@
 import { Button } from '@department-of-veterans-affairs/clinical-design-system';
 import clsx from 'clsx';
+import type { PropsWithChildren } from 'react';
 import AttachmentsIcon from '@/assets/icons/attachments.svg';
 import Close from '@/assets/icons/close.svg';
 import FirstPage from '@/assets/icons/first_page.svg';
 import HistoryIcon from '@/assets/icons/history.svg';
 import { useLayoutStore } from '@/stores/layout-store';
-import { RecentSection } from './recent-section';
-import { SummarySection } from './summary-section';
 
-export function Sidebar() {
+type SidebarProps = PropsWithChildren;
+
+export function Sidebar({ children }: SidebarProps) {
   const leftCollapsed = useLayoutStore((state) => state.leftCollapsed);
   const toggleLeftSidebar = useLayoutStore((state) => state.toggleLeftSidebar);
 
@@ -81,13 +82,7 @@ export function Sidebar() {
         </div>
       )}
 
-      {/* Expanded sidebar content */}
-      {!leftCollapsed && (
-        <div className="flex-1 overflow-y-auto">
-          <SummarySection />
-          <RecentSection />
-        </div>
-      )}
+      {children}
     </aside>
   );
 }
