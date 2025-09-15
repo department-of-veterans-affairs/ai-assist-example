@@ -84,6 +84,4 @@ Use this to guide when linking lab and vital results to indication groups. Use l
   ]
 }
 
-**DO NOT PREFACE THE JSON STRUCTURE WITH ANYTHING ELSE.**
-**DO NOT FOLLOW THE JSON STRUCTURE WITH ANYTHING ELSE.**
-**RETURN ONLY VALID JSON OBJECT**
+**CRITICAL: Return only the JSON object. Do not include any explanatory text, markdown formatting, or code blocks. The response must be pure, valid JSON that can be parsed directly.**

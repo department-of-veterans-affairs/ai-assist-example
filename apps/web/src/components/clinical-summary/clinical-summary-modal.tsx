@@ -40,9 +40,6 @@ export function ClinicalSummaryModal() {
 
     setIsLoading(true);
     try {
-      // Simulate API call with delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
       const response = await fetchApi('summary/medications', {
         method: 'POST',
         headers: {
@@ -51,8 +48,13 @@ export function ClinicalSummaryModal() {
         body: JSON.stringify({ dfn: patient.dfn }),
       });
 
+      const parsedSummary = JSON.parse(await response.text());
+      console.log(typeof parsedSummary);
+      if (typeof summary !== 'object') {
+        throw new Error('Invalid summary response');
+      }
       setSummary({
-        summary: JSON.parse(await response.text()),
+        summary: parsedSummary,
         timestamp: new Date(),
       });
       setHasLoaded(true);

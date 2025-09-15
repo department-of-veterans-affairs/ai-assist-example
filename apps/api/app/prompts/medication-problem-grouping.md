@@ -10,7 +10,12 @@ The medication tool will return JSON with a medication list that may contain var
 - **sig**: Directions for use/instructions
 - **indication**: Medical reason for prescription (may or may not be explicitly stated)
 - **vaStatus**: Active, pending, discontinued
-- **lastFilled**: Date the medication was last filled in ISO8601 format (YYYY-MM-DD)
+- **Date ordered**: Date the medication was ordered in ISO8601 format (YYYY-MM-DD)
+- **Date last filled**: Date the medication was last filled in ISO8601 format (YYYY-MM-DD)
+- **fillsAllowed**: The number of fills allowed
+- **fillsRemaining**: The number of fills remaining
+- **provider**: The name of the provider
+- **"drugClassName"**: Broad therapeutic category for the medication
 
 **use the `days_back` flag to request medications from the last 183 days**
 **set the `return_all_active_and_pending` flag to ensure active and pending medications are returned**
@@ -47,11 +52,11 @@ Exclude generic medical supplies such as:
 ## Grouping Guidelines
 
 ### Key Requirements
-1. **Number groups sequentially** starting with 1. Each group should represent a unique condition or indication.
+1. **Number groups sequentially** starting with 1. Each group should represent a unique condition or indication. Use the input indication or drug class name to inform the indication.
 2. **Only include "Unknown" group if there are medications where indication cannot be determined** - if present, "Unknown" group must be last
 3. **Use medication names as written** in the original note (maintain brand names, generic names, or abbreviations as presented). Medications with the same name should be treated as separate items. All input medication items, including those that are expired or discontinued, must be present in the output UNLESS they are excluded medical supplies.
 4. **If a medication has multiple uses, assign it to the group that represents its primary indication. Do not list the same medication in multiple groups.**
-5. **Extract only available information**: If dose, route, or frequency is missing from the original note, leave as null.
+5. **Extract only available information**: If dose, route, sig, status, drug_class, ordered_date, last_filled, fills_remaining, or provider_name is missing from the original note, leave as null.
 6. **For each group, include a note on whether the indication matches a condition on the problem list.**
 
 ## Required Output Format
@@ -70,7 +75,12 @@ Exclude generic medical supplies such as:
           "route": "string or null - administration method if available",
           "sig": "string or null - instructions for use if available",
           "status": "string or null - active/pending/discontinued/expired if available",
-          "last_filled": "string or null - the date the medication was last filled in ISO8601 format (YYYY-MM-DD)"
+          "drug_class": "string or null - broad therapeutic category for the medication",
+          "ordered_date": "string or null - the date the medication was ordered in mm/dd/yyyy format",
+          "last_filled": "string or null - the date the medication was last filled in mm/dd/yyyy format",
+          "fills_allowed": "int or null - the number of fills allowed",
+          "fills_remaining": "int or null - the number of fills remaining",
+          "provider_name": "string or null - the name of the provider"
         }
       ],
       "problem_list_match_type": "Exact | Approximate | Not on Problem List",
@@ -79,6 +89,4 @@ Exclude generic medical supplies such as:
   ]
 }
 
-**DO NOT PREFACE THE JSON STRUCTURE WITH ANYTHING ELSE.**
-**DO NOT FOLLOW THE JSON STRUCTURE WITH ANYTHING ELSE.**
-**RETURN ONLY VALID JSON**
+**CRITICAL: Return only the JSON object. Do not include any explanatory text, markdown formatting, or code blocks. The response must be pure, valid JSON that can be parsed directly.**

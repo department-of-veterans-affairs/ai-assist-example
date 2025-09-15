@@ -26,18 +26,35 @@ function Assessment({ reasoning, match }: AssessmentProps) {
   );
 }
 
+function med_detail_row(med: Medication) {
+  const details = [
+    ...(med.provider_name ? [`Provider: ${med.provider_name}`] : []),
+    ...(med.ordered_date
+      ? [`Ordered: ${new Date(med.ordered_date).toLocaleDateString()}`]
+      : []),
+    ...(med.last_filled
+      ? [`Last Filled: ${new Date(med.last_filled).toLocaleDateString()}`]
+      : []),
+    ...(med.fills_remaining ? [`Fills Remaining: ${med.fills_remaining}`] : []),
+  ];
+  return details.length > 0 ? details.join('; ') : null;
+}
+
 function RegimenSection({ medications }: { medications: Medication[] }) {
+  const medRows = medications.map((med) => {
+    const medDetail = med_detail_row(med);
+    return (
+      <div className="margin-left-2" key={med.name}>
+        {med.name || 'None'} {med.status && `(${med.status}) `}|{' '}
+        {med.dose || 'None'} | {med.route || 'None'} | {med.sig || 'None'}
+        {medDetail && <div className="margin-left-2">{medDetail}</div>}
+      </div>
+    );
+  });
   return (
     <div>
       <div className="margin-top-2">Regimen:</div>
-      {medications.map((med) => (
-        <div className="margin-left-2" key={med.name}>
-          <div>
-            {med.name || 'None'} | {med.dose || 'None'} | {med.route || 'None'}{' '}
-            | {med.sig || 'None'} {med.status && `(${med.status}) `}
-          </div>
-        </div>
-      ))}
+      {medRows}
     </div>
   );
 }
