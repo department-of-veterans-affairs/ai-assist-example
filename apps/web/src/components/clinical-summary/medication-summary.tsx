@@ -74,9 +74,9 @@ function VitalsLabsSection({
           <div>
             {[...labs, ...vitals].map((lab_or_vital) => (
               <div key={lab_or_vital.name}>
-                {lab_or_vital.values.map((value) => (
+                {lab_or_vital.values.map((value, index) => (
                   <div
-                    key={`${lab_or_vital.name}_${value.date}`}
+                    key={`${lab_or_vital.name}_${value.date}_${index}`}
                   >{`${lab_or_vital.name.toLocaleUpperCase()}: ${value.value} (${new Date(value.date).toLocaleDateString()})`}</div>
                 ))}
                 <div className="margin-bottom-1">
