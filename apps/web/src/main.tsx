@@ -23,7 +23,7 @@ function renderApp(client: Client | undefined) {
 
   root.render(
     <StrictMode>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <FhirClientProvider client={client}>
           <App />
         </FhirClientProvider>
