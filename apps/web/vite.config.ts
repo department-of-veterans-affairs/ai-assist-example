@@ -27,6 +27,10 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
+      define: {
+        'process.env.NODE_ENV': JSON.stringify(env.NODE_ENV),
+        global: 'window',
+      },
       minify: 'terser',
       terserOptions: {
         compress: {
