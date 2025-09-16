@@ -38,6 +38,9 @@ importers:
       '@ai-sdk/react':
         specifier: ^1.2.12
         version: 1.2.12(react@19.1.1)(zod@3.25.76)
+      '@datadog/browser-logs':
+        specifier: ^6.19.0
+        version: 6.19.0
       '@department-of-veterans-affairs/cds-patient-context-lib':
         specifier: ^1.0.5
         version: 1.0.5
@@ -850,6 +853,17 @@ packages:
   '@csstools/css-tokenizer@3.0.4':
     resolution: {integrity: sha512-Vd/9EVDiu6PPJt9yAh6roZP6El1xHrdvIVGjyBsHR0RYwNHgL7FJPyIIW4fANJNG6FtyZfvlRPpFI4ZM/lubvw==}
     engines: {node: '>=18'}
+
+  '@datadog/browser-core@6.19.0':
+    resolution: {integrity: sha512-cyqmTXJlysZ3Tx/ZWm3dnDCUh3BT4ndtkkoBKqgEfqpM6DkUSnEFdVtsiF0gvcAkkqassaCq7OIzKo0vR24Qww==}
+
+  '@datadog/browser-logs@6.19.0':
+    resolution: {integrity: sha512-Kiz/5JDuJzisW3U8s+aBYwHJO/3XLzB/C6Tk8m31VzjrLhrKFkGPFUxSHvC0RSUoWsipmauf6qPGPLohaWfP8w==}
+    peerDependencies:
+      '@datadog/browser-rum': 6.19.0
+    peerDependenciesMeta:
+      '@datadog/browser-rum':
+        optional: true
 
   '@department-of-veterans-affairs/cds-patient-context-lib@1.0.5':
     resolution: {integrity: sha512-L6Q5WFwTjnE0Yu9pggazc+Sx6Kd0C5BDyI/NJaVx4vIoQyei74vjHcaebc6+daFb9I24ZmhosBvPcPx0OVPW5Q==, tarball: https://npm.pkg.github.com/download/@department-of-veterans-affairs/cds-patient-context-lib/1.0.5/9bf829feb1b0728c618f46176387255c0201f518}
@@ -5914,6 +5928,12 @@ snapshots:
 
   '@csstools/css-tokenizer@3.0.4': {}
 
+  '@datadog/browser-core@6.19.0': {}
+
+  '@datadog/browser-logs@6.19.0':
+    dependencies:
+      '@datadog/browser-core': 6.19.0
+
   '@department-of-veterans-affairs/cds-patient-context-lib@1.0.5':
     dependencies:
       react: 18.3.1
@@ -6737,7 +6757,9 @@ snapshots:
       metro-runtime: 0.83.1
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
     optional: true
 
   '@react-native/normalize-colors@0.79.5':

@@ -6,9 +6,15 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import App from './app';
+import { initDatadogLogger } from './lib/logger';
 import { FhirClientProvider } from './providers/fhir-client-provider';
 import { getEnvVar } from './utils/helpers';
 import { setupMessageEventListener } from './utils/message-event-handlers';
+
+// Initialize Datadog logger in production
+if (!import.meta.env.DEV) {
+  initDatadogLogger();
+}
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -46,11 +52,21 @@ async function initializeApp() {
   const code = urlParams.get('code');
   const state = urlParams.get('state');
 
-  console.log('Full URL:', window.location.href);
-
-  console.log('All URL params:', Object.fromEntries(urlParams));
-
-  console.log('SMART params:', { launch, iss, code, state });
+  console.log('**** env ****', {
+    launch,
+    iss,
+    code,
+    state,
+    url: window.location.href,
+    clientId: getEnvVar('VITE_AUTH_CLIENT_ID'),
+    scope: getEnvVar('VITE_AUTH_SCOPES'),
+    redirectUri: getEnvVar('VITE_AUTH_REDIRECT_URI', 'index.html'),
+    pkceMode: getEnvVar('VITE_AUTH_PKCE_MODE', 'unsafeV1') as
+      | 'ifSupported'
+      | 'required'
+      | 'disabled'
+      | 'unsafeV1',
+  });
 
   // Handle both initial SMART launch and OAuth callback
   if ((launch && iss) || (code && state)) {
