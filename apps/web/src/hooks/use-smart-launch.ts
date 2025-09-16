@@ -2,8 +2,8 @@ import type { Patient as FHIRPatient } from 'fhir/r4';
 import FHIR from 'fhirclient';
 import type Client from 'fhirclient/lib/Client';
 import { useEffect, useState } from 'react';
+import { CONFIG } from '@/config';
 import { type Patient, usePatientStore } from '@/stores/patient-store';
-import { getEnvVar } from '@/utils/helpers';
 
 interface LaunchContext {
   patient: string; // ICN
@@ -38,16 +38,8 @@ function validateLaunchContext(data: unknown): LaunchContext {
 
 async function initializeFhirClient(iss: string) {
   return await FHIR.oauth2.init({
-    clientId: getEnvVar('VITE_AUTH_CLIENT_ID'),
-    scope: getEnvVar('VITE_AUTH_SCOPES'),
-    redirectUri: getEnvVar('VITE_AUTH_REDIRECT_URI', 'index.html'),
-    pkceMode: getEnvVar('VITE_AUTH_PKCE_MODE', 'unsafeV1') as
-      | 'ifSupported'
-      | 'required'
-      | 'disabled'
-      | 'unsafeV1',
+    ...CONFIG,
     iss,
-    completeInTarget: true,
   });
 }
 

@@ -5,11 +5,11 @@ import {
   TextInput,
 } from '@department-of-veterans-affairs/clinical-design-system';
 import { useState } from 'react';
-import { getEnvVar } from '@/utils/helpers';
+import { CONFIG } from '@/config';
 
 export function PatientSelector() {
   const [icn, setIcn] = useState('');
-  const smartContainerUrl = getEnvVar('VITE_SMART_CONTAINER_URL');
+  const smartContainerUrl = CONFIG.smartOnFhirContainerUrl;
   const { updatePatient, errorMessage, isLoading, isSuccess } =
     useUpdatePatient(smartContainerUrl);
 

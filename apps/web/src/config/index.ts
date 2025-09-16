@@ -32,14 +32,17 @@ export const CONFIG: Config = {
     'launch fhirUser openid profile patient/Patient.read'
   ),
   redirectUri: getEnvVar('VITE_AUTH_REDIRECT_URI', 'index.html'),
-  pkceMode: getEnvVar('VITE_AUTH_PKCE_MODE', 'unsafeV1') as AuthPKCEMode,
+  pkceMode: getEnvVar('VITE_AUTH_PKCE_MODE') as AuthPKCEMode,
   iss: getEnvVar('VITE_AUTH_ISS', 'https://launch.smarthealthit.org/v/r4/fhir'),
   smartOnFhirContainerUrl: getEnvVar(
     'VITE_SMART_CONTAINER_URL',
-    'https://dev.cds.med.example.com/smart-container/'
+    'https://staging.cds.med.example.com/smart-container/'
   ),
   completeInTarget: true,
-  featureFlags: {
-    fhirAuth: true,
-  },
+  featureFlags: getEnvVar(
+    'VITE_FEATURE_FLAGS',
+    JSON.stringify({
+      fhirAuth: true,
+    })
+  ) as FeatureFlags,
 } as const;
