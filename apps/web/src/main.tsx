@@ -107,7 +107,7 @@ if (CONFIG.featureFlags?.fhirAuth) {
   // REMOVE ME
   console.log('**** PARAMS ****', {
     launch,
-    iss: iss || CONFIG.iss,
+    iss,
     code,
     state,
     url: window.location.href,
