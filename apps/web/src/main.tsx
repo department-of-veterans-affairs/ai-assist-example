@@ -117,7 +117,7 @@ if (CONFIG.featureFlags?.fhirAuth) {
     '**** API URL ****',
     import.meta.env.VITE_API_URL || window.env.API_URL
   );
-  FHIR.oauth2.init(CONFIG).then(
+  FHIR.oauth2.init({ ...CONFIG, iss }).then(
     (client: Client) => {
       renderApp(client);
     },
