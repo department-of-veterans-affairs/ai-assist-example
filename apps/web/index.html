@@ -8,30 +8,11 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Load environment configuration from S3 (production only) -->
-    <script>
-      // Only load config.js in production (not localhost)
-      if (window.location.hostname !== 'localhost') {
-        // Create a promise to track config loading
-        window.configReady = new Promise((resolve) => {
-          const script = document.createElement('script');
-          script.src = '/ai-assist/config/config.js';
-          script.onload = () => {
-            console.log('Config loaded successfully');
-            resolve();
-          };
-          script.onerror = () => {
-            console.warn('No config.js found - using local environment');
-            resolve();
-          };
-          document.head.appendChild(script);
-        });
-      } else {
-        console.log('Local development - skipping config.js load');
-        // Resolve immediately for local development
-        window.configReady = Promise.resolve();
-      }
-    </script>
+    <!-- Load environment configuration -->
+    <!-- For local dev: loads from /config.js -->
+    <!-- For production: both files load, but /config/config.js overwrites with env-specific values -->
+    <script src="/config.js"></script>
+    <script src="/config/config.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

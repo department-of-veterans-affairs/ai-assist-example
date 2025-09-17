@@ -4,9 +4,8 @@
  * - Deployed environments: Uses VITE_API_URL + '/api'
  */
 function getApiBaseUrl(): string {
-  // Check window.env first (production config from S3), then import.meta.env (local dev)
-  const windowEnv = (window as unknown as { env?: Record<string, string> }).env;
-  const apiUrl = windowEnv?.VITE_API_URL ?? import.meta.env.VITE_API_URL;
+  // Use Vite's environment variable for API URL (build-time configuration)
+  const apiUrl = import.meta.env.VITE_API_URL || window.env.API_URL;
 
   if (apiUrl) {
     // In deployed environments, append /api to the service URL
