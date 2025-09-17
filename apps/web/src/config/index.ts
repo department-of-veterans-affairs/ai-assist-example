@@ -23,17 +23,13 @@ export interface Config {
 }
 
 export const CONFIG: Config = {
-  hostEnv: window.env.HOST_ENV || 'dev',
-  clientId: window.env.AUTH_CLIENT_ID || 'Lighthouse_Sandbox_3_NP',
-  scope:
-    window.env.AUTH_SCOPES ||
-    'launch fhirUser openid profile patient/Patient.read',
-  redirectUri: window.env.AUTH_REDIRECT_URI || 'index.html',
-  pkceMode: (window.env.AUTH_PKCE_MODE as AuthPKCEMode) || 'required',
+  hostEnv: window.env.HOST_ENV,
+  clientId: window.env.AUTH_CLIENT_ID,
+  scope: window.env.AUTH_SCOPES,
+  redirectUri: window.env.AUTH_REDIRECT_URI,
+  pkceMode: window.env.AUTH_PKCE_MODE as AuthPKCEMode,
   iss: window.env.AUTH_ISS || 'https://launch.smarthealthit.org/v/r4/fhir',
-  smartOnFhirContainerUrl:
-    window.env.SMART_CONTAINER_URL ||
-    'https://staging.cds.med.example.com/smart-container/',
+  smartOnFhirContainerUrl: window.env.SMART_CONTAINER_URL,
   completeInTarget: true,
   featureFlags: window.env.FEATURE_FLAGS || { fhirAuth: true },
 } as const;
