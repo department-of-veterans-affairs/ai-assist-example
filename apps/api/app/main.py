@@ -1,5 +1,4 @@
 import logging
-import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -40,7 +39,7 @@ async def lifespan(_app: FastAPI):
 # Root path based on environment (use prefix only when deployed, not localhost)
 # In local development, we don't set ROOT_PATH_PREFIX
 # In ECS deployment, terraform sets ROOT_PATH_PREFIX="/ai-assist-api"
-root_path = os.getenv("ROOT_PATH_PREFIX", "")
+root_path = settings.root_path_prefix
 
 # Enhanced FastAPI app with proper OpenAPI configuration
 app = FastAPI(

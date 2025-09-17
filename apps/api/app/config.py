@@ -1,3 +1,4 @@
+import os
 from typing import ClassVar
 
 from pydantic import Field, field_validator
@@ -5,8 +6,19 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """
+    Application settings loaded from environment variables.
+
+    In production/staging: Only loads from actual environment variables
+    In development/test: Also loads from .env file for convenience
+    """
+
+    # Only load .env file in non-production environments
+    _env: str = os.getenv("ENVIRONMENT", "development").lower()
+    _load_dotenv: bool = _env not in ["prod", "production", "stage", "staging"]
+
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
-        env_file=".env",
+        env_file=".env" if _load_dotenv else None,
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",  # Ignore unknown env vars
@@ -21,6 +33,7 @@ class Settings(BaseSettings):
 
     # API configuration
     api_prefix: str = "/api"
+    root_path_prefix: str = Field(default="", alias="ROOT_PATH_PREFIX")
 
     # Logging
     log_level: str = "INFO"
@@ -107,10 +120,27 @@ class Settings(BaseSettings):
     @field_validator("environment")
     @classmethod
     def validate_environment(cls, v: str) -> str:
-        allowed = {"development", "staging", "production", "test"}
-        if v.lower() not in allowed:
+        """Normalize environment names to standard values."""
+        v_lower = v.lower()
+
+        # Map common variations to standard names
+        env_mapping = {
+            "dev": "development",
+            "develop": "development",
+            "development": "development",
+            "stage": "staging",
+            "staging": "staging",
+            "prod": "production",
+            "production": "production",
+            "test": "test",
+            "testing": "test",
+        }
+
+        if v_lower not in env_mapping:
+            allowed = list(env_mapping.keys())
             raise ValueError(f"Environment must be one of: {allowed}")
-        return v.lower()
+
+        return env_mapping[v_lower]
 
     @property
     def is_development(self) -> bool:
@@ -119,6 +149,17 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.environment == "production"
+
+    @property
+    def is_dev_mode(self) -> bool:
+        """
+        Check if running in development mode (local development).
+
+        In your deployments, you always set ROOT_PATH_PREFIX="/ai-assist-api"
+        Locally, this is not set.
+        """
+        # Use ROOT_PATH_PREFIX as the marker - it's set in all deployments
+        return not self.root_path_prefix
 
 
 settings = Settings()

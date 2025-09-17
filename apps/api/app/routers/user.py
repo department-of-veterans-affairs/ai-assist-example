@@ -35,15 +35,15 @@ async def get_current_user(request: Request):
     Get current user information from JWT token.
 
     Behavior:
-    - Non-production: Returns test user for local/test environments
-    - Production: Requires valid JWT, returns unauthenticated on failure
+    - Local development: Returns test user
+    - Any deployment (dev/stage/prod): Requires valid JWT authentication
     """
-    # Non-production mode - return test user
-    if not settings.is_production:
-        logger.debug("Non-production mode, returning test user")
+    # Check if we're in development mode
+    if settings.is_dev_mode:
+        logger.debug("Development mode, returning test user")
         return CurrentUserResponse(authenticated=True, user_info=_get_test_user())
 
-    # Production mode - require valid JWT
+    # Deployed environment - always require valid JWT
     try:
         # Check if SSO is properly configured
         if not settings.sso_auth_url:

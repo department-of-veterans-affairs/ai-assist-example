@@ -52,6 +52,7 @@ class TestGetCurrentUser:
     @patch("app.routers.user.settings")
     def test_development_without_sso_returns_test_user(self, mock_settings):
         """Test that development mode without SSO returns test user."""
+        mock_settings.is_dev_mode = True
         mock_settings.is_production = False
 
         response = client.get("/api/me")
@@ -66,6 +67,7 @@ class TestGetCurrentUser:
     @patch("app.routers.user.settings")
     def test_development_always_returns_test_user(self, mock_settings):
         """Test that development mode always returns test user (SSO not available)."""
+        mock_settings.is_dev_mode = True
         mock_settings.is_production = False
 
         response = client.get("/api/me", cookies={"IAMSESSION": "any-session"})
@@ -81,6 +83,7 @@ class TestGetCurrentUser:
         self, mock_jwt_service, mock_settings, mock_jwt_token
     ):
         """Test that production with valid JWT returns user info."""
+        mock_settings.is_dev_mode = False
         mock_settings.is_development = False
         mock_settings.is_production = True
         mock_settings.sso_auth_url = "https://sso.example.com/auth"
@@ -99,6 +102,7 @@ class TestGetCurrentUser:
         self, mock_jwt_service, mock_settings, expired_jwt_token
     ):
         """Test that production with expired JWT returns unauthenticated."""
+        mock_settings.is_dev_mode = False
         mock_settings.is_development = False
         mock_settings.is_production = True
         mock_settings.sso_auth_url = "https://sso.example.com/auth"
@@ -119,6 +123,7 @@ class TestGetCurrentUser:
         self, mock_jwt_service, mock_settings
     ):
         """Test that production without IAMSESSION cookie returns unauthenticated."""
+        mock_settings.is_dev_mode = False
         mock_settings.is_development = False
         mock_settings.is_production = True
         mock_settings.sso_auth_url = "https://sso.example.com/auth"
@@ -136,6 +141,7 @@ class TestGetCurrentUser:
         self, mock_settings
     ):
         """Test that production without SSO configured returns unauthenticated."""
+        mock_settings.is_dev_mode = False
         mock_settings.is_development = False
         mock_settings.is_production = True
         mock_settings.sso_auth_url = ""
@@ -153,6 +159,7 @@ class TestGetCurrentUser:
         self, mock_jwt_service, mock_settings
     ):
         """Test that production with JWT exchange failure returns unauthenticated."""
+        mock_settings.is_dev_mode = False
         mock_settings.is_development = False
         mock_settings.is_production = True
         mock_settings.sso_auth_url = "https://sso.example.com/auth"
@@ -171,6 +178,7 @@ class TestGetCurrentUser:
         self, mock_jwt_service, mock_settings
     ):
         """Test that production with exception during auth returns unauthenticated."""
+        mock_settings.is_dev_mode = False
         mock_settings.is_development = False
         mock_settings.is_production = True
         mock_settings.sso_auth_url = "https://sso.example.com/auth"
@@ -188,6 +196,7 @@ class TestGetCurrentUser:
     @patch("app.routers.user.settings")
     def test_staging_environment_returns_test_user(self, mock_settings):
         """Test that staging environment also returns test user."""
+        mock_settings.is_dev_mode = True
         mock_settings.is_production = False
         mock_settings.environment = "staging"
 

@@ -8,7 +8,8 @@ export function usePatient(): Patient | undefined {
 
   useEffect(() => {
     const readPatient = async () => {
-      if (!client) {
+      // Skip reading patient in development
+      if (!client || import.meta.env.DEV) {
         return;
       }
 
