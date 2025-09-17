@@ -34,33 +34,49 @@ async def get_current_user(request: Request):
     """
     Get current user information from JWT token.
 
-    In development without SSO configured, returns a test user for frontend development.
+    Behavior:
+    - Non-production: Returns test user for local/test environments
+    - Production: Requires valid JWT, returns unauthenticated on failure
     """
+    # Non-production mode - return test user
+    if not settings.is_production:
+        logger.debug("Non-production mode, returning test user")
+        return CurrentUserResponse(authenticated=True, user_info=_get_test_user())
+
+    # Production mode - require valid JWT
     try:
-        # If SSO is configured, try to get real JWT
-        if settings.sso_auth_url:
-            jwt_token = await jwt_auth_service.get_jwt_from_request(request)
+        # Check if SSO is properly configured
+        if not settings.sso_auth_url:
+            logger.error("SSO_AUTH_URL not configured in production environment")
+            return CurrentUserResponse(authenticated=False)
 
-            if jwt_token and not jwt_token.is_expired:
-                logger.info(f"User info requested for: {jwt_token.user_info.email}")
-                return CurrentUserResponse(
-                    authenticated=True, user_info=jwt_token.user_info
-                )
-            else:
-                logger.debug("User info requested but no valid JWT token found")
-                return CurrentUserResponse(authenticated=False)
+        # Try to get JWT from IAMSESSION cookie
+        jwt_token = await jwt_auth_service.get_jwt_from_request(request)
 
-        # Development mode: return test user when SSO not configured
+        # Check if we got a valid, non-expired JWT
+        if jwt_token and not jwt_token.is_expired:
+            logger.info(f"User authenticated successfully: {jwt_token.user_info.email}")
+            return CurrentUserResponse(
+                authenticated=True, user_info=jwt_token.user_info
+            )
+
+        # JWT exchange failed or token is expired/invalid
+        iamsession = request.cookies.get("IAMSESSION")
+        if not iamsession:
+            logger.warning("No IAMSESSION cookie found in request")
+        elif jwt_token and jwt_token.is_expired:
+            logger.warning(f"JWT token expired for user {jwt_token.user_info.email}")
         else:
-            logger.debug("SSO not configured, returning test user for development")
-            return CurrentUserResponse(authenticated=True, user_info=_get_test_user())
+            logger.warning("Failed to exchange IAMSESSION cookie for valid JWT")
+
+        return CurrentUserResponse(authenticated=False)
 
     except Exception as e:
-        logger.warning(f"Error getting current user: {e}")
+        # Log the error with appropriate level based on environment
+        if settings.is_production:
+            logger.error(f"Authentication error in production: {e}")
+        else:
+            logger.warning(f"Authentication error in development: {e}")
 
-        # Fallback to test user in development if SSO not configured
-        if not settings.sso_auth_url and settings.is_development:
-            logger.debug("Returning test user due to error in development mode")
-            return CurrentUserResponse(authenticated=True, user_info=_get_test_user())
-
+        # Never return test user when SSO is configured or in production
         return CurrentUserResponse(authenticated=False)

@@ -72,6 +72,7 @@ indent-style = "space"
 typeCheckingMode = "strict"
 pythonVersion = "3.13"
 pythonPlatform = "Linux"
+exclude = ["tests/**", ".venv/**", "venv/**", "**/node_modules/**"]
 reportMissingImports = true
 reportMissingTypeStubs = true
 reportUnknownParameterType = true
