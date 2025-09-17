@@ -12,3 +12,6 @@ class CurrentUserResponse(BaseModel):
     user_info: UserInfo | None = Field(
         default=None, description="User information from JWT"
     )
+    error: str | None = Field(
+        default=None, description="Error message if authentication failed"
+    )
