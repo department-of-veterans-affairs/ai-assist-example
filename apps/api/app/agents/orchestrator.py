@@ -1,6 +1,6 @@
 """Main orchestrator agent for Vista patient queries."""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from agents import Agent, OpenAIChatCompletionsModel
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 ORCHESTRATOR_INSTRUCTIONS = """You are a VA clinical assistant for patient queries.
 
 You have access to Vista patient data tools that will be auto-discovered.
-The patient DFN will be provided with each query.
+The patient ICN (Integration Control Number) will be provided with each query.
 
 For now, handle simple direct queries like:
 - "What are the current vitals?"
@@ -25,15 +25,17 @@ For now, handle simple direct queries like:
 Simply call the appropriate MCP tool and return the results in a clear, concise format.
 Focus on providing clinically relevant information.
 
-Always confirm you have the patient DFN before making any tool calls.
-If no patient DFN is provided, ask for it first."""
+Always confirm you have the patient ICN before making any tool calls.
+If no patient ICN is provided, ask for it first."""
 
 # Global orchestrator instance
 _orchestrator_instance: Agent | None = None
 
 
 def get_orchestrator_agent(
-    with_mcp: bool = True, jwt_token: str | None = None
+    with_mcp: bool = True,
+    jwt_token: str | None = None,
+    patient_context: dict[str, Any] | None = None,
 ) -> Agent:
     """
     Get or create the main orchestrator agent.
@@ -42,6 +44,7 @@ def get_orchestrator_agent(
         with_mcp: Whether to include MCP server connection.
             Set to False for testing without MCP.
         jwt_token: Optional JWT token for MCP authentication.
+        patient_context: Optional patient context with dfn, sta3n, duz.
 
     Returns:
         Agent: Configured orchestrator agent with or without Vista MCP tools
@@ -57,8 +60,11 @@ def get_orchestrator_agent(
         try:
             from ..services.mcp_client import get_vista_mcp_client
 
-            # Get MCP client with JWT if provided
-            vista_mcp = get_vista_mcp_client(jwt_token)
+            # Extract DUZ from patient context if available
+            user_duz = patient_context.get("duz") if patient_context else None
+
+            # Get MCP client with JWT and DUZ if provided
+            vista_mcp = get_vista_mcp_client(jwt_token, user_duz=user_duz)
             mcp_servers = [vista_mcp]
         except ImportError as e:
             import logging

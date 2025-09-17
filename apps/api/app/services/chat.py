@@ -13,7 +13,7 @@ from openai.types.responses import ResponseTextDeltaEvent
 
 from ..agents.orchestrator import get_orchestrator_agent
 from ..config import settings
-from ..models.chat import ChatMessage
+from ..models.chat import ChatMessage, PatientContext
 from ..services.azure_openai import create_azure_openai_client
 from ..services.mcp_client import get_vista_mcp_client
 
@@ -31,7 +31,8 @@ class ChatService:
     async def generate_stream(
         self,
         messages: list[ChatMessage],
-        patient_dfn: str | None = None,
+        patient: PatientContext | None = None,
+        patient_dfn: str | None = None,  # Backward compatibility
         request: Request | None = None,
     ) -> AsyncGenerator[str]:
         """Generate a streaming response"""
@@ -41,9 +42,31 @@ class ChatService:
                 last_user_message = msg.content
                 break
 
+        # Extract patient context
+        patient_icn = None
+        patient_dfn = None
+        patient_sta3n = None
+        if patient:
+            patient_icn = patient.icn
+            patient_dfn = patient.dfn
+            patient_sta3n = patient.sta3n
+        elif patient_dfn:
+            # Legacy support - use patient_dfn parameter
+            patient_icn = patient_dfn  # Treat as ICN for now
+            patient_dfn = patient_dfn
+
         # Enhance message with patient context if provided
-        if patient_dfn:
-            enhanced_message = f"Patient DFN: {patient_dfn}\n{last_user_message}"
+        if patient:
+            enhanced_message = (
+                f"Patient Context:\n"
+                f"ICN: {patient.icn}\n"
+                f"DFN: {patient.dfn or 'N/A'}\n"
+                f"Station: {patient.sta3n or 'Unknown'}\n"
+                f"Name: {patient.firstName} {patient.lastName}\n\n"
+                f"{last_user_message}"
+            )
+        elif patient_icn:
+            enhanced_message = f"Patient ICN: {patient_icn}\n{last_user_message}"
         else:
             enhanced_message = last_user_message
 
@@ -51,8 +74,9 @@ class ChatService:
 
         vista_mcp = None
         jwt_token = None
+        user_duz = None
 
-        # Extract JWT token if request provided
+        # Extract JWT token and DUZ if request provided
         if request and settings.sso_auth_url:
             try:
                 from ..services.jwt_auth import jwt_auth_service
@@ -63,6 +87,22 @@ class ChatService:
                     logger.info(
                         f"Using JWT auth for user: {jwt_token_obj.user_info.email}"
                     )
+
+                    # Extract DUZ based on patient's station
+                    if patient_sta3n and jwt_token_obj.user_info.vista_ids:
+                        for vista_id in jwt_token_obj.user_info.vista_ids:
+                            if vista_id.site_id == patient_sta3n:
+                                user_duz = vista_id.duz
+                                logger.info(
+                                    f"Found DUZ {user_duz} for station {patient_sta3n}"
+                                )
+                                break
+
+                        if not user_duz:
+                            logger.warning(
+                                f"No DUZ found for station {patient_sta3n} "
+                                f"in user's Vista IDs"
+                            )
             except ImportError as e:
                 logger.warning(f"JWT auth module import failed: {e}")
             except Exception as e:
@@ -73,11 +113,22 @@ class ChatService:
             if settings.rate_limit_delay_ms > 0:
                 await asyncio.sleep(settings.rate_limit_delay_ms / 1000)
 
-            # Get orchestrator with JWT if available
-            orchestrator = get_orchestrator_agent(with_mcp=True, jwt_token=jwt_token)
+            # Get orchestrator with JWT and patient context if available
+            orchestrator = get_orchestrator_agent(
+                with_mcp=True,
+                jwt_token=jwt_token,
+                patient_context={
+                    "icn": patient_icn,
+                    "dfn": patient_dfn,
+                    "sta3n": patient_sta3n,
+                    "duz": user_duz,
+                }
+                if patient_icn
+                else None,
+            )
 
-            # Get MCP client for connection
-            vista_mcp = get_vista_mcp_client(jwt_token)
+            # Get MCP client for connection with JWT and DUZ context
+            vista_mcp = get_vista_mcp_client(jwt_token, user_duz=user_duz)
             # Connect MCP server before using it
             await vista_mcp.connect()
 
@@ -88,8 +139,15 @@ class ChatService:
                 # Include input/output data in traces (controlled by environment)
                 # NOTE: Set to False in production if handling PHI/sensitive data
                 trace_include_sensitive_data=settings.trace_include_sensitive_data,
-                # Add patient DFN as metadata
-                trace_metadata={"patient_dfn": patient_dfn} if patient_dfn else {},
+                # Add patient context as metadata
+                trace_metadata={
+                    "patient_icn": patient_icn,
+                    "patient_dfn": patient_dfn,
+                    "patient_sta3n": patient_sta3n,
+                    "user_duz": user_duz,
+                }
+                if patient_icn
+                else {},
             )
 
             # Use orchestrator agent with MCP tools

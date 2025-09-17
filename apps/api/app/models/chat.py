@@ -10,8 +10,20 @@ class ChatMessage(BaseModel):
     content: str
 
 
+class PatientContext(BaseModel):
+    """Patient context for Vista queries"""
+
+    icn: str  # (primary identifier for VA)
+    dfn: str | None = None  # DFN - kept for backward compatibility
+    sta3n: str | None = None  # Station number
+    firstName: str | None = None
+    lastName: str | None = None
+
+
 class ChatRequest(BaseModel):
     """Chat request payload"""
 
     messages: list[ChatMessage]
-    patient_dfn: str | None = None  # Optional patient DFN for Vista queries
+    patient: PatientContext | None = None  # Patient context for Vista queries
+    # Keep backward compatibility
+    patient_dfn: str | None = None  # Deprecated: use patient.dfn instead

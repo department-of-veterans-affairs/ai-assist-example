@@ -12,12 +12,15 @@ logger = logging.getLogger(__name__)
 _vista_mcp_instance: MCPServerStreamableHttp | None = None
 
 
-def get_vista_mcp_client(jwt_token: str | None = None) -> MCPServerStreamableHttp:
+def get_vista_mcp_client(
+    jwt_token: str | None = None, user_duz: str | None = None
+) -> MCPServerStreamableHttp:
     """
     Get Vista MCP client configured to use Streamable HTTP transport.
 
     Args:
         jwt_token: Optional JWT token for authentication
+        user_duz: Optional DUZ for the current Vista context
 
     Returns:
         MCPServerStreamableHttp: Configured MCP server instance
@@ -36,12 +39,20 @@ def get_vista_mcp_client(jwt_token: str | None = None) -> MCPServerStreamableHtt
                 "url": settings.vista_mcp_server_url,
             }
 
-            # Add JWT token if provided
+            # Add JWT token and DUZ if provided
+            headers = {}
             if jwt_token:
-                params["headers"] = {"Authorization": f"Bearer {jwt_token}"}
+                headers["Authorization"] = f"Bearer {jwt_token}"
                 logger.info("Using JWT authentication for MCP client")
-            else:
-                logger.info("No JWT token provided for MCP client")
+            if user_duz:
+                headers["X-Vista-DUZ"] = user_duz
+                logger.info(f"Using DUZ {user_duz} for MCP client")
+
+            if headers:
+                params["headers"] = headers
+
+            if not jwt_token and not user_duz:
+                logger.info("No JWT token or DUZ provided for MCP client")
 
             new_instance = MCPServerStreamableHttp(
                 params=params,

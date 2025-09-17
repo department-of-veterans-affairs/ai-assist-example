@@ -8,21 +8,24 @@ export type PatientContextProps = NonNullable<
 >;
 
 export interface Patient extends PatientContextProps {
-  dfn: string;
+  id?: string; // FHIR resource ID
+  icn?: string; // (primary identifier for VA)
+  dfn?: string; // DFN - kept for backward compatibility
+  sta3n?: string; // Station number
   description: string;
   keyConditions: string[];
   ssn: string;
-  // SMART on FHIR context
-  icn?: string;
-  sta3n?: string;
-  duz?: string;
   dob?: string;
   mrn?: string;
+  duz?: string; // User-specific, not patient-specific
 }
 
 // Hardcoded test patient: MARTINEZ, MARIA ELENA
 const TEST_PATIENT: Patient = {
-  dfn: '100023',
+  id: '100023', // FHIR resource ID
+  icn: '1000000219V596118', // Test ICN (primary identifier)
+  dfn: '100023', // DFN for backward compatibility
+  sta3n: '500', // Default station for development
   firstName: 'MARIA ELENA',
   lastName: 'MARTINEZ',
   description: 'Female Gulf War Veteran',

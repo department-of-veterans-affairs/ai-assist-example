@@ -66,8 +66,8 @@ jobs:
       - name: Run linting and type checking
         run: pnpm check:ci
 
-      # - name: Run tests
-      #   run: pnpm test
+      - name: Run tests
+        run: pnpm test
 
       - name: Build application
         run: pnpm build

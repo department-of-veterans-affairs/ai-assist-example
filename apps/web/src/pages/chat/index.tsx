@@ -11,7 +11,15 @@ export default function ChatPage() {
     useChat({
       api: createApiUrl('chat'),
       body: {
-        patient_dfn: patient?.dfn,
+        patient: patient
+          ? {
+              icn: patient.icn || patient.id, // ICN is the primary identifier for MCP
+              dfn: patient.dfn, // Keep for backward compatibility
+              sta3n: patient.sta3n,
+              firstName: patient.firstName,
+              lastName: patient.lastName,
+            }
+          : null,
       },
     });
 

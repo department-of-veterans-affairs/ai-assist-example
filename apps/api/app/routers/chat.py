@@ -31,7 +31,8 @@ async def chat(chat_request: ChatRequest, request: Request):
         return StreamingResponse(
             content=chat_service.generate_stream(
                 messages=chat_request.messages,
-                patient_dfn=chat_request.patient_dfn,
+                patient=chat_request.patient,
+                patient_dfn=chat_request.patient_dfn,  # Keep for backward compatibility
                 request=request,
             ),
             media_type="text/event-stream",
