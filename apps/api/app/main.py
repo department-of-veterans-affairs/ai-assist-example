@@ -8,6 +8,16 @@ from .config import settings
 from .routers import chat, health, summary, user
 from .services.tracing import initialize_langsmith_tracing
 
+# Configure logging only if not already configured
+if not logging.getLogger().handlers:
+    logging.basicConfig(
+        level=getattr(logging, settings.log_level.upper(), logging.INFO),
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler()],
+    )
+
+logger = logging.getLogger(__name__)
+
 # Initialize LangSmith tracing if enabled
 initialize_langsmith_tracing()
 
@@ -16,7 +26,6 @@ initialize_langsmith_tracing()
 async def lifespan(_app: FastAPI):
     """Manage application lifecycle events"""
     # Startup
-    logger = logging.getLogger(__name__)
     logger.info("Starting VA AI Assist API")
 
     # LangSmith tracing is already initialized above

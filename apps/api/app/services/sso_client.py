@@ -43,7 +43,7 @@ class SSOClient:
         }
 
         if self.referrer:
-            headers["Referrer"] = self.referrer
+            headers["Referer"] = self.referrer
 
         try:
             async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:

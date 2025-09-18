@@ -48,7 +48,16 @@ export function ClinicalSummaryModal() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ dfn: patient.dfn }),
+          body: JSON.stringify({
+            patient: {
+              icn: patient.icn || patient.id,
+              dfn: patient.dfn,
+              station: patient.sta3n,
+              firstName: patient.firstName,
+              lastName: patient.lastName,
+            },
+            patient_dfn: patient.dfn, // Keep for backward compatibility
+          }),
         });
 
         const parsedSummary = JSON.parse(await response.text());

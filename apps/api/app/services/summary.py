@@ -1,4 +1,4 @@
-"""Chat service using OpenAI Agents SDK with Azure OpenAI"""
+"""Summary service using OpenAI Agents SDK with Azure OpenAI"""
 
 import asyncio
 import contextlib
@@ -14,6 +14,7 @@ from fastapi import HTTPException
 from ..agents.medications import get_agent as med_grouping_agent
 from ..agents.medications_enrichment import get_agent as med_enrichment_agent
 from ..config import settings
+from ..dependencies.context import RequestContext
 from ..services.azure_openai import create_azure_openai_client
 from ..services.mcp_client import get_vista_mcp_client
 
@@ -43,22 +44,53 @@ class SummaryService:
         # Create and set Azure OpenAI client
         _ = create_azure_openai_client()
 
-    async def generate_summary(self, type: SummaryType, patient_dfn: str) -> str:
+    async def generate_summary(
+        self,
+        type: SummaryType,
+        context: RequestContext,
+        patient_dfn: str | None = None,  # Keep for backward compatibility
+    ) -> str:
         # Agent SDK will log its own activity
         vista_mcp = None
+
+        # Extract patient context
+        patient = context.patient
+        patient_icn = None
+        patient_dfn_local = patient_dfn  # Use local var to avoid overwriting parameter
+        patient_station = None
+        if patient:
+            patient_icn = patient.icn
+            patient_dfn_local = patient.dfn
+            patient_station = patient.station
+        elif patient_dfn:
+            # Legacy support - use patient_dfn parameter
+            patient_dfn_local = patient_dfn
+
+        if not patient_dfn_local:
+            raise HTTPException(
+                status_code=400,
+                detail="Patient DFN is required for medication summaries.",
+            )
+
         try:
             # Apply rate limit delay if configured (environment-specific)
             if settings.rate_limit_delay_ms > 0:
                 await asyncio.sleep(settings.rate_limit_delay_ms / 1000)
 
-            # # Get MCP client for connection
-            vista_mcp = get_vista_mcp_client()
+            # Get auth params from context
+            jwt_token, user_duz = context.get_mcp_params()
+
+            # Get MCP client for connection
+            vista_mcp = get_vista_mcp_client(jwt_token, user_duz=user_duz)
             # Connect MCP server before using it
             await vista_mcp.connect()
 
             # Get and run agents
             agent_result: RunResult | None = None
             for agent in self.AGENTS[type]:
+                # Attach MCP server to agent
+                agent.mcp_servers = [vista_mcp]
+
                 # Configure run settings
                 run_config = RunConfig(
                     # Enable workflow tracing with a name
@@ -66,12 +98,19 @@ class SummaryService:
                     # Include input/output data in traces (controlled by environment)
                     # NOTE: Set to False in production if handling PHI/sensitive data
                     trace_include_sensitive_data=settings.trace_include_sensitive_data,
-                    # Add patient DFN as metadata
-                    trace_metadata={"patient_dfn": patient_dfn},
+                    # Add patient context as metadata
+                    trace_metadata={
+                        "patient_icn": patient_icn,
+                        "patient_dfn": patient_dfn_local,
+                        "patient_station": patient_station,
+                        "user_duz": user_duz,
+                    }
+                    if patient_dfn_local
+                    else {},
                 )
 
                 input_json = json.dumps(
-                    {"patient_dfn": patient_dfn}
+                    {"patient_dfn": patient_dfn_local}
                     | ({"data": agent_result.final_output} if agent_result else {})
                 )
 

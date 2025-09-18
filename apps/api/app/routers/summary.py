@@ -5,6 +5,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
+from ..dependencies import Context
 from ..models.summary import SummaryRequest
 from ..services.summary import SummaryService
 
@@ -14,18 +15,31 @@ router = APIRouter()
 
 
 @router.post("/medications")
-async def medications_summary(request: SummaryRequest):
+async def medications_summary(request: SummaryRequest, ctx: Context):
     try:
-        if not request.patient_dfn:
+        # Add patient to context
+        ctx.patient = request.patient
+
+        # Get patient DFN from either the new patient object or legacy field
+        patient_dfn = None
+        if ctx.patient:
+            patient_dfn = ctx.patient.dfn
+        elif request.patient_dfn:
+            patient_dfn = request.patient_dfn
+
+        if not patient_dfn:
             raise HTTPException(
                 status_code=400,
                 detail="Patient DFN is required for medication summaries.",
             )
+
         summary_service = SummaryService()
 
         return Response(
             content=await summary_service.generate_summary(
-                SummaryService.SummaryType.MEDICATIONS, patient_dfn=request.patient_dfn
+                SummaryService.SummaryType.MEDICATIONS,
+                context=ctx,
+                patient_dfn=patient_dfn,  # Keep for backward compatibility
             ),
             media_type="application/json",
             headers={

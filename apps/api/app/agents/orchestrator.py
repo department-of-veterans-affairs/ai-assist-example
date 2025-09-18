@@ -44,7 +44,7 @@ def get_orchestrator_agent(
         with_mcp: Whether to include MCP server connection.
             Set to False for testing without MCP.
         jwt_token: Optional JWT token for MCP authentication.
-        patient_context: Optional patient context with dfn, sta3n, duz.
+        patient_context: Optional patient context with dfn, station, duz.
 
     Returns:
         Agent: Configured orchestrator agent with or without Vista MCP tools

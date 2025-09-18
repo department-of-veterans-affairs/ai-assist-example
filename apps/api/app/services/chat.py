@@ -8,12 +8,12 @@ import re
 from collections.abc import AsyncGenerator
 
 from agents import RunConfig, Runner
-from fastapi import Request
 from openai.types.responses import ResponseTextDeltaEvent
 
 from ..agents.orchestrator import get_orchestrator_agent
 from ..config import settings
-from ..models.chat import ChatMessage, PatientContext
+from ..dependencies.context import RequestContext
+from ..models.chat import ChatMessage
 from ..services.azure_openai import create_azure_openai_client
 from ..services.mcp_client import get_vista_mcp_client
 
@@ -31,12 +31,14 @@ class ChatService:
     async def generate_stream(
         self,
         messages: list[ChatMessage],
-        patient: PatientContext | None = None,
+        context: RequestContext,
         patient_dfn: str | None = None,  # Backward compatibility
-        request: Request | None = None,
     ) -> AsyncGenerator[str]:
         """Generate a streaming response"""
         last_user_message = ""
+        patient = context.patient
+
+        logger.info(f"Patient context: {patient}")
         for msg in reversed(messages):
             if msg.role == "user":
                 last_user_message = msg.content
@@ -44,16 +46,16 @@ class ChatService:
 
         # Extract patient context
         patient_icn = None
-        patient_dfn = None
-        patient_sta3n = None
+        patient_dfn_local = patient_dfn  # Use local var to avoid overwriting parameter
+        patient_station = None
         if patient:
             patient_icn = patient.icn
-            patient_dfn = patient.dfn
-            patient_sta3n = patient.sta3n
+            patient_dfn_local = patient.dfn
+            patient_station = patient.station
         elif patient_dfn:
             # Legacy support - use patient_dfn parameter
             patient_icn = patient_dfn  # Treat as ICN for now
-            patient_dfn = patient_dfn
+            patient_dfn_local = patient_dfn
 
         # Enhance message with patient context if provided
         if patient:
@@ -61,7 +63,7 @@ class ChatService:
                 f"Patient Context:\n"
                 f"ICN: {patient.icn}\n"
                 f"DFN: {patient.dfn or 'N/A'}\n"
-                f"Station: {patient.sta3n or 'Unknown'}\n"
+                f"Station: {patient.station or 'Unknown'}\n"
                 f"Name: {patient.firstName} {patient.lastName}\n\n"
                 f"{last_user_message}"
             )
@@ -70,67 +72,34 @@ class ChatService:
         else:
             enhanced_message = last_user_message
 
-        # Agent SDK will log its own activity
-
         vista_mcp = None
-        jwt_token = None
-        user_duz = None
 
-        # Extract JWT token and DUZ if request provided
-        if request and settings.sso_auth_url:
-            try:
-                from ..services.jwt_auth import jwt_auth_service
-
-                jwt_token_obj = await jwt_auth_service.get_jwt_from_request(request)
-                if jwt_token_obj:
-                    jwt_token = jwt_token_obj.access_token
-                    logger.info(
-                        f"Using JWT auth for user: {jwt_token_obj.user_info.email}"
-                    )
-
-                    # Extract DUZ based on patient's station
-                    if patient_sta3n and jwt_token_obj.user_info.vista_ids:
-                        for vista_id in jwt_token_obj.user_info.vista_ids:
-                            if vista_id.site_id == patient_sta3n:
-                                user_duz = vista_id.duz
-                                logger.info(
-                                    f"Found DUZ {user_duz} for station {patient_sta3n}"
-                                )
-                                break
-
-                        if not user_duz:
-                            logger.warning(
-                                f"No DUZ found for station {patient_sta3n} "
-                                f"in user's Vista IDs"
-                            )
-            except ImportError as e:
-                logger.warning(f"JWT auth module import failed: {e}")
-            except Exception as e:
-                logger.warning(f"JWT auth failed, continuing without: {e}")
+        # Get auth params from context
+        jwt_token, user_duz = context.get_mcp_params()
 
         try:
-            # Apply rate limit delay if configured (environment-specific)
             if settings.rate_limit_delay_ms > 0:
                 await asyncio.sleep(settings.rate_limit_delay_ms / 1000)
 
-            # Get orchestrator with JWT and patient context if available
             orchestrator = get_orchestrator_agent(
-                with_mcp=True,
+                with_mcp=False,  # Don't create MCP client in orchestrator
                 jwt_token=jwt_token,
                 patient_context={
                     "icn": patient_icn,
-                    "dfn": patient_dfn,
-                    "sta3n": patient_sta3n,
+                    "dfn": patient_dfn_local,
+                    "station": patient_station,
                     "duz": user_duz,
                 }
                 if patient_icn
                 else None,
             )
 
-            # Get MCP client for connection with JWT and DUZ context
+            # Get MCP client and connect it after creating orchestrator
             vista_mcp = get_vista_mcp_client(jwt_token, user_duz=user_duz)
-            # Connect MCP server before using it
             await vista_mcp.connect()
+
+            # Add MCP server to orchestrator after connecting
+            orchestrator.mcp_servers = [vista_mcp]
 
             # Configure run settings
             run_config = RunConfig(
@@ -142,8 +111,8 @@ class ChatService:
                 # Add patient context as metadata
                 trace_metadata={
                     "patient_icn": patient_icn,
-                    "patient_dfn": patient_dfn,
-                    "patient_sta3n": patient_sta3n,
+                    "patient_dfn": patient_dfn_local,
+                    "patient_station": patient_station,
                     "user_duz": user_duz,
                 }
                 if patient_icn

@@ -49,7 +49,7 @@ def expired_jwt_token():
 class TestGetCurrentUser:
     """Test /me endpoint for current user information."""
 
-    @patch("app.routers.user.settings")
+    @patch("app.dependencies.auth.settings")
     def test_development_without_sso_returns_test_user(self, mock_settings):
         """Test that development mode without SSO returns test user."""
         mock_settings.is_dev_mode = True
@@ -64,7 +64,7 @@ class TestGetCurrentUser:
         assert data["user_info"]["first_name"] == "Test"
         assert data["user_info"]["last_name"] == "User"
 
-    @patch("app.routers.user.settings")
+    @patch("app.dependencies.auth.settings")
     def test_development_always_returns_test_user(self, mock_settings):
         """Test that development mode always returns test user (SSO not available)."""
         mock_settings.is_dev_mode = True
@@ -77,8 +77,8 @@ class TestGetCurrentUser:
         assert data["authenticated"] is True
         assert data["user_info"]["email"] == "test.user@example.com"
 
-    @patch("app.routers.user.settings")
-    @patch("app.routers.user.jwt_auth_service")
+    @patch("app.dependencies.auth.settings")
+    @patch("app.dependencies.auth.jwt_auth_service")
     def test_production_with_valid_jwt_returns_user(
         self, mock_jwt_service, mock_settings, mock_jwt_token
     ):
@@ -96,8 +96,8 @@ class TestGetCurrentUser:
         assert data["authenticated"] is True
         assert data["user_info"]["email"] == "test.user@example.com"
 
-    @patch("app.routers.user.settings")
-    @patch("app.routers.user.jwt_auth_service")
+    @patch("app.dependencies.auth.settings")
+    @patch("app.dependencies.auth.jwt_auth_service")
     def test_production_with_expired_jwt_returns_unauthenticated(
         self, mock_jwt_service, mock_settings, expired_jwt_token
     ):
@@ -117,8 +117,8 @@ class TestGetCurrentUser:
         assert data["authenticated"] is False
         assert data["user_info"] is None
 
-    @patch("app.routers.user.settings")
-    @patch("app.routers.user.jwt_auth_service")
+    @patch("app.dependencies.auth.settings")
+    @patch("app.dependencies.auth.jwt_auth_service")
     def test_production_without_iamsession_returns_unauthenticated(
         self, mock_jwt_service, mock_settings
     ):
@@ -136,7 +136,7 @@ class TestGetCurrentUser:
         assert data["authenticated"] is False
         assert data["user_info"] is None
 
-    @patch("app.routers.user.settings")
+    @patch("app.dependencies.auth.settings")
     def test_production_without_sso_configured_returns_unauthenticated(
         self, mock_settings
     ):
@@ -153,8 +153,8 @@ class TestGetCurrentUser:
         assert data["authenticated"] is False
         assert data["user_info"] is None
 
-    @patch("app.routers.user.settings")
-    @patch("app.routers.user.jwt_auth_service")
+    @patch("app.dependencies.auth.settings")
+    @patch("app.dependencies.auth.jwt_auth_service")
     def test_production_with_jwt_exchange_failure_returns_unauthenticated(
         self, mock_jwt_service, mock_settings
     ):
@@ -172,8 +172,8 @@ class TestGetCurrentUser:
         assert data["authenticated"] is False
         assert data["user_info"] is None
 
-    @patch("app.routers.user.settings")
-    @patch("app.routers.user.jwt_auth_service")
+    @patch("app.dependencies.auth.settings")
+    @patch("app.dependencies.auth.jwt_auth_service")
     def test_production_with_exception_returns_unauthenticated(
         self, mock_jwt_service, mock_settings
     ):
@@ -193,7 +193,7 @@ class TestGetCurrentUser:
         assert data["authenticated"] is False
         assert data["user_info"] is None
 
-    @patch("app.routers.user.settings")
+    @patch("app.dependencies.auth.settings")
     def test_staging_environment_returns_test_user(self, mock_settings):
         """Test that staging environment also returns test user."""
         mock_settings.is_dev_mode = True

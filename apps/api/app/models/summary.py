@@ -1,11 +1,13 @@
 """Summary-related Pydantic models"""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
+from .chat import PatientContext
 
 
 class SummaryRequest(BaseModel):
     """Summary request payload"""
 
-    patient_dfn: str | None = Field(
-        alias="dfn"
-    )  # Optional patient DFN for Vista queries
+    patient: PatientContext | None = None  # Patient context for Vista queries
+    # Keep for backward compatibility
+    patient_dfn: str | None = None  # Deprecated: use patient.dfn instead

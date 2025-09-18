@@ -15,7 +15,7 @@ class PatientContext(BaseModel):
 
     icn: str  # (primary identifier for VA)
     dfn: str | None = None  # DFN - kept for backward compatibility
-    sta3n: str | None = None  # Station number
+    station: str | None = None  # Station number
     firstName: str | None = None
     lastName: str | None = None
 

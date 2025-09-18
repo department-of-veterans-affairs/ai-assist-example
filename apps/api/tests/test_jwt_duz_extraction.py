@@ -106,10 +106,10 @@ class TestDUZExtraction:
         )
 
         # Find DUZ for station 530
-        patient_sta3n = "530"
+        patient_station = "530"
         user_duz = None
         for vista_id in user_info.vista_ids:
-            if vista_id.site_id == patient_sta3n:
+            if vista_id.site_id == patient_station:
                 user_duz = vista_id.duz
                 break
 
@@ -129,10 +129,10 @@ class TestDUZExtraction:
         )
 
         # Try to find DUZ for station 600 (not in user's access)
-        patient_sta3n = "600"
+        patient_station = "600"
         user_duz = None
         for vista_id in user_info.vista_ids:
-            if vista_id.site_id == patient_sta3n:
+            if vista_id.site_id == patient_station:
                 user_duz = vista_id.duz
                 break
 
