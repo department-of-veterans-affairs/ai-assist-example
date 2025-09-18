@@ -13,20 +13,20 @@ RUN apk update && apk add --no-cache ca-certificates libssl3 curl=8.12.0-r0 libc
     && curl -sS http://aia.pki.example.com/PKI/AIA/VA/VA-Internal-S2-ICA11.cer -o /usr/local/share/ca-certificates/VA-Internal-S2-ICA11.crt \
     && /usr/sbin/update-ca-certificates --fresh
 
-# Ensure correct ownership of working directory (must be done as root)
-RUN chown -R nonroot:nonroot /app
-
-# Switch back to non-root user
-USER nonroot
-
-# Install uv for package management
-COPY --from=ghcr.io/astral-sh/uv:latest --chown=nonroot:nonroot /uv /usr/local/bin/uv
+# Install uv for package management (as root)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 # Copy dependency files and README (needed for editable install)
 COPY --chown=nonroot:nonroot pyproject.toml README.md ./
 
 # Install dependencies in editable mode
 RUN uv pip install --system -e .
+
+# Ensure correct ownership of working directory
+RUN chown -R nonroot:nonroot /app
+
+# Switch back to non-root user
+USER nonroot
 
 # Copy application code
 COPY --chown=nonroot:nonroot . .
