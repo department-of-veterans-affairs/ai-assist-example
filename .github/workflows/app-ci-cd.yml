@@ -238,7 +238,7 @@ jobs:
   stage-deployment:
     name: Deploy to Stage
     if: github.event.ref == 'refs/heads/main'
-    needs: [dev-deployment]
+    needs: [continuous-integration]  # Run in parallel with dev-deployment
     runs-on: ubuntu-latest
     environment: stage
     env:
@@ -269,11 +269,12 @@ jobs:
           
           echo "Deploying web service"
           aws ecs update-service --cluster stage-fargate-cluster --service stage-ai-assist-web --force-new-deployment
-      - name: Tag and deploy API service  
+
+      - name: Tag and deploy API service
         run: |
           echo "Tagging API image for deployment"
           MANIFEST=$(aws ecr batch-get-image --repository-name cds/ai-assist-api --image-ids imageTag=${{ github.sha }} --query 'images[].imageManifest' --output text)
-          aws ecr put-image --repository-name cds/ai-assist-api --image-tag dev --image-manifest "$MANIFEST" || true
-          
-          echo "Deploying API service" 
-          aws ecs update-service --cluster dev-fargate-cluster --service dev-ai-assist-api --force-new-deployment
+          aws ecr put-image --repository-name cds/ai-assist-api --image-tag stage --image-manifest "$MANIFEST" || true
+
+          echo "Deploying API service"
+          aws ecs update-service --cluster stage-fargate-cluster --service stage-ai-assist-api --force-new-deployment
