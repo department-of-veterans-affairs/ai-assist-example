@@ -57,15 +57,12 @@ ENV PATH="$PATH:/root/.local/bin" \
 # Install dependencies using uv
 RUN uv pip install --system -e .
 
-# reinstalling certifi to get the .pem file
+# reinstalling certifi to get the .pem file and set REQUESTS_CA_BUNDLE
 RUN uv pip install --system --upgrade certifi && \
-    export REQUESTS_CA_BUNDLE=$(python -c "import certifi; print(certifi.where())")
-
-ENV REQUESTS_CA_BUNDLE="${REQUESTS_CA_BUNDLE}"
+    echo "export REQUESTS_CA_BUNDLE=$(python -c 'import certifi; print(certifi.where())')" >> /etc/environment
 
 # Copy application code
 COPY app/ ./app/
-COPY scripts/ ./scripts/
 
 # Runtime stage
 FROM builder AS runtime
@@ -97,7 +94,9 @@ WORKDIR /app
 ENV CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
     SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
     REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
-    HTTPX_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    HTTPX_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 # Copy from builder
 COPY --from=builder /app ./
