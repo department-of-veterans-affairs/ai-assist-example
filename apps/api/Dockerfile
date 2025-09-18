@@ -22,15 +22,15 @@ RUN apk add --no-cache \
     openssl x509 -inform PEM -in "$cert" -out "${cert%.cer}.crt"; \
     done && \
     rm *.cer && \
-    # Create the symlinks in /etc/ssl/certs
+    # Update CA certificates to include VA certs in bundle
+    update-ca-certificates && \
+    # Also copy to /etc/ssl/certs with .pem extension for compatibility
     for cert in *.crt; do \
-    hash=$(openssl x509 -hash -noout -in "$cert").0 && \
-    cp "$cert" "/etc/ssl/certs/${cert%.crt}.pem" && \
-    ln -sf "/etc/ssl/certs/${cert%.crt}.pem" "/etc/ssl/certs/$hash"; \
+    cp "$cert" "/etc/ssl/certs/${cert%.crt}.pem"; \
     done && \
-    update-ca-certificates --fresh && \
     # Verify certificates were properly installed
-    ls -la /etc/ssl/certs/VA-Internal-S2-*.pem
+    ls -la /etc/ssl/certs/VA-Internal-S2-*.pem && \
+    grep -c "VA-Internal" /etc/ssl/certs/ca-certificates.crt || echo "Warning: VA certs may not be in bundle"
 
 # Ensure curl uses the system certificate store
 ENV CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \

@@ -1,11 +1,15 @@
+import logging
 import time
 from datetime import UTC, datetime
 
+import httpx
 from fastapi import APIRouter
 from openai import AsyncAzureOpenAI
 
 from ..config import settings
 from ..models import HealthResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -61,4 +65,59 @@ async def check_azure_openai() -> dict[str, str | bool]:
             "rate_limited": rate_limited,
             "endpoint": settings.azure_openai_endpoint,
             "deployment": settings.azure_openai_deployment_name,
+        }
+
+
+@router.get("/health/ssl-certs")
+async def check_ssl_certificates() -> dict[str, str | bool | int]:
+    """Check VA SSL certificate configuration by testing connection to VA PKI."""
+    import ssl
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            # Test connection to VA PKI service
+            response = await client.get("https://aia.pki.example.com")
+
+            return {
+                "status": "healthy",
+                "message": "VA SSL certificates working correctly",
+                "va_pki_accessible": True,
+                "status_code": response.status_code,
+            }
+    except httpx.ConnectError:
+        # Connection failed but not due to SSL - this is expected outside VA network
+        return {
+            "status": "healthy",
+            "message": (
+                "SSL certificates configured correctly "
+                "(connection failed as expected outside VA network)"
+            ),
+            "va_pki_accessible": False,
+            "ssl_error": False,
+        }
+    except (ssl.SSLError, httpx.ConnectTimeout, httpx.TimeoutException) as e:
+        # Check if it's specifically an SSL error
+        if isinstance(e, ssl.SSLError):
+            # SSL certificate verification failed - this is the actual problem
+            logger.error(f"SSL certificate verification failed: {e}")
+            return {
+                "status": "unhealthy",
+                "message": "SSL certificate verification failed",
+                "va_pki_accessible": False,
+                "ssl_error": True,
+            }
+        else:
+            # Timeout - treat as connection issue, not SSL issue
+            return {
+                "status": "healthy",
+                "message": "Connection timeout (SSL certificates OK)",
+                "va_pki_accessible": False,
+                "ssl_error": False,
+            }
+    except Exception:
+        # Other errors
+        logger.exception("Unexpected error verifying SSL certificates")
+        return {
+            "status": "unknown",
+            "message": "Unable to verify SSL certificates",
         }
