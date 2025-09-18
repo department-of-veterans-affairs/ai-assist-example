@@ -182,34 +182,6 @@ jobs:
           echo "Deploying API service" 
           aws ecs update-service --cluster dev-fargate-cluster --service dev-ai-assist-api --force-new-deployment
 
-      - name: Debug service status
-        run: |
-          echo "=== WEB SERVICE STATUS ==="
-          aws ecs describe-services --cluster dev-fargate-cluster --services dev-ai-assist-web --query 'services[0].{Status:status,RunningCount:runningCount,PendingCount:pendingCount,FailedTasks:deployments[0].failedTasks,LastEvent:events[0].message}'
-          
-          echo "=== API SERVICE STATUS ==="
-          aws ecs describe-services --cluster dev-fargate-cluster --services dev-ai-assist-api --query 'services[0].{Status:status,RunningCount:runningCount,PendingCount:pendingCount,FailedTasks:deployments[0].failedTasks,LastEvent:events[0].message}'
-          
-          echo "=== RECENT FAILED TASKS ==="
-          WEB_TASK=$(aws ecs list-tasks --cluster dev-fargate-cluster --service-name dev-ai-assist-web --desired-status STOPPED --query 'taskArns[0]' --output text)
-          if [ "$WEB_TASK" != "None" ]; then
-            echo "Latest failed web task: $WEB_TASK"
-            aws ecs describe-tasks --cluster dev-fargate-cluster --tasks $WEB_TASK --query 'tasks[0].{StoppedReason:stoppedReason,ExitCode:containers[0].exitCode,LastStatus:lastStatus}'
-          fi
-          
-          API_TASK=$(aws ecs list-tasks --cluster dev-fargate-cluster --service-name dev-ai-assist-api --desired-status STOPPED --query 'taskArns[0]' --output text)
-          if [ "$API_TASK" != "None" ]; then
-            echo "Latest failed API task: $API_TASK"
-            aws ecs describe-tasks --cluster dev-fargate-cluster --tasks $API_TASK --query 'tasks[0].{StoppedReason:stoppedReason,ExitCode:containers[0].exitCode,LastStatus:lastStatus}'
-          fi
-      - name: Wait for services to stabilize (with timeout)
-        run: |
-          echo "Waiting for web service to stabilize (max 10 minutes)"
-          timeout 600 aws ecs wait services-stable --cluster dev-fargate-cluster --service dev-ai-assist-web || echo "Web service failed to stabilize within 10 minutes"
-          
-          echo "Waiting for API service to stabilize (max 10 minutes)"
-          timeout 600 aws ecs wait services-stable --cluster dev-fargate-cluster --service dev-ai-assist-api || echo "API service failed to stabilize within 10 minutes"
-
   stage-deployment:
     name: Deploy to Stage
     if: github.event.ref == 'refs/heads/main'
@@ -244,20 +216,3 @@ jobs:
           
           echo "Deploying web service"
           aws ecs update-service --cluster stage-fargate-cluster --service stage-ai-assist-web --force-new-deployment
-
-      - name: Tag and deploy API service  
-        run: |
-          echo "Tagging API image for deployment"
-          MANIFEST=$(aws ecr batch-get-image --repository-name cds/ai-assist-api --image-ids imageTag=${{ github.sha }} --query 'images[].imageManifest' --output text)
-          aws ecr put-image --repository-name cds/ai-assist-api --image-tag stage --image-manifest "$MANIFEST" || true
-          
-          echo "Deploying API service" 
-          aws ecs update-service --cluster stage-fargate-cluster --service stage-ai-assist-api --force-new-deployment
-
-      - name: Wait for services to stabilize
-        run: |
-          echo "Waiting for web service to stabilize"
-          aws ecs wait services-stable --cluster stage-fargate-cluster --service stage-ai-assist-web
-          
-          echo "Waiting for API service to stabilize"
-          aws ecs wait services-stable --cluster stage-fargate-cluster --service stage-ai-assist-api
