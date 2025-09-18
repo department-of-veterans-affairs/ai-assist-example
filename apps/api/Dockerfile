@@ -1,108 +1,114 @@
-# Builder stage
-FROM python:3.13-slim AS builder
+# Use VA hardened Python runtime as a parent image
+FROM ghcr.io/department-of-veterans-affairs/cdsp-base-docker-images/python-base:3 AS builder
 
-WORKDIR /app
+# Update CA certificates
+USER root
 
-# Install necessary packages for building and certificates
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# System dependencies (Alpine Linux based)
+RUN apk add --no-cache \
+    build-base \
     ca-certificates \
-    curl \
+    libffi-dev \
     openssl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Download and install VA internal certificates
-WORKDIR /usr/local/share/ca-certificates
-RUN curl -OsS http://aia.pki.example.com/PKI/AIA/VA/VA-Internal-S2-ICA4.cer && \
+    curl && \
+    cd /usr/local/share/ca-certificates/ && \
+    curl -OsS http://aia.pki.example.com/PKI/AIA/VA/VA-Internal-S2-ICA4.cer && \
     curl -OsS http://aia.pki.example.com/PKI/AIA/VA/VA-Internal-S2-ICA11.cer && \
     curl -OsS http://aia.pki.example.com/PKI/AIA/VA/VA-Internal-S2-RCA1-v1.cer && \
     curl -OsS http://aia.pki.example.com/PKI/AIA/VA/VA-Internal-S2-RCA2.cer && \
     curl -OsS http://aia.pki.example.com/PKI/AIA/VA/VA-Internal-S2-RCA3.cer && \
-    # Convert certificates from DER to PEM format
     for cert in *.cer; do \
-        openssl x509 -inform DER -in "$cert" -out "${cert%.cer}.crt" 2>/dev/null || \
-        openssl x509 -inform PEM -in "$cert" -out "${cert%.cer}.crt"; \
+    openssl x509 -inform DER -in "$cert" -out "${cert%.cer}.crt" 2>/dev/null || \
+    openssl x509 -inform PEM -in "$cert" -out "${cert%.cer}.crt"; \
     done && \
     rm *.cer && \
-    # Create symlinks in /etc/ssl/certs
+    # Create the symlinks in /etc/ssl/certs
     for cert in *.crt; do \
-        hash=$(openssl x509 -hash -noout -in "$cert").0 && \
-        cp "$cert" "/etc/ssl/certs/${cert%.crt}.pem" && \
-        ln -sf "/etc/ssl/certs/${cert%.crt}.pem" "/etc/ssl/certs/$hash"; \
+    hash=$(openssl x509 -hash -noout -in "$cert").0 && \
+    cp "$cert" "/etc/ssl/certs/${cert%.crt}.pem" && \
+    ln -sf "/etc/ssl/certs/${cert%.crt}.pem" "/etc/ssl/certs/$hash"; \
     done && \
     update-ca-certificates --fresh && \
     # Verify certificates were properly installed
     ls -la /etc/ssl/certs/VA-Internal-S2-*.pem
 
-# Set SSL environment variables
+# Ensure curl uses the system certificate store
 ENV CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
-    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
-    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
-    HTTPX_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+# Capture Python version information first
+RUN python3 -c "import sys; print(f'Python version: {sys.version_info.major}.{sys.version_info.minor}')" && \
+    PYTHON_VERSION=$(python3 -c "import sys; print(f'python{sys.version_info.major}.{sys.version_info.minor}')") && \
+    echo "export PYTHON_VERSION=$PYTHON_VERSION" > /python_version.env && \
+    echo "Python version captured as: $PYTHON_VERSION"
 
 WORKDIR /app
 
-# Install uv
+# Install uv for package management
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Copy dependency files and README
+# Add required files
 COPY pyproject.toml README.md ./
 
-# Install dependencies
+# Set paths
+ENV PATH="$PATH:/root/.local/bin" \
+    PYTHONPATH="$PYTHONPATH:/app"
+
+# Install dependencies using uv
 RUN uv pip install --system -e .
 
-# Install/upgrade certifi and link certificates
+# reinstalling certifi to get the .pem file
 RUN uv pip install --system --upgrade certifi && \
-    # Export the certifi path for later use
-    python -c "import certifi; print(certifi.where())" > /tmp/certifi_path.txt && \
-    export CERTIFI_PATH=$(cat /tmp/certifi_path.txt) && \
-    # Backup original certifi bundle
-    cp "$CERTIFI_PATH" "${CERTIFI_PATH}.backup" && \
-    # Replace with system certificates that include VA certs
-    cp /etc/ssl/certs/ca-certificates.crt "$CERTIFI_PATH"
+    export REQUESTS_CA_BUNDLE=$(python -c "import certifi; print(certifi.where())")
+
+ENV REQUESTS_CA_BUNDLE="${REQUESTS_CA_BUNDLE}"
+
+# Copy application code
+COPY app/ ./app/
+COPY scripts/ ./scripts/
 
 # Runtime stage
-FROM python:3.13-slim AS runtime
+FROM builder AS runtime
 
-WORKDIR /app
+USER root
 
-# Install runtime dependencies only
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# Copy version information
+COPY --from=builder /python_version.env /python_version.env
 
 # Copy CA certificates from builder stage
 COPY --from=builder /usr/local/share/ca-certificates/ /usr/local/share/ca-certificates/
 COPY --from=builder /etc/ssl/certs/VA-Internal-S2-*.pem /etc/ssl/certs/
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-# Update certificate store
-RUN update-ca-certificates
+# Load Python version
+RUN . /python_version.env && \
+    echo "Builder Python version: $PYTHON_VERSION"
+
+# Runtime dependencies only
+RUN apk update && apk --no-cache add \
+    libffi \
+    ca-certificates && \
+    update-ca-certificates
+
+# Set the working directory in the container
+WORKDIR /app
 
 # Set SSL environment variables for runtime
 ENV CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
     SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
     REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
-    HTTPX_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    HTTPX_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
-# Copy uv from builder
-COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
+# Copy from builder
+COPY --from=builder /app ./
 
-# Copy installed packages from builder
-COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+# Copy Python packages
+COPY --from=builder /usr/local/lib/python*/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy application code
-COPY . .
-
-# Create non-root user for security
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-USER appuser
-
-# Expose port
+# Make port 8080 available to the world outside this container
 EXPOSE 8080
 
-# Run the application
+# Run the application when the container launches as root
+USER root
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]

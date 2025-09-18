@@ -115,6 +115,57 @@ jobs:
           tags: |
             016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }}
 
+      - name: Verify VA Certificates in API Image
+        if: github.event.ref == 'refs/heads/main'
+        run: |
+          echo "=== Verifying VA Certificate Installation ==="
+
+          # Check if VA certificates are installed
+          docker run --rm 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }} \
+            sh -c "ls -la /etc/ssl/certs/VA-Internal-S2-*.pem" || exit 1
+
+          # Verify certificates are in the CA bundle
+          docker run --rm 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }} \
+            sh -c "grep -c 'VA-Internal' /etc/ssl/certs/ca-certificates.crt && echo '✓ VA certificates found in CA bundle'" || exit 1
+
+          # Test Python SSL configuration
+          docker run --rm 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }} \
+            python -c "
+          import os
+          import ssl
+          import certifi
+          print('✓ Python SSL configuration:')
+          print(f'  Certifi: {certifi.where()}')
+          print(f'  SSL_CERT_FILE: {os.environ.get(\"SSL_CERT_FILE\", \"Not set\")}')
+          print(f'  REQUESTS_CA_BUNDLE: {os.environ.get(\"REQUESTS_CA_BUNDLE\", \"Not set\")}')
+          " || exit 1
+
+          # Test that SSL libraries don't throw certificate errors
+          docker run --rm 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }} \
+            python -c "
+          import requests
+          import ssl
+          try:
+              # Test that SSL context can be created without errors
+              context = ssl.create_default_context()
+              print('✓ SSL context created successfully')
+
+              # Test requests library (connection may fail, but shouldn't have cert errors)
+              try:
+                  requests.get('https://aia.pki.example.com', timeout=2)
+                  print('✓ VA PKI service accessible')
+              except requests.exceptions.SSLError as e:
+                  print(f'✗ SSL Certificate Error: {e}')
+                  exit(1)
+              except Exception:
+                  print('✓ No SSL certificate errors (connection failed as expected)')
+          except Exception as e:
+              print(f'✗ SSL configuration error: {e}')
+              exit(1)
+          " || exit 1
+
+          echo "=== VA Certificate Verification Complete ===">
+
       - name: Configure AWS Credentials
         if: github.event.ref == 'refs/heads/main'
         uses: aws-actions/configure-aws-credentials@v4
