@@ -120,45 +120,47 @@ jobs:
         run: |
           echo "=== Verifying VA Certificate Installation ==="
 
-          # Check if VA certificates are installed
+          # Check if VA certificates are installed (Debian paths)
           docker run --rm 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }} \
-            sh -c "ls -la /etc/ssl/certs/VA-Internal-S2-*.pem" || exit 1
+            sh -c "ls -la /usr/local/share/ca-certificates/VA-Internal-S2-*.crt" || exit 1
 
-          # Check if certificates are in the CA bundle (may not be on Alpine)
+          # Check if certificates are in the CA bundle (Debian)
           docker run --rm 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }} \
-            sh -c "if grep -q 'VA-Internal' /etc/ssl/certs/ca-certificates.crt 2>/dev/null; then echo '✓ VA certificates found in CA bundle'; else echo '⚠ VA certificates not in bundle but may still work via individual files'; fi"
+            sh -c "if grep -q 'VA-Internal' /etc/ssl/certs/ca-certificates.crt 2>/dev/null; then echo '✓ VA certificates found in CA bundle'; else echo '⚠ VA certificates not found in bundle'; exit 1; fi"
 
           # Test Python SSL configuration
           docker run --rm 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }} \
             python -c "
           import os
           import ssl
-          import certifi
           print('✓ Python SSL configuration:')
-          print(f'  Certifi: {certifi.where()}')
+          print(f'  Default verify paths: {ssl.get_default_verify_paths()}')
           print(f'  SSL_CERT_FILE: {os.environ.get(\"SSL_CERT_FILE\", \"Not set\")}')
           print(f'  REQUESTS_CA_BUNDLE: {os.environ.get(\"REQUESTS_CA_BUNDLE\", \"Not set\")}')
           " || exit 1
 
-          # Test that SSL libraries don't throw certificate errors
+          # Test that SSL libraries work with VA certs
           docker run --rm 016134983543.dkr.ecr.us-gov-east-1.amazonaws.com/cds/ai-assist-api:${{ github.sha }} \
             python -c "
-          import requests
           import ssl
+          import urllib.request
           try:
               # Test that SSL context can be created without errors
               context = ssl.create_default_context()
               print('✓ SSL context created successfully')
 
-              # Test requests library (connection may fail, but shouldn't have cert errors)
+              # Test connection to VA PKI (connection may fail, but shouldn't have cert errors)
               try:
-                  requests.get('https://aia.pki.example.com', timeout=2)
-                  print('✓ VA PKI service accessible')
-              except requests.exceptions.SSLError as e:
-                  print(f'✗ SSL Certificate Error: {e}')
-                  exit(1)
-              except Exception:
-                  print('✓ No SSL certificate errors (connection failed as expected)')
+                  with urllib.request.urlopen('https://aia.pki.example.com', timeout=2) as response:
+                      print('✓ VA PKI service accessible')
+              except urllib.error.URLError as e:
+                  if 'certificate' in str(e).lower() or 'ssl' in str(e).lower():
+                      print(f'✗ SSL Certificate Error: {e}')
+                      exit(1)
+                  else:
+                      print('✓ No SSL certificate errors (connection failed as expected)')
+              except Exception as e:
+                  print('✓ No SSL certificate errors (timeout/connection failed as expected)')
           except Exception as e:
               print(f'✗ SSL configuration error: {e}')
               exit(1)
