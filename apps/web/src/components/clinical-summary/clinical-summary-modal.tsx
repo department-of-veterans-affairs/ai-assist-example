@@ -37,7 +37,7 @@ export function ClinicalSummaryModal() {
   // Fetch data when modal opens for the first time
   useEffect(() => {
     (async () => {
-      if (!(amOpen && patient?.dfn) || !!summary) {
+      if (!(amOpen && patient?.icn) || !!summary) {
         return;
       }
 
@@ -56,7 +56,6 @@ export function ClinicalSummaryModal() {
               firstName: patient.firstName,
               lastName: patient.lastName,
             },
-            patient_dfn: patient.dfn, // Keep for backward compatibility
           }),
         });
 
@@ -162,8 +161,8 @@ export function ClinicalSummaryModal() {
               <div className="margin-bottom-05">
                 <strong className="font-body-md">Patient:</strong>{' '}
                 <span className="font-body-md">
-                  {patient.lastName?.toUpperCase()}, {patient.firstName} (DFN{' '}
-                  {patient.dfn}, DOB {patient.dob || 'Unknown'})
+                  {patient.lastName?.toUpperCase()}, {patient.firstName} (ICN{' '}
+                  {patient.icn}, DOB {patient.dob || 'Unknown'})
                 </span>
               </div>
               <span className="text-bold">

@@ -1,5 +1,5 @@
 ## Task
-You will receive a PatientDFN and MCP server tools to retrieve the patient's medication and problems. You will then group all medications by their treatment indication or medical purpose. **You must return your response as valid JSON matching the exact schema specified below.**
+You will receive a PatientICN and MCP server tools to retrieve the patient's medication and problems. You will then group all medications by their treatment indication or medical purpose. **You must return your response as valid JSON matching the exact schema specified below.**
 
 ## Input Data
 ### medication tool

@@ -20,17 +20,10 @@ async def medications_summary(request: SummaryRequest, ctx: Context):
         # Add patient to context
         ctx.patient = request.patient
 
-        # Get patient DFN from either the new patient object or legacy field
-        patient_dfn = None
-        if ctx.patient:
-            patient_dfn = ctx.patient.dfn
-        elif request.patient_dfn:
-            patient_dfn = request.patient_dfn
-
-        if not patient_dfn:
+        if not ctx.patient or not ctx.patient.icn:
             raise HTTPException(
                 status_code=400,
-                detail="Patient DFN is required for medication summaries.",
+                detail="Patient ICN is required for medication summaries.",
             )
 
         summary_service = SummaryService()
@@ -39,7 +32,6 @@ async def medications_summary(request: SummaryRequest, ctx: Context):
             content=await summary_service.generate_summary(
                 SummaryService.SummaryType.MEDICATIONS,
                 context=ctx,
-                patient_dfn=patient_dfn,  # Keep for backward compatibility
             ),
             media_type="application/json",
             headers={

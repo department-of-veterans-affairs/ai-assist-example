@@ -48,7 +48,6 @@ class SummaryService:
         self,
         type: SummaryType,
         context: RequestContext,
-        patient_dfn: str | None = None,  # Keep for backward compatibility
     ) -> str:
         # Agent SDK will log its own activity
         vista_mcp = None
@@ -56,20 +55,14 @@ class SummaryService:
         # Extract patient context
         patient = context.patient
         patient_icn = None
-        patient_dfn_local = patient_dfn  # Use local var to avoid overwriting parameter
         patient_station = None
         if patient:
             patient_icn = patient.icn
-            patient_dfn_local = patient.dfn
             patient_station = patient.station
-        elif patient_dfn:
-            # Legacy support - use patient_dfn parameter
-            patient_dfn_local = patient_dfn
-
-        if not patient_dfn_local:
+        if not patient_icn:
             raise HTTPException(
                 status_code=400,
-                detail="Patient DFN is required for medication summaries.",
+                detail="Patient ICN is required for medication summaries.",
             )
 
         try:
@@ -101,16 +94,15 @@ class SummaryService:
                     # Add patient context as metadata
                     trace_metadata={
                         "patient_icn": patient_icn,
-                        "patient_dfn": patient_dfn_local,
                         "patient_station": patient_station,
                         "user_duz": user_duz,
                     }
-                    if patient_dfn_local
+                    if patient_icn
                     else {},
                 )
 
                 input_json = json.dumps(
-                    {"patient_dfn": patient_dfn_local}
+                    {"patient_icn": patient_icn}
                     | ({"data": agent_result.final_output} if agent_result else {})
                 )
 

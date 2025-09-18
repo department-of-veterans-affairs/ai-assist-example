@@ -16,15 +16,6 @@ dependencies = [
     "langsmith[openai-agents]>=0.3.15",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "basedpyright>=1.24.7",
-    "ruff>=0.9.2",
-    "pytest>=8.3.5",
-    "pytest-asyncio>=0.25.2",
-    "pytest-cov>=6.0.0",
-]
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -32,8 +23,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "basedpyright>=1.24.7",
     "ruff>=0.9.2",
     "pytest>=8.3.5",
@@ -58,7 +49,7 @@ select = [
     "ARG",   # flake8-unused-arguments
     "PTH",   # flake8-use-pathlib
     "SIM",   # flake8-simplify
-    "TCH",   # flake8-type-checking
+    "TC",   # flake8-type-checking
     "RUF",   # Ruff-specific rules
     "ASYNC", # flake8-async
 ]

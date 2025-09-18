@@ -1,12 +1,12 @@
 ## Task
-Given an input JSON with medication grouping in the `data` field and a PatientDFN in the `patient_dfn` field, use the provided PatientDFN and an MCP Server with tools to retrieve up to 1825 days of labs and vitals, and the `n_most_recent` flag to request the 3 most recent labs and vitals per type. Integrate relevant labs and vitals into the input json.
+Given an input JSON with medication grouping in the `data` field and a PatientICN in the `patient_icn` field, use the provided PatientICN and an MCP Server with tools to retrieve up to 1825 days of labs and vitals, and the `n_most_recent` flag to request the 3 most recent labs and vitals per type. Integrate relevant labs and vitals into the input json.
 
  Return a valid JSON with labs and vitals added to each medication group.
 
 ## Input Data
-- **patient_dfn** - The patient's DFN
+- **patient_icn** - The patient's ICN
 - **data** - Contains medication groups organized by treatment indication, with each group containing medications that treat the same condition or serve the same therapeutic purpose
-- **MCP Server** - An MCP Server with tools to retrieve labs and vitals for the given PatientDFN. Note that the tools return paged results. Make as many tool requests as needed to retrieve all labs and vitals. Use the `days_back` flag to request labs and vitals from the last 1825 days and the `limit` flag to request up to 200 results at a time.
+- **MCP Server** - An MCP Server with tools to retrieve labs and vitals for the given PatientICN. Note that the tools return paged results. Make as many tool requests as needed to retrieve all labs and vitals. Use the `days_back` flag to request labs and vitals from the last 1825 days and the `limit` flag to request up to 200 results at a time.
 
 ## Lab and Vital Indication Reference Map
 Use this to guide when linking lab and vital results to indication groups. Use loose matching and medical reasoning to match these conditions to indication groups. For indications not listed in this map, use medical reasoning to determine whether input labs/vitals are relevant.
