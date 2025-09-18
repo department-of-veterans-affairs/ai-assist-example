@@ -24,5 +24,12 @@ async def get_current_user(ctx: Context):
         logger.info(f"User authenticated successfully: {ctx.user.email}")
         return CurrentUserResponse(authenticated=True, user_info=ctx.user)
     else:
-        logger.debug("No authenticated user found")
-        return CurrentUserResponse(authenticated=False, error="Not authenticated")
+        logger.warning(
+            "Authentication failed: No valid JWT token obtained from IAMSESSION cookie"
+        )
+        # Still return 200 but with authenticated=false for backward compatibility
+        # The frontend should check the 'authenticated' field
+        return CurrentUserResponse(
+            authenticated=False,
+            error="Failed to exchange IAMSESSION cookie for valid JWT",
+        )

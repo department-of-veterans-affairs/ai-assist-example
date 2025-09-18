@@ -151,6 +151,10 @@ class Settings(BaseSettings):
         return self.environment == "production"
 
     @property
+    def is_staging(self) -> bool:
+        return self.environment == "staging"
+
+    @property
     def is_dev_mode(self) -> bool:
         """
         Check if running in development mode (local development).

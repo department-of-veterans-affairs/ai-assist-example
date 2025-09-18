@@ -15,7 +15,7 @@ class JWTAuthService:
     """JWT authentication service with caching."""
 
     def __init__(self):
-        self.sso_client = SSOClient()
+        self.sso_client: SSOClient = SSOClient()
         self._cache: dict[str, AuthSession] = {}
 
     def extract_iamsession(self, request: Request) -> str | None:
@@ -30,13 +30,23 @@ class JWTAuthService:
             JWTToken if successful, None if exchange fails or SSO not configured.
         """
         if not settings.sso_auth_url:
-            if settings.is_production:
-                logger.error("SSO_AUTH_URL not configured in production")
+            # SSO is only available in deployed environments, not locally
+            logger.debug(f"SSO_AUTH_URL not configured in {settings.environment}")
             return None
 
         if not iamsession:
-            logger.debug("No IAMSESSION cookie provided to get_jwt_token")
+            logger.warning("No IAMSESSION cookie provided to get_jwt_token")
             return None
+
+        # Avoid logging raw cookie content; log length and a stable hash for correlation
+        try:
+            import hashlib
+
+            length = len(iamsession)
+            digest = hashlib.sha256(iamsession.encode("utf-8")).hexdigest()[:10]
+            logger.debug(f"Processing IAMSESSION cookie (len={length}, hash={digest})")
+        except Exception:
+            logger.debug("Processing IAMSESSION cookie (hash unavailable)")
 
         # Check cache
         session = self._cache.get(iamsession)
@@ -54,6 +64,7 @@ class JWTAuthService:
             logger.debug("No cached session found, performing new JWT exchange")
 
         # Refresh or get new token
+        logger.info("Calling SSO client to exchange IAMSESSION for JWT")
         jwt_token = await self.sso_client.exchange_cookie_for_jwt(iamsession)
         if jwt_token:
             # Update cache
@@ -64,6 +75,7 @@ class JWTAuthService:
             logger.info(f"JWT successfully obtained/refreshed for user {email}")
             return jwt_token
         else:
+            logger.error("JWT exchange failed - SSO client returned None")
             # Remove invalid session from cache
             if iamsession in self._cache:
                 logger.info(
@@ -76,8 +88,10 @@ class JWTAuthService:
         """Extract IAMSESSION from request and get JWT token."""
         iamsession = self.extract_iamsession(request)
         if not iamsession:
+            logger.warning("No IAMSESSION cookie found in request")
             return None
 
+        logger.info("IAMSESSION cookie found, attempting JWT exchange")
         return await self.get_jwt_token(iamsession)
 
 
