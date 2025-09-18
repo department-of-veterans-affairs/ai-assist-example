@@ -3,6 +3,8 @@ FROM --platform=linux/amd64 ghcr.io/department-of-veterans-affairs/cdsp-base-doc
 # Switch to root to install certificates
 USER root
 
+# Create working directory
+WORKDIR /app
 
 # Update CA certificates (Alpine-based image uses apk)
 RUN apk update && apk add --no-cache ca-certificates libssl3 curl=8.12.0-r0 libcurl-openssl4=8.12.0-r0 \
@@ -16,7 +18,6 @@ RUN chown -R nonroot:nonroot /app
 
 # Switch back to non-root user
 USER nonroot
-WORKDIR /app
 
 # Install uv for package management
 COPY --from=ghcr.io/astral-sh/uv:latest --chown=nonroot:nonroot /uv /usr/local/bin/uv
