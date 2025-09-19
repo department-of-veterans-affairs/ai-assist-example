@@ -47,8 +47,10 @@ async def chat(chat_request: ChatRequest, ctx: Context):
         )
 
     except Exception as e:
-        logger.error(f"Chat error: {e!s}")
+        # Log the full error with stack trace for debugging
+        logger.error(f"Chat error: {e!s}", exc_info=True)
+        # Return sanitized error message to user
         raise HTTPException(
             status_code=500,
             detail="An internal server error occurred. Please try again later.",
-        ) from e
+        ) from None

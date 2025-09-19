@@ -54,14 +54,32 @@ async def check_azure_openai() -> dict[str, str | bool]:
             "test_response": response.choices[0].message.content or "no content",
         }
     except Exception as e:
+        # Log the full error with stack trace for debugging
+        logger.error(f"Azure OpenAI health check failed: {e!s}", exc_info=True)
+
+        # Sanitize error message to avoid exposing stack traces
         error_msg = str(e)
+        # Only include safe, user-friendly error information
+        if "quota" in error_msg.lower():
+            sanitized_error = "Service quota exceeded"
+        elif (
+            "authentication" in error_msg.lower() or "unauthorized" in error_msg.lower()
+        ):
+            sanitized_error = "Authentication failed"
+        elif "timeout" in error_msg.lower():
+            sanitized_error = "Connection timeout"
+        elif "network" in error_msg.lower() or "connection" in error_msg.lower():
+            sanitized_error = "Network connection failed"
+        else:
+            sanitized_error = "Service unavailable"
+
         rate_limited = (
             "Azure support request" in error_msg or "quota" in error_msg.lower()
         )
 
         return {
             "status": "error",
-            "error": error_msg,
+            "error": sanitized_error,
             "rate_limited": rate_limited,
             "endpoint": settings.azure_openai_endpoint,
             "deployment": settings.azure_openai_deployment_name,
