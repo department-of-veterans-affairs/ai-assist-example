@@ -75,7 +75,8 @@ class ChatService:
         vista_mcp = None
 
         # Get auth params from context
-        jwt_token, user_duz = context.get_mcp_params()
+        jwt_token, user_duz, station_from_context = context.get_mcp_params()
+        station = patient_station or station_from_context
 
         try:
             if settings.rate_limit_delay_ms > 0:
@@ -95,7 +96,11 @@ class ChatService:
             )
 
             # Get MCP client and connect it after creating orchestrator
-            vista_mcp = get_vista_mcp_client(jwt_token, user_duz=user_duz)
+            vista_mcp = get_vista_mcp_client(
+                jwt_token,
+                user_duz=user_duz,
+                station=station,
+            )
             await vista_mcp.connect()
 
             # Add MCP server to orchestrator after connecting

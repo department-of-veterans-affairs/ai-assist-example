@@ -56,15 +56,21 @@ def get_orchestrator_agent(
         return _orchestrator_instance
 
     mcp_servers: list[MCPServer]
+    station_header: str | None = None
     if with_mcp:
         try:
             from ..services.mcp_client import get_vista_mcp_client
 
-            # Extract DUZ from patient context if available
+            # Extract Vista parameters from patient context if available
             user_duz = patient_context.get("duz") if patient_context else None
+            station_header = patient_context.get("station") if patient_context else None
 
             # Get MCP client with JWT and DUZ if provided
-            vista_mcp = get_vista_mcp_client(jwt_token, user_duz=user_duz)
+            vista_mcp = get_vista_mcp_client(
+                jwt_token,
+                user_duz=user_duz,
+                station=station_header,
+            )
             mcp_servers = [vista_mcp]
         except ImportError as e:
             import logging
@@ -103,8 +109,8 @@ def get_orchestrator_agent(
         mcp_servers=mcp_servers,
     )
 
-    # Only cache if no JWT (static config)
-    if with_mcp and mcp_servers and not jwt_token:
+    # Only cache if no JWT or station-specific headers (static config)
+    if with_mcp and mcp_servers and not jwt_token and not station_header:
         _orchestrator_instance = agent
 
     return agent

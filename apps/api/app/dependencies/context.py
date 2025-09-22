@@ -48,9 +48,10 @@ class RequestContext:
                     return vista_id.duz
         return None
 
-    def get_mcp_params(self) -> tuple[str | None, str | None]:
-        """Get parameters needed for MCP client initialization."""
-        return self.jwt_token, self.user_duz
+    def get_mcp_params(self) -> tuple[str | None, str | None, str | None]:
+        """Return auth headers and station metadata for Vista MCP."""
+        station = self.patient.station if self.patient else None
+        return self.jwt_token, self.user_duz, station
 
 
 async def get_request_context(

@@ -79,15 +79,27 @@ class SummariesService:
 
         azure_client = create_azure_openai_client()
 
-        jwt_token, user_duz = context.get_mcp_params()
-        vista_mcp = get_vista_mcp_client(jwt_token, user_duz=user_duz)
+        jwt_token, user_duz, station_from_context = context.get_mcp_params()
+        station = patient.station or station_from_context
+
+        vista_mcp = get_vista_mcp_client(
+            jwt_token,
+            user_duz=user_duz,
+            station=station,
+        )
+        logger.debug(
+            "Initialized Vista MCP client for summary (jwt=%s, duz=%s, station=%s)",
+            "present" if jwt_token else "missing",
+            user_duz or "missing",
+            station or "missing",
+        )
         await vista_mcp.connect()
 
         tools = build_medication_tools()
         run_context = MedicationRunContext(
             vista_mcp=vista_mcp,
             patient_icn=patient.icn,
-            station=patient.station,
+            station=station,
             user_duz=user_duz,
             options=request.options.model_dump(),
             max_pages=4,
@@ -96,7 +108,7 @@ class SummariesService:
 
         metadata = {
             "patient_icn": patient.icn,
-            "patient_station": patient.station,
+            "patient_station": station,
             "user_duz": user_duz,
         }
 
@@ -115,7 +127,7 @@ class SummariesService:
                     {
                         "task": "group_medications",
                         "patient_icn": patient.icn,
-                        "patient_station": patient.station,
+                        "patient_station": station,
                     }
                 ),
                 run_context=run_context,
