@@ -42,7 +42,7 @@ def build_medication_enrichment_agent(
         model_settings=ModelSettings(
             temperature=0.15,
             top_p=0.1,
-            max_tokens=1600,
+            max_tokens=2400,
             parallel_tool_calls=False,
         ),
     )
