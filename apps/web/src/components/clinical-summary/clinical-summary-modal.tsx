@@ -4,16 +4,15 @@ import {
   type ModalRef,
   ModalToggleButton,
 } from '@department-of-veterans-affairs/clinical-design-system';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import regenerateIcon from '@/assets/icons/autorenew.svg';
 import copyIcon from '@/assets/icons/copy.svg';
 import LaunchIcon from '@/assets/icons/launch.svg';
 import printIcon from '@/assets/icons/print.svg';
 import thumbsDownIcon from '@/assets/icons/thumbs-down.svg';
 import thumbsUpIcon from '@/assets/icons/thumbs-up.svg';
-
+import { useMedicationSummary } from '@/components/clinical-summary/use-medication-summary';
 import { LoadingIndicator } from '@/components/loading-indicator';
-import { fetchApi } from '@/lib/api';
 import { usePatientStore } from '@/stores';
 import type { MedicationSummary as MedicationSummaryType } from '@/types/medication-summary';
 import { MedicationSummary } from './medication-summary';
@@ -23,67 +22,42 @@ type SummaryEnvelope = {
   timestamp: Date;
 };
 
-/**
- * Clinical Summary Modal with trigger button
- * Uses VACDS ref pattern - modal is always in DOM but hidden/shown via ref
- */
+type SummaryState = SummaryEnvelope | null;
+
+const MODAL_ID = 'clinical-summary-modal';
+
 export function ClinicalSummaryModal() {
   const modalRef = useRef<ModalRef>(null);
-  const [summary, setSummary] = useState<SummaryEnvelope | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [amOpen, setAmOpen] = useState(false);
   const patient = usePatientStore((state) => state.patient);
 
-  // Fetch data when modal opens for the first time
-  useEffect(() => {
-    (async () => {
-      if (!(amOpen && patient?.icn) || !!summary) {
-        return;
+  const {
+    data,
+    dataUpdatedAt,
+    error,
+    isError,
+    isFetching,
+    isLoading,
+    refetch,
+  } = useMedicationSummary({ patient, enabled: amOpen });
+
+  const summary: SummaryState = data
+    ? {
+        summary: data,
+        timestamp: dataUpdatedAt ? new Date(dataUpdatedAt) : new Date(),
       }
-
-      setIsLoading(true);
-      try {
-        const response = await fetchApi('summary/medications', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            patient: {
-              icn: patient.icn || patient.id,
-              dfn: patient.dfn,
-              station: patient.sta3n,
-              firstName: patient.firstName,
-              lastName: patient.lastName,
-            },
-          }),
-        });
-
-        const parsedSummary = JSON.parse(await response.text());
-        // const parsedSummary = await JSON.parse(TEST_DATA);
-
-        if (typeof summary !== 'object') {
-          throw new Error('Invalid summary response');
-        }
-        setSummary({
-          summary: parsedSummary,
-          timestamp: new Date(),
-        });
-      } catch (error) {
-        setSummary(null);
-        console.error('Failed to fetch summary:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [amOpen, patient, summary]);
+    : null;
 
   const handleCopy = () => {
-    if (summary?.summary) {
-      // todo: grab rendered content
-      navigator.clipboard.writeText(JSON.stringify(summary.summary));
-      console.log('Copied to clipboard');
+    if (!summary?.summary) {
+      return;
     }
+
+    navigator.clipboard
+      .writeText(JSON.stringify(summary.summary))
+      .catch((copyError) =>
+        console.error('Failed to copy summary:', copyError)
+      );
   };
 
   const handlePrint = () => {
@@ -94,19 +68,20 @@ export function ClinicalSummaryModal() {
     console.log(isPositive ? 'Positive feedback' : 'Negative feedback');
   };
 
-  // Load data when modal opens
   const handleModalOpen = () => {
     setAmOpen(true);
   };
 
-  // Regenerate report
   const regenerateReport = () => {
-    setSummary(null);
+    refetch({ throwOnError: false }).catch((refetchError) => {
+      console.error('Failed to regenerate summary:', refetchError);
+    });
   };
+
+  const loading = isLoading || isFetching;
 
   return (
     <>
-      {/* Trigger Button - styled as a custom button */}
       <button
         className="position-relative margin-bottom-1 padding-y-1 padding-x-2 display-flex radius-md width-full flex-align-center cursor-pointer gap-2 border-1px border-primary bg-white text-left hover:bg-base-lightest"
         onClick={() => {
@@ -119,24 +94,23 @@ export function ClinicalSummaryModal() {
           Generate Patient Medication-Problem Summary
         </span>
         <img
-          alt="Launch"
+          alt=""
+          aria-hidden="true"
           className="width-3 height-3 flex-shrink-0"
           src={LaunchIcon}
         />
       </button>
 
-      {/* FIXME: Need to fix this in VACDS Modal Style override for modal width */}
       <style>{`
-        #clinical-summary-modal .usa-modal__main {
+        #${MODAL_ID} .usa-modal__main {
           max-width: 70rem;
         }
       `}</style>
 
-      {/* Modal - always in DOM, controlled via ref */}
       <Modal
         aria-describedby="clinical-summary-description"
         aria-labelledby="clinical-summary-heading"
-        id="clinical-summary-modal"
+        id={MODAL_ID}
         isLarge
         ref={modalRef}
       >
@@ -144,7 +118,6 @@ export function ClinicalSummaryModal() {
           className="display-flex height-full maxh flex-column"
           style={{ maxHeight: '70vh' }}
         >
-          {/* Modal Header - larger font to match Figma */}
           <div className="padding-3 border-base-light border-bottom-1px">
             <h2
               className="margin-0 font-heading-xl"
@@ -155,7 +128,6 @@ export function ClinicalSummaryModal() {
             <div>Grouped by Problem with relevant Vitals and Labs</div>
           </div>
 
-          {/* Patient Info Section - adjusted formatting */}
           {patient && (
             <div className="padding-3 border-base-light border-bottom-1px">
               <div className="margin-bottom-05">
@@ -174,19 +146,27 @@ export function ClinicalSummaryModal() {
 
           <div className="flex-1 overflow-y-auto">
             <div className="padding-3" id="clinical-summary-description">
-              {isLoading && (
+              {loading && (
                 <div className="padding-5 text-center">
                   <LoadingIndicator />
                 </div>
               )}
 
-              {!isLoading && summary?.summary && (
-                <div className="line-height-body-3 font-body-md text-base-darker`">
+              {!loading && isError && (
+                <div className="padding-5 text-center text-secondary-dark">
+                  {error instanceof Error
+                    ? error.message
+                    : 'Failed to retrieve patient summary.'}
+                </div>
+              )}
+
+              {!loading && summary?.summary && (
+                <div className="line-height-body-3 font-body-md text-base-darker">
                   <MedicationSummary summary={summary.summary} />
                 </div>
               )}
 
-              {!(isLoading || summary?.summary) && (
+              {!(loading || isError || summary?.summary) && (
                 <div className="padding-5 text-center text-base">
                   Click to load patient summary
                 </div>
@@ -194,11 +174,9 @@ export function ClinicalSummaryModal() {
             </div>
           </div>
 
-          {/* Footer with Actions */}
           <ModalFooter>
             <div className="width-full display-flex flex-align-center flex-justify-space-between">
               <div className="display-flex flex-align-center gap-2">
-                {/* Close Button using ModalToggleButton */}
                 <ModalToggleButton
                   className="usa-button"
                   closer
@@ -208,23 +186,35 @@ export function ClinicalSummaryModal() {
                   Close
                 </ModalToggleButton>
 
-                {/* Action Icons */}
                 <button
-                  aria-label="Regenrate Report"
+                  aria-label="Regenerate Report"
                   className="padding-05 cursor-pointer border-0 bg-transparent"
                   onClick={regenerateReport}
                   type="button"
                 >
-                  <img alt="" height="20" src={regenerateIcon} width="20" />
+                  <img
+                    alt=""
+                    aria-hidden="true"
+                    height="20"
+                    src={regenerateIcon}
+                    width="20"
+                  />
                 </button>
 
                 <button
                   aria-label="Copy to clipboard"
                   className="padding-05 cursor-pointer border-0 bg-transparent"
+                  disabled={!summary}
                   onClick={handleCopy}
                   type="button"
                 >
-                  <img alt="" height="20" src={copyIcon} width="20" />
+                  <img
+                    alt=""
+                    aria-hidden="true"
+                    height="20"
+                    src={copyIcon}
+                    width="20"
+                  />
                 </button>
 
                 <button
@@ -233,7 +223,13 @@ export function ClinicalSummaryModal() {
                   onClick={handlePrint}
                   type="button"
                 >
-                  <img alt="" height="20" src={printIcon} width="20" />
+                  <img
+                    alt=""
+                    aria-hidden="true"
+                    height="20"
+                    src={printIcon}
+                    width="20"
+                  />
                 </button>
 
                 <button
@@ -242,7 +238,13 @@ export function ClinicalSummaryModal() {
                   onClick={() => handleFeedback(true)}
                   type="button"
                 >
-                  <img alt="" height="20" src={thumbsUpIcon} width="20" />
+                  <img
+                    alt=""
+                    aria-hidden="true"
+                    height="20"
+                    src={thumbsUpIcon}
+                    width="20"
+                  />
                 </button>
 
                 <button
@@ -251,11 +253,16 @@ export function ClinicalSummaryModal() {
                   onClick={() => handleFeedback(false)}
                   type="button"
                 >
-                  <img alt="" height="20" src={thumbsDownIcon} width="20" />
+                  <img
+                    alt=""
+                    aria-hidden="true"
+                    height="20"
+                    src={thumbsDownIcon}
+                    width="20"
+                  />
                 </button>
               </div>
 
-              {/* Disclaimer */}
               <span className="font-body-xs text-base">
                 AI-generated content may be incorrect
               </span>

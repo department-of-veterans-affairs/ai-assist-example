@@ -43,7 +43,7 @@ def initialize_langsmith_tracing() -> None:
         # Set environment variables for LangSmith
         os.environ["LANGSMITH_API_KEY"] = settings.langsmith_api_key
         os.environ["LANGSMITH_PROJECT"] = settings.langsmith_project
-        os.environ["LANGCHAIN_TRACING_V2"] = "true"
+        os.environ["LANGCHAIN_TRACING"] = "true"
 
         # Also set LANGCHAIN_ENDPOINT if not already set
         if "LANGCHAIN_ENDPOINT" not in os.environ:

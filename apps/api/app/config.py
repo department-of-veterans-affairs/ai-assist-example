@@ -50,6 +50,26 @@ class Settings(BaseSettings):
     azure_client_id: str = Field(
         default="", alias="AZURE_CLIENT_ID"
     )  # For managed identity
+    azure_openai_max_concurrency: int = Field(
+        default=2,
+        alias="AZURE_OPENAI_MAX_CONCURRENCY",
+        description="Maximum number of concurrent Azure OpenAI runs allowed",
+    )
+    azure_openai_rate_limit_max_attempts: int = Field(
+        default=3,
+        alias="AZURE_OPENAI_RATE_LIMIT_MAX_ATTEMPTS",
+        description="Total retry attempts when Azure OpenAI returns a rate limit",
+    )
+    azure_openai_rate_limit_base_delay_ms: int = Field(
+        default=500,
+        alias="AZURE_OPENAI_RATE_LIMIT_BASE_DELAY_MS",
+        description="Initial Azure OpenAI backoff delay in milliseconds",
+    )
+    azure_openai_rate_limit_jitter_ms: int = Field(
+        default=250,
+        alias="AZURE_OPENAI_RATE_LIMIT_JITTER_MS",
+        description="Maximum jitter (milliseconds) added to Azure OpenAI backoff",
+    )
 
     # Vista MCP Configuration
     vista_mcp_server_url: str = Field(
