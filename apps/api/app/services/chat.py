@@ -4,7 +4,6 @@ import asyncio
 import contextlib
 import json
 import logging
-import re
 from collections.abc import AsyncGenerator
 
 from agents import RunConfig, Runner
@@ -143,18 +142,30 @@ class ChatService:
         except Exception as e:
             logger.error(f"Stream error: {e!s}", exc_info=True)
             # All error details are logged; users get only generic messages.
-            if settings.rate_limit_delay_ms > 0 or "rate limit" in str(e).lower() or "429" in str(e):
+            if (
+                settings.rate_limit_delay_ms > 0
+                or "rate limit" in str(e).lower()
+                or "429" in str(e)
+            ):
                 # Log details internally for troubleshooting.
-                logger.warning("Azure rate/token limit hit - likely due to large number of MCP tools")
-                error_message = (
-                    "Azure OpenAI limit exceeded. Try a simpler query or contact support. "
-                    "If the problem persists, your administrator may need to increase Azure quotas."
+                logger.warning(
+                    "Azure rate/token limit hit - "
+                    "likely due to large number of MCP tools"
                 )
-            elif "Azure support request" in str(e) or "An error occurred while processing your request" in str(e):
+                error_message = (
+                    "Azure OpenAI limit exceeded. "
+                    "Try a simpler query or contact support. "
+                    "If the problem persists, your administrator may need to "
+                    "increase Azure quotas."
+                )
+            elif "Azure support request" in str(
+                e
+            ) or "An error occurred while processing your request" in str(e):
                 # Log details but do not send request ID or specifics to the client.
                 logger.error("Azure service error encountered.")
                 error_message = (
-                    "Azure OpenAI service error. Try disabling Vista MCP tools or use a simpler query. "
+                    "Azure OpenAI service error. Try disabling Vista MCP tools or "
+                    "use a simpler query. "
                     "If the issue persists, contact support."
                 )
             else:
