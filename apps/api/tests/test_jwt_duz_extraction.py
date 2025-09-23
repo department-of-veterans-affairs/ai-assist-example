@@ -13,7 +13,9 @@ from app.services.jwt_auth import JWTAuthService
 from app.services.sso_client import SSOClient
 
 
-def create_test_jwt(vista_ids: list[dict[str, Any]], email: str = "test@example.com") -> str:
+def create_test_jwt(
+    vista_ids: list[dict[str, Any]], email: str = "test@example.com"
+) -> str:
     """Create a test JWT token with specified Vista IDs."""
     header = {"alg": "HS256", "typ": "JWT"}
     payload = {
