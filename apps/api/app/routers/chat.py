@@ -1,5 +1,6 @@
 """Chat router for AI conversations"""
 
+import json
 import logging
 
 from fastapi import APIRouter, HTTPException
@@ -32,12 +33,24 @@ async def chat(chat_request: ChatRequest, ctx: Context):
 
         chat_service = ChatService()
 
+        # Create a safe streaming wrapper to prevent stack trace exposure
+        async def safe_stream_generator():
+            try:
+                async for chunk in chat_service.generate_stream(
+                    messages=chat_request.messages,
+                    context=ctx,
+                    patient_dfn=chat_request.patient_dfn,  # Keep for backward compatibility
+                ):
+                    yield chunk
+            except Exception as e:
+                # Log the full error with stack trace for debugging
+                logger.error(f"Streaming error: {e!s}", exc_info=True)
+                # Return sanitized error message to user
+                error_message = "An internal server error occurred. Please try again later."
+                yield f"3:{json.dumps(error_message)}\n"
+
         return StreamingResponse(
-            content=chat_service.generate_stream(
-                messages=chat_request.messages,
-                context=ctx,
-                patient_dfn=chat_request.patient_dfn,  # Keep for backward compatibility
-            ),
+            content=safe_stream_generator(),
             media_type="text/event-stream",
             headers={
                 "Cache-Control": "no-cache",
