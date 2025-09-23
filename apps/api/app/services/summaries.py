@@ -77,9 +77,17 @@ class SummariesService:
                 detail="Patient ICN is required to generate a medication summary.",
             )
 
-        azure_client = create_azure_openai_client()
+        vista_context = context.require_vista_context(
+            logger=logger,
+            require_icn=True,
+            endpoint="medication_summary",
+        )
 
-        jwt_token, user_duz, station_from_context = context.get_mcp_params()
+        jwt_token = vista_context.token
+        user_duz = vista_context.duz
+        station_from_context = vista_context.station
+
+        azure_client = create_azure_openai_client()
         station = patient.station or station_from_context
 
         vista_mcp = get_vista_mcp_client(

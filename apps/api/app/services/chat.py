@@ -74,8 +74,16 @@ class ChatService:
         vista_mcp = None
 
         # Get auth params from context
-        jwt_token, user_duz, station_from_context = context.get_mcp_params()
-        station = patient_station or station_from_context
+        vista_context = context.require_vista_context(
+            logger=logger,
+            require_icn=True,
+            endpoint="chat",
+        )
+
+        jwt_token = vista_context.token
+        user_duz = vista_context.duz
+        station = patient_station or vista_context.station
+        patient_icn = vista_context.icn
 
         try:
             if settings.rate_limit_delay_ms > 0:
