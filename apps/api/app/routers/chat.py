@@ -39,14 +39,17 @@ async def chat(chat_request: ChatRequest, ctx: Context):
                 async for chunk in chat_service.generate_stream(
                     messages=chat_request.messages,
                     context=ctx,
-                    patient_dfn=chat_request.patient_dfn,  # Keep for backward compatibility
+                    # Keep for backward compatibility
+                    patient_dfn=chat_request.patient_dfn,
                 ):
                     yield chunk
             except Exception as e:
                 # Log the full error with stack trace for debugging
                 logger.error(f"Streaming error: {e!s}", exc_info=True)
                 # Return sanitized error message to user
-                error_message = "An internal server error occurred. Please try again later."
+                error_message = (
+                    "An internal server error occurred. Please try again later."
+                )
                 yield f"3:{json.dumps(error_message)}\n"
 
         return StreamingResponse(
