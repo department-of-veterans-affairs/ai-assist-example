@@ -38,7 +38,7 @@ Our target audience is primary care physicians and their teams.
 ## Goals and metrics for success
 
 - Reduce the time PCPs spend preparing for an appointment with a patient
-- Customer satisfaction score (CSAT) is equal to or above VA.gov average
+- Customer satisfaction score (CSAT) meets or exceeds organizational standards
 
 ### Short-term goals through end of Phase 3
 

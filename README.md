@@ -1,78 +1,177 @@
-# Welcome to VA AI Assist
-This repository contains documentation about a generative AI-enabled chat tool that helps VA clinical staff with summarizing clinical documentation from the electronic health record (EHR) to support pre-encounter chart review.
+# AI Clinical Assistant
 
-## Project description
-### Overview
-VA AI Assist empowers physicians to streamline their workflows by leveraging a Large Language Models (LLM). Our application connects to patient data through a [Model Context Protocol (MCP) server](https://github.com/department-of-veterans-affairs/octo-vista-api-x-mcp-server) that interfaces with VA's VistA EHR system, enabling safe and intelligent summarization and chat-based queries about patient information.
-<br>
-<br>
-VA physicians, nurses, and other clinical staff have expressed interest in using AI to conduct tasks like:
-- Summarize large volumes of patient information
-- Summarize prior cardiac testing procedures and clinical visits
-- Improve accuracy and completeness in coding
-- Identify social work service needs through chart review when evaluating a new patient
+A modern web application that provides AI-powered clinical assistance for healthcare providers. Built with React, FastAPI, and OpenAI integration.
 
-Learn more about our solution narrative in our [initiative brief](https://github.com/department-of-veterans-affairs/ai-assist/blob/main/docs/initiative-brief.md).
+## Features
 
-### Timeline
+- **AI-Powered Chat Interface**: Interactive chat with AI agents for clinical assistance
+- **Patient Context Management**: Secure patient data integration with SMART on FHIR
+- **Clinical Summaries**: Automated generation of patient summaries and medication insights
+- **Modern Tech Stack**: React 19, FastAPI, TypeScript, and comprehensive testing
 
-We are currently building a proof of concept through end of September 2025.
+## Architecture
 
-Learn more about our phases of work in our [initiative brief](https://github.com/department-of-veterans-affairs/ai-assist/blob/main/docs/initiative-brief.md).
+### Frontend (`apps/web`)
+- **React 19** with TypeScript
+- **VA Clinical Design System (VACDS)** for UI components
+- **React Router v7** for navigation
+- **Zustand** for state management
+- **TanStack Query** for server state
+- **AI SDK** for chat functionality
+- **SMART on FHIR** for healthcare authentication
 
-### Roadmap
+### Backend (`apps/api`)
+- **FastAPI** with Python 3.13
+- **OpenAI Agents** framework
+- **Azure OpenAI** integration
+- **Pydantic** for data validation
+- **LangSmith** for observability
+- **MCP (Model Context Protocol)** for external integrations
 
-Our roadmap provides an overview of how we plan to build this generative AI-enabled clinical tool.
+## Quick Start
 
-![roadmap](https://github.com/department-of-veterans-affairs/ai-assist/blob/main/docs/roadmap-september-2025.png)
+### Prerequisites
 
-Review our roadmap in [VA Mural](https://app.mural.co/t/departmentofveteransaffairs9999/m/departmentofveteransaffairs9999/1750882921059/550b745268addb245a7f73287ec7645b6fa0d2c7?sender=u65f0a75fc7c68f2a5a2a9545).
+- Node.js 22.18.0 LTS
+- Python 3.13.1+
+- Git
 
-## Get to know our code
+### Installation
 
-### Project structure
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd ai-assist
+   ```
+
+2. **Install dependencies**
+   ```bash
+   # Install all dependencies
+   pnpm setup
+   ```
+
+3. **Configure environment variables**
+   ```bash
+   # Frontend
+   cp apps/web/.env.example apps/web/.env.local
+   
+   # Backend
+   cp apps/api/.env.example apps/api/.env
+   ```
+
+4. **Start development servers**
+   ```bash
+   # Start both frontend and backend
+   pnpm dev
+   
+   # Or start individually
+   pnpm dev:web    # Frontend at http://localhost:3000
+   pnpm dev:api    # Backend at http://localhost:8080
+   ```
+
+## Development
+
+### Code Quality
+
+This project enforces high code quality standards:
+
+```bash
+# Run all quality checks
+pnpm check:all
+
+# Format code
+pnpm format
+
+# Lint code
+pnpm lint
+
+# Type check
+pnpm typecheck
+```
+
+### Testing
+
+```bash
+# Run all tests
+pnpm test
+
+# Frontend tests only
+pnpm test:web
+
+# Backend tests only
+pnpm test:api
+```
+
+### Project Structure
 
 ```
-root/
-├─ apps/
-│  ├─ web/            # React 19 + VACDS
-│  └─ api/            # FastAPI service
-├─ .mise.toml         # node, python, uv, pnpm versions
-├─ pnpm-workspace.yaml
-└─ docker-compose.yml # api service
+ai-assist/
+├── apps/
+│   ├── web/                 # React frontend
+│   │   ├── src/
+│   │   │   ├── components/  # Reusable components
+│   │   │   ├── pages/       # Route pages
+│   │   │   ├── hooks/       # Custom hooks
+│   │   │   └── stores/      # Zustand stores
+│   │   └── package.json
+│   │
+│   └── api/                 # FastAPI backend
+│       ├── app/
+│       │   ├── routers/     # API routes
+│       │   ├── services/    # Business logic
+│       │   ├── models/      # Data models
+│       │   └── agents/      # AI agents
+│       └── pyproject.toml
+│
+├── docs/                    # Documentation
+└── package.json            # Root scripts
 ```
 
-### Our tech stack
+## Configuration
 
-This is a modern monorepo project with a React 19 frontend using [VA Clinical Design System (VACDS)](./docs/vacds-guide.md)  and FastAPI backend.
+### Environment Variables
 
-#### Frontend
+**Frontend** (`apps/web/.env.local`):
+- `VITE_API_URL` - Backend API URL
+- `VITE_SMART_CONTAINER_URL` - SMART on FHIR container URL
+- `VITE_AUTH_CLIENT_ID` - OAuth client ID
 
-- `React 19` with `React Router v7`
-- [VA Clinical Design System (VACDS)](./docs/vacds-guide.md) 
-- `TypeScript` with strict mode
-- `Ultracite` an AI-ready formatter based on `Biome`
-- `Vite` for fast development
-- `CSS Modules` for styling
-- `Node.js 22.x LTS` or 'Jod'
+**Backend** (`apps/api/.env`):
+- `AZURE_OPENAI_ENDPOINT` - Azure OpenAI endpoint
+- `AZURE_OPENAI_API_KEY` - Azure OpenAI API key
+- `CORS_ORIGINS` - Allowed CORS origins
+- `ENVIRONMENT` - Environment (development/staging/production)
 
-#### Backend
+## API Documentation
 
-- `FastAPI` with `Python 3.13`
-- `uv` for package management
-- `Ruff` for linting/formatting
-- `BasedPyright` for type checking
+When running locally, API documentation is available at:
+- **Swagger UI**: http://localhost:8080/docs
+- **ReDoc**: http://localhost:8080/redoc
+- **OpenAPI Schema**: http://localhost:8080/openapi.json
 
-#### Developer tools
+## Contributing
 
-- `mise` for version management
-- `pnpm` for Node.js packages
-- `Docker Compose` for local services
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run quality checks: `pnpm check:all`
+5. Write tests for new functionality
+6. Submit a pull request
 
-### Installation instructions
+### Commit Convention
 
-Our [quick start guide](./docs/quick-start.md) will help you get up and running. And our [development guide](./docs/development.md) includes comprehensive setup and workflows.
+This project uses [Conventional Commits](https://www.conventionalcommits.org/):
 
-## Connect with us
+```bash
+feat(web): add dark mode toggle
+fix(api): resolve authentication issue
+docs: update README with setup instructions
+```
 
-Reach out on Office of CTO Slack: [#va-ai-chat-public](https://dsva.slack.com/archives/C099YJ3ESJ0)
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For questions and support, please open an issue in the repository.

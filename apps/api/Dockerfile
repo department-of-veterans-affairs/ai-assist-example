@@ -8,9 +8,6 @@ WORKDIR /app
 
 # Update CA certificates (Alpine-based image uses apk)
 RUN apk update && apk add --no-cache ca-certificates libssl3 curl=8.12.0-r0 libcurl-openssl4=8.12.0-r0 \
-    && curl -sS http://aia.pki.example.com/PKI/AIA/VA/VA-Internal-S2-RCA1-v1.cer -o /usr/local/share/ca-certificates/VA-Internal-S2-RCA1-v1.crt \
-    && curl -sS http://aia.pki.example.com/PKI/AIA/VA/VA-Internal-S2-RCA2.cer -o /usr/local/share/ca-certificates/VA-Internal-S2-RCA2.crt \
-    && curl -sS http://aia.pki.example.com/PKI/AIA/VA/VA-Internal-S2-ICA11.cer -o /usr/local/share/ca-certificates/VA-Internal-S2-ICA11.crt \
     && /usr/sbin/update-ca-certificates --fresh
 
 # Install uv for package management (as root)

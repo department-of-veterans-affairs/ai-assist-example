@@ -13,10 +13,7 @@ COPY apps/web/package.json ./apps/web/
 # Enable corepack for pnpm
 RUN corepack enable
 
-# Configure GitHub npm registry with secret
-RUN --mount=type=secret,id=GITHUB_PACKAGE_TOKEN \
-    echo "@department-of-veterans-affairs:registry=https://npm.pkg.github.com" >> .npmrc && \
-    echo "//npm.pkg.github.com/:_authToken=$(cat /run/secrets/GITHUB_PACKAGE_TOKEN)" >> .npmrc
+# Configure npm registry (remove VA-specific registry configuration for public release)
 
 # Install dependencies (frozen lockfile automatically used with pnpm-lock.yaml)
 RUN pnpm install
@@ -30,7 +27,7 @@ WORKDIR /app/apps/web
 RUN pnpm build
 
 # Layer 2: nginx
-FROM ghcr.io/department-of-veterans-affairs/smart-on-fhir-infra/cdsp-base-nginx:latest
+FROM nginx:alpine
 USER nginx
 
 # Copy built application to nginx html directory

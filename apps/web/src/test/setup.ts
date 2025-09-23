@@ -18,7 +18,7 @@ Object.defineProperty(import.meta, 'env', {
     VITE_AUTH_REDIRECT_URI: 'index.html',
     VITE_AUTH_PKCE_MODE: 'unsafeV1',
     VITE_API_URL: 'http://localhost:8001',
-    VITE_SMART_CONTAINER_URL: 'https://dev.cds.med.example.com/smart-container/',
+    VITE_SMART_CONTAINER_URL: 'https://example.com/smart-container/',
     MODE: 'test',
     NODE_ENV: 'test',
   },

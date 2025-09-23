@@ -94,7 +94,7 @@ async def check_ssl_certificates() -> dict[str, str | bool | int]:
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             # Test connection to VA PKI service
-            response = await client.get("https://aia.pki.example.com")
+            response = await client.get("https://httpbin.org/status/200")
 
             return {
                 "status": "healthy",
