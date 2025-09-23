@@ -142,50 +142,27 @@ class ChatService:
 
         except Exception as e:
             logger.error(f"Stream error: {e!s}", exc_info=True)
-            # Check if it's a rate limit or Azure service error
-            error_message = str(e)
-            if "429" in error_message or "rate limit" in error_message.lower():
-                # This is often a token limit issue with Azure OpenAI when
-                # using many tools
-                logger.warning(
-                    "Azure rate/token limit hit - likely due to large number "
-                    + "of MCP tools"
-                )
+            # All error details are logged; users get only generic messages.
+            if settings.rate_limit_delay_ms > 0 or "rate limit" in str(e).lower() or "429" in str(e):
+                # Log details internally for troubleshooting.
+                logger.warning("Azure rate/token limit hit - likely due to large number of MCP tools")
                 error_message = (
-                    "Azure OpenAI limit exceeded. This often happens when "
-                    "too many tools "
-                    "are registered. The Vista MCP server provides 15+ tools which may "
-                    "exceed Azure's token limits. Try a simpler query or "
-                    "contact your admin "
-                    "to increase Azure OpenAI quotas."
+                    "Azure OpenAI limit exceeded. Try a simpler query or contact support. "
+                    "If the problem persists, your administrator may need to increase Azure quotas."
                 )
-            elif (
-                "Azure support request" in error_message
-                or "An error occurred while processing your request" in error_message
-            ):
-                # Extract request ID if available
-
-                request_id_match = re.search(r"request ID ([a-f0-9-]+)", error_message)
-                request_id = (
-                    request_id_match.group(1) if request_id_match else "unknown"
-                )
-
-                logger.error(f"Azure service error - Request ID: {request_id}")
+            elif "Azure support request" in str(e) or "An error occurred while processing your request" in str(e):
+                # Log details but do not send request ID or specifics to the client.
+                logger.error("Azure service error encountered.")
                 error_message = (
-                    "Azure OpenAI service error. This often occurs when the "
-                    "model is overloaded "
-                    "with too many tools or complex requests. Try disabling "
-                    "Vista MCP tools or "
-                    "use a simpler query. If the issue persists, contact support with "
-                    f"Request ID: {request_id}"
+                    "Azure OpenAI service error. Try disabling Vista MCP tools or use a simpler query. "
+                    "If the issue persists, contact support."
                 )
             else:
-                # For all other errors, do not expose internal details to the client
+                # For all other errors, do not expose internal details to the client.
                 error_message = (
                     "An internal server error occurred. Please try again later."
                 )
-
-            # Format error for Vercel AI SDK - it expects the error as a direct string
+            # Always yield a fully generic error message to the client.
             yield f"3:{json.dumps(error_message)}\n"
         finally:
             # Cleanup MCP connection
