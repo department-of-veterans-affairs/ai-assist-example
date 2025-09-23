@@ -1,6 +1,5 @@
 import type { PropsWithChildren } from 'react';
 import { SummarySection } from '@/components/clinical-summary';
-import { RecentSection } from '@/components/patient/recent-section';
 import { Sidebar } from '@/components/sidebar';
 import { Footer } from './footer';
 import { Header } from './header';
@@ -17,7 +16,6 @@ export function RootLayout({ children }: RootLayoutProps) {
         {/* Sidebar */}
         <Sidebar>
           <SummarySection />
-          <RecentSection />
         </Sidebar>
       </div>
       <Footer />
