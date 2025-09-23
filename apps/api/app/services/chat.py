@@ -100,6 +100,12 @@ class ChatService:
                 user_duz=user_duz,
                 station=station,
             )
+            logger.info(
+                "Initialized Vista MCP client for chat (jwt=%s, duz=%s, station=%s)",
+                "present" if jwt_token else "missing",
+                user_duz or "missing",
+                station or "missing",
+            )
             await vista_mcp.connect()
 
             # Add MCP server to orchestrator after connecting

@@ -87,7 +87,7 @@ class SummariesService:
             user_duz=user_duz,
             station=station,
         )
-        logger.debug(
+        logger.info(
             "Initialized Vista MCP client for summary (jwt=%s, duz=%s, station=%s)",
             "present" if jwt_token else "missing",
             user_duz or "missing",
@@ -185,7 +185,7 @@ class SummariesService:
                 agent,
                 input=input_payload,
                 context=run_context,
-                max_turns=4,
+                max_turns=10,
                 run_config=RunConfig(
                     workflow_name=workflow_name,
                     trace_include_sensitive_data=settings.trace_include_sensitive_data,

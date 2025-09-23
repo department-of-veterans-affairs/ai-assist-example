@@ -1,15 +1,18 @@
 FROM --platform=linux/amd64 ghcr.io/department-of-veterans-affairs/cdsp-base-docker-images/python-base:3.13 AS runtime
 
-# Switch to root to install certificates
+# Switch to root
 USER root
 
 # Create working directory
 WORKDIR /app
 
+<<<<<<< ours
 # Update CA certificates (Alpine-based image uses apk)
 RUN apk update && apk add --no-cache ca-certificates libssl3 curl=8.12.0-r0 libcurl-openssl4=8.12.0-r0 \
     && /usr/sbin/update-ca-certificates --fresh
 
+=======
+>>>>>>> theirs
 # Install uv for package management (as root)
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
