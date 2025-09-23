@@ -49,9 +49,10 @@ class RequestContext:
 
     @property
     def user_duz(self) -> str | None:
-        """Get user's DUZ for the patient's station."""
-        _, duz = self._resolve_station_and_duz()
-        return duz
+        """Get user's DUZ from patient context."""
+        if self.patient and self.patient.duz:
+            return self.patient.duz
+        return None
 
     def get_mcp_params(self) -> tuple[str | None, str | None, str | None]:
         """Return auth headers and station metadata for Vista MCP."""
@@ -60,7 +61,8 @@ class RequestContext:
 
     def get_vista_context(self) -> VistaContextData:
         """Return resolved Vista context without enforcing presence."""
-        station, duz = self._resolve_station_and_duz()
+        station = self.patient.station if self.patient else None
+        duz = self.patient.duz if self.patient else None
         icn = self.patient.icn if self.patient else None
         return VistaContextData(
             token=self.jwt_token,
@@ -111,33 +113,10 @@ class RequestContext:
             )
             raise HTTPException(
                 status_code=403,
-                detail="User does not have station access (missing DUZ).",
+                detail="User DUZ is required for Vista access.",
             )
 
         return vista_context
-
-    def _resolve_station_and_duz(self) -> tuple[str | None, str | None]:
-        """Resolve station and DUZ using patient context or JWT vista IDs."""
-        station: str | None = getattr(self.patient, "station", None)
-        duz: str | None = None
-
-        vista_ids = []
-        if self.jwt and self.jwt.user_info and self.jwt.user_info.vista_ids:
-            vista_ids = self.jwt.user_info.vista_ids
-
-        if not station and len(vista_ids) == 1:
-            station = vista_ids[0].site_id
-
-        if station and vista_ids:
-            for vista_id in vista_ids:
-                if vista_id.site_id == station:
-                    duz = vista_id.duz
-                    break
-
-        if duz is None and len(vista_ids) == 1:
-            duz = vista_ids[0].duz
-
-        return station, duz
 
 
 async def get_request_context(

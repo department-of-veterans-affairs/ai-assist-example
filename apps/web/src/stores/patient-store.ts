@@ -11,7 +11,7 @@ export interface Patient extends PatientContextProps {
   id?: string; // FHIR resource ID
   icn?: string; // (primary identifier for VA)
   dfn?: string; // DFN - kept for backward compatibility
-  sta3n?: string; // Station number
+  station?: string; // Station number
   description: string;
   keyConditions: string[];
   ssn: string;
@@ -25,7 +25,7 @@ const TEST_PATIENT: Patient = {
   id: '100023', // FHIR resource ID
   icn: '1000000219V596118', // Test ICN (primary identifier)
   dfn: '100023', // DFN for backward compatibility
-  sta3n: '500', // Default station for development
+  station: '500', // Default station for development
   firstName: 'MARIA ELENA',
   lastName: 'MARTINEZ',
   description: 'Female Gulf War Veteran',

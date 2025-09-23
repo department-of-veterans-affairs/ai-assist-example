@@ -9,6 +9,10 @@ vi.mock('@/hooks/use-patient', () => ({
   usePatient: vi.fn(),
 }));
 
+vi.mock('@/hooks/use-current-user', () => ({
+  useCurrentUser: vi.fn(),
+}));
+
 vi.mock('@department-of-veterans-affairs/cds-patient-context-lib', () => ({
   useUpdatePatient: vi.fn(),
 }));
@@ -22,7 +26,7 @@ vi.mock('@/config', () => ({
 describe('SmartLaunchProvider', () => {
   let originalLocation: Location;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Save original location
     originalLocation = window.location;
 
@@ -31,6 +35,43 @@ describe('SmartLaunchProvider', () => {
 
     // Clear all mocks
     vi.clearAllMocks();
+
+    // Mock useCurrentUser to return unauthenticated by default
+    const { useCurrentUser } = await import('@/hooks/use-current-user');
+    vi.mocked(useCurrentUser).mockReturnValue({
+      data: {
+        authenticated: false,
+        user_info: null,
+      },
+      isLoading: false,
+      error: null,
+      isError: false,
+      isSuccess: true,
+      isPending: false,
+      isStale: false,
+      isFetched: true,
+      isFetching: false,
+      isRefetching: false,
+      isLoadingError: false,
+      isRefetchError: false,
+      dataUpdatedAt: Date.now(),
+      errorUpdatedAt: 0,
+      failureCount: 0,
+      failureReason: null,
+      errorUpdateCount: 0,
+      isFetchedAfterMount: true,
+      isPlaceholderData: false,
+      isInitialLoading: false,
+      isPaused: false,
+      isEnabled: true,
+      promise: Promise.resolve({
+        authenticated: false,
+        user_info: null,
+      }),
+      refetch: vi.fn(),
+      status: 'success',
+      fetchStatus: 'idle',
+    });
   });
 
   afterEach(() => {
@@ -97,7 +138,7 @@ describe('SmartLaunchProvider', () => {
       id: '12345',
       icn: '1000000219V596118', // From launch context
       dfn: '12345',
-      sta3n: '530', // From launch context
+      station: '530', // From launch context
       duz: '520824797', // From launch context
       firstName: 'MARIA ELENA',
       lastName: 'MARTINEZ',
@@ -156,8 +197,8 @@ describe('SmartLaunchProvider', () => {
       id: '67890',
       icn: '67890', // Falls back to FHIR ID
       dfn: '67890',
-      sta3n: undefined, // No launch context
-      duz: undefined, // No launch context
+      station: '500', // Default station when no launch context
+      duz: undefined, // No launch context or user vista_ids
       firstName: 'JOHN',
       lastName: 'DOE',
       description: '',
@@ -215,7 +256,7 @@ describe('SmartLaunchProvider', () => {
 
     // Should still set patient with FHIR data
     const state = usePatientStore.getState();
-    expect(state.patient?.sta3n).toBeUndefined();
+    expect(state.patient?.station).toBe('500'); // Default station
     expect(state.patient?.firstName).toBe('JANE');
 
     consoleSpy.mockRestore();
@@ -266,7 +307,7 @@ describe('SmartLaunchProvider', () => {
     // Should not use partial context
     const state = usePatientStore.getState();
     expect(state.patient?.icn).toBe('22222'); // Falls back to FHIR ID
-    expect(state.patient?.sta3n).toBeUndefined(); // Partial context not used
+    expect(state.patient?.station).toBe('500'); // Default station when partial context
     expect(state.patient?.duz).toBeUndefined();
   });
 
