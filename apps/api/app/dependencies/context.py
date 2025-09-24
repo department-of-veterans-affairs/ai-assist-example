@@ -47,11 +47,14 @@ class RequestContext:
         """Get JWT token string if authenticated."""
         return self.jwt.access_token if self.jwt else None
 
-    @property
-    def user_duz(self) -> str | None:
-        """Get user's DUZ from patient context."""
-        if self.patient and self.patient.duz:
-            return self.patient.duz
+    def get_user_duz_for_station(self, station: str | None) -> str | None:
+        """Get user's DUZ for a specific station from JWT vista_ids."""
+        if not station or not self.user or not self.user.vista_ids:
+            return None
+
+        for vista_id in self.user.vista_ids:
+            if vista_id.site_id == station:
+                return vista_id.duz
         return None
 
     def get_mcp_params(self) -> tuple[str | None, str | None, str | None]:
@@ -62,7 +65,7 @@ class RequestContext:
     def get_vista_context(self) -> VistaContextData:
         """Return resolved Vista context without enforcing presence."""
         station = self.patient.station if self.patient else None
-        duz = self.patient.duz if self.patient else None
+        duz = self.get_user_duz_for_station(station)
         icn = self.patient.icn if self.patient else None
         return VistaContextData(
             token=self.jwt_token,

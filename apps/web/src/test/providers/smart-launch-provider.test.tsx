@@ -139,7 +139,6 @@ describe('SmartLaunchProvider', () => {
       icn: '1000000219V596118', // From launch context
       dfn: '12345',
       station: '530', // From launch context
-      duz: '520824797', // From launch context
       firstName: 'MARIA ELENA',
       lastName: 'MARTINEZ',
       description: '',
@@ -308,7 +307,6 @@ describe('SmartLaunchProvider', () => {
     const state = usePatientStore.getState();
     expect(state.patient?.icn).toBe('22222'); // Falls back to FHIR ID
     expect(state.patient?.station).toBe('500'); // Default station when partial context
-    expect(state.patient?.duz).toBeUndefined();
   });
 
   it('should not update store when no FHIR patient is available', async () => {

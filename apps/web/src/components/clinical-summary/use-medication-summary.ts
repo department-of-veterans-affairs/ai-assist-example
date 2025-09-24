@@ -26,7 +26,6 @@ const buildRequestBody = (patient: Patient | null) => {
       icn: identifier,
       dfn: patient?.dfn ?? null,
       station: patient?.station ?? null,
-      duz: patient?.duz ?? null,
       firstName: patient?.firstName ?? null,
       lastName: patient?.lastName ?? null,
     },

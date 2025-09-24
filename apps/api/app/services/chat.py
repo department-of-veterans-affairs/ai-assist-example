@@ -7,6 +7,8 @@ import logging
 from collections.abc import AsyncGenerator
 
 from agents import RunConfig, Runner
+from agents.exceptions import AgentsException
+from mcp.shared.exceptions import McpError
 from openai.types.responses import ResponseTextDeltaEvent
 
 from ..agents.orchestrator import get_orchestrator_agent
@@ -153,6 +155,26 @@ class ChatService:
                     content = json.dumps(event.data.delta)
                     yield f"0:{content}\n"
 
+        except AgentsException as e:
+            logger.error(f"Stream error: {e!s}", exc_info=True)
+            if (
+                isinstance(e.__cause__, McpError)
+                and "timed out" in str(e.__cause__).lower()
+            ):
+                logger.warning(
+                    "Vista MCP timeout - Vista RPC call took longer than %d seconds",
+                    settings.vista_mcp_timeout_seconds,
+                )
+                error_message = (
+                    "Vista is taking longer than expected to respond. "
+                    "This can happen with complex queries or large data sets. "
+                    "Please try a more specific query or contact support."
+                )
+            else:
+                error_message = (
+                    "An error occurred while processing your request. Please try again."
+                )
+            yield f"3:{json.dumps(error_message)}\n"
         except Exception as e:
             logger.error(f"Stream error: {e!s}", exc_info=True)
             # All error details are logged; users get only generic messages.

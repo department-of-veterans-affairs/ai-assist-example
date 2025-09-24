@@ -16,7 +16,6 @@ export default function ChatPage() {
               icn: patient.icn || patient.id, // ICN is the primary identifier for MCP
               dfn: patient.dfn, // Keep for backward compatibility
               station: patient.station,
-              duz: patient.duz,
               firstName: patient.firstName,
               lastName: patient.lastName,
             }

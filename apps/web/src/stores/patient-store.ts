@@ -17,7 +17,6 @@ export interface Patient extends PatientContextProps {
   ssn: string;
   dob?: string;
   mrn?: string;
-  duz?: string; // User-specific, not patient-specific
 }
 
 // Hardcoded test patient: MARTINEZ, MARIA ELENA

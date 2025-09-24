@@ -41,7 +41,7 @@ function parseLaunchContext(): LaunchContext | null {
   return null;
 }
 
-function resolveStationAndDuz(
+function resolveStation(
   launchContext: LaunchContext | null,
   currentUser:
     | {
@@ -51,9 +51,8 @@ function resolveStationAndDuz(
         } | null;
       }
     | undefined
-): { station: string; duz: string | undefined } {
+): string {
   let station = launchContext?.sta3n;
-  let duz = launchContext?.duz;
 
   if (
     !station &&
@@ -61,28 +60,13 @@ function resolveStationAndDuz(
     currentUser.user_info?.vista_ids?.length
   ) {
     station = currentUser.user_info.vista_ids[0].site_id;
-    duz = currentUser.user_info.vista_ids[0].duz;
   }
 
   if (!station) {
     station = '500';
   }
 
-  if (
-    station &&
-    !duz &&
-    currentUser?.authenticated &&
-    currentUser.user_info?.vista_ids
-  ) {
-    const vistaId = currentUser.user_info.vista_ids.find(
-      (v) => v.site_id === station
-    );
-    if (vistaId) {
-      duz = vistaId.duz;
-    }
-  }
-
-  return { station, duz };
+  return station;
 }
 
 export function SmartLaunchProvider({ children }: SmartLaunchProviderProps) {
@@ -99,14 +83,13 @@ export function SmartLaunchProvider({ children }: SmartLaunchProviderProps) {
       const firstName = fhirPatient.name?.[0]?.given?.join(' ') ?? '';
       const lastName = fhirPatient.name?.[0]?.family ?? '';
 
-      const { station, duz } = resolveStationAndDuz(launchContext, currentUser);
+      const station = resolveStation(launchContext, currentUser);
 
       setPatient({
         id: fhirPatient.id,
         icn: launchContext?.patient || fhirPatient.id,
         dfn: fhirPatient.id,
         station,
-        duz,
         firstName: firstName.toUpperCase(),
         lastName: lastName.toUpperCase(),
         description: '',
@@ -115,15 +98,6 @@ export function SmartLaunchProvider({ children }: SmartLaunchProviderProps) {
         dob: fhirPatient.birthDate || '',
         mrn: '',
       });
-    } else if (import.meta.env.DEV && currentUser?.authenticated) {
-      const existingPatient = usePatientStore.getState().patient;
-      if (existingPatient && !existingPatient.duz) {
-        const { duz } = resolveStationAndDuz(null, currentUser);
-        setPatient({
-          ...existingPatient,
-          duz,
-        });
-      }
     }
   }, [fhirPatient, launchContext, currentUser, setPatient]);
 
