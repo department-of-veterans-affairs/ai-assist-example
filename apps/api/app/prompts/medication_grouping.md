@@ -37,4 +37,4 @@ Exclude: basic supplies like diapers, tape, gauze, gloves, catheters, and routin
 
 ## Output
 
-Return ONLY a JSON Object matching the `MedicationGroupingOutput` schema. Do not include any prose or markdown.
+Return ONLY a JSON Object matching the provided schema. Do not include any prose or markdown.

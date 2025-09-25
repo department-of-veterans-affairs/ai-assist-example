@@ -210,11 +210,13 @@ class SummariesService:
     @staticmethod
     def _require_output(result: RunResult, model_type: type[T]) -> T:
         final_output = result.final_output
-        match = JSON_MATCHER.match(final_output)
 
         output_obj: T = model_type.model_validate_json(
             matched_content
-            if (match and (matched_content := match.group(1)))
+            if (
+                (match := JSON_MATCHER.match(final_output))
+                and (matched_content := match.group(1))
+            )
             else final_output
         )
         if not isinstance(output_obj, model_type):
