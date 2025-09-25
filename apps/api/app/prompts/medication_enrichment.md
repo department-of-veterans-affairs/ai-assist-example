@@ -49,4 +49,5 @@ You extend an existing medication grouping with relevant labs and vitals so clin
 1. Keep at most three recent values per lab or vital, ordered most recent first.
 2. Provide a short trend statement per metric (`stable`, `uptrending`, `downtrending`, or `insufficient data`).
 3. Include all available dates in `YYYY-MM-DD` format and preserve original value strings.
-4. Return a `MedicationSummary` object. The Agents SDK enforces the schema—emit the structured fields only, without markdown or additional prose.
+4. Return ONLY a JSON Object matching the `MedicationSummary` schema. Do not include any prose or markdown.
+
