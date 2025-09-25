@@ -5,7 +5,6 @@ from __future__ import annotations
 import contextlib
 import json
 import logging
-import re
 from enum import Enum
 from typing import TYPE_CHECKING, TypeVar, cast
 
@@ -38,8 +37,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
-
-JSON_MATCHER = re.compile(r"```json(.*?)```", re.DOTALL)
 
 
 class SummariesService:
@@ -209,16 +206,9 @@ class SummariesService:
 
     @staticmethod
     def _require_output(result: RunResult, model_type: type[T]) -> T:
-        final_output = result.final_output
+        final_output = result.final_output.replace("```json", "", 1).replace("```", "")
 
-        output_obj: T = model_type.model_validate_json(
-            matched_content
-            if (
-                (match := JSON_MATCHER.match(final_output))
-                and (matched_content := match.group(1))
-            )
-            else final_output
-        )
+        output_obj: T = model_type.model_validate_json(final_output)
         if not isinstance(output_obj, model_type):
             raise HTTPException(
                 status_code=500,
