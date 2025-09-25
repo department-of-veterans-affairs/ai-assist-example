@@ -45,7 +45,7 @@ def build_medication_grouping_agent(
         model_settings=ModelSettings(
             temperature=0.2,
             top_p=0.1,
-            max_tokens=8600,
+            max_tokens=4096,
             parallel_tool_calls=False,
         ),
     )
