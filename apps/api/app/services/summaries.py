@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, TypeVar, cast
 
 from agents import RunConfig, Runner, RunResult
 from fastapi import HTTPException
+from pydantic import BaseModel
 
 from ..agents import (
     MedicationRunContext,
@@ -35,7 +36,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar("T")
+T = TypeVar("T", bound=BaseModel)
 
 
 class SummariesService:
@@ -204,9 +205,9 @@ class SummariesService:
         return await self._rate_limiter.run(_execute)
 
     @staticmethod
-    def _require_output(result: RunResult, expected_type: type[T]) -> T:
-        output_obj: object = cast("object", result.final_output)
-        if not isinstance(output_obj, expected_type):
+    def _require_output(result: RunResult, model_type: type[T]) -> T:
+        output_obj: T = model_type.model_validate_json(result.final_output)
+        if not isinstance(output_obj, model_type):
             raise HTTPException(
                 status_code=500,
                 detail="Agent run did not return the expected structured output.",
