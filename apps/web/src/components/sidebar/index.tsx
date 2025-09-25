@@ -17,7 +17,7 @@ export function Sidebar({ children }: SidebarProps) {
     <aside
       className={clsx(
         'display-flex flex-column flex-shrink-0 border-base-lighter border-left bg-white transition-all',
-        leftCollapsed ? 'width-8' : 'width-mobile-lg'
+        leftCollapsed ? 'width-7' : 'width-mobile-lg'
       )}
     >
       {/* Header with toggle */}
@@ -25,7 +25,9 @@ export function Sidebar({ children }: SidebarProps) {
         <div className="padding-top-3 padding-left-2 display-flex flex-align-center flex-justify-space-between">
           <Button
             aria-label={leftCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="padding-1 display-flex flex-align-center text-base-dark hover:text-primary"
+            className={clsx(
+              'padding-1 display-flex flex-align-center text-base-dark hover:text-primary'
+            )}
             onClick={toggleLeftSidebar}
             type="button"
             unstyled
