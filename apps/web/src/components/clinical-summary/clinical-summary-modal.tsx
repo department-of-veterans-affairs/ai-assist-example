@@ -9,8 +9,6 @@ import regenerateIcon from '@/assets/icons/autorenew.svg';
 import copyIcon from '@/assets/icons/copy.svg';
 import LaunchIcon from '@/assets/icons/launch.svg';
 import printIcon from '@/assets/icons/print.svg';
-import thumbsDownIcon from '@/assets/icons/thumbs-down.svg';
-import thumbsUpIcon from '@/assets/icons/thumbs-up.svg';
 import { useMedicationSummary } from '@/components/clinical-summary/use-medication-summary';
 import { LoadingIndicator } from '@/components/loading-indicator';
 import { usePatientStore } from '@/stores';
@@ -62,10 +60,6 @@ export function ClinicalSummaryModal() {
 
   const handlePrint = () => {
     window.print();
-  };
-
-  const handleFeedback = (isPositive: boolean) => {
-    console.log(isPositive ? 'Positive feedback' : 'Negative feedback');
   };
 
   const handleModalOpen = () => {
@@ -228,36 +222,6 @@ export function ClinicalSummaryModal() {
                     aria-hidden="true"
                     height="20"
                     src={printIcon}
-                    width="20"
-                  />
-                </button>
-
-                <button
-                  aria-label="Good response"
-                  className="padding-05 cursor-pointer border-0 bg-transparent"
-                  onClick={() => handleFeedback(true)}
-                  type="button"
-                >
-                  <img
-                    alt=""
-                    aria-hidden="true"
-                    height="20"
-                    src={thumbsUpIcon}
-                    width="20"
-                  />
-                </button>
-
-                <button
-                  aria-label="Bad response"
-                  className="padding-05 cursor-pointer border-0 bg-transparent"
-                  onClick={() => handleFeedback(false)}
-                  type="button"
-                >
-                  <img
-                    alt=""
-                    aria-hidden="true"
-                    height="20"
-                    src={thumbsDownIcon}
                     width="20"
                   />
                 </button>
