@@ -84,7 +84,8 @@ export function Sidebar({ children }: SidebarProps) {
         </div>
       )}
 
-      {children}
+      {/* Only show children (SummarySection) when sidebar is expanded */}
+      {!leftCollapsed && children}
     </aside>
   );
 }

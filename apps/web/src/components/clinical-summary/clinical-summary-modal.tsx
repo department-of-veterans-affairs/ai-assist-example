@@ -99,6 +99,94 @@ export function ClinicalSummaryModal() {
         #${MODAL_ID} .usa-modal__main {
           max-width: 70rem;
         }
+
+        /* Print styles */
+        @media print {
+          /* Hide UI elements */
+          .usa-modal__overlay,
+          .usa-modal__close,
+          .usa-modal__footer,
+          header,
+          footer,
+          nav,
+          aside,
+          button {
+            display: none !important;
+          }
+
+          /* Hide screen-only content */
+          .screen-only {
+            display: none !important;
+          }
+
+          /* Show print-only content */
+          .print-only {
+            display: block !important;
+            margin-bottom: 20px !important;
+          }
+
+          .print-only h1 {
+            font-size: 18pt !important;
+            margin: 0 0 10px 0 !important;
+            color: black !important;
+          }
+
+          .print-only hr {
+            border: 1px solid #000 !important;
+            margin: 20px 0 !important;
+          }
+
+          .print-only strong {
+            font-weight: bold !important;
+          }
+
+          .print-only p {
+            margin: 10px 0 !important;
+          }
+
+          /* Reset modal positioning for print */
+          #${MODAL_ID} {
+            position: static !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+
+          #${MODAL_ID} .usa-modal__content {
+            position: static !important;
+            max-height: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+
+          #${MODAL_ID} .usa-modal__main {
+            max-width: 100% !important;
+            padding: 0 !important;
+          }
+
+          /* Style the print content */
+          #clinical-summary-print-content {
+            padding: 20px !important;
+            font-size: 12pt !important;
+            color: black !important;
+          }
+
+          #clinical-summary-print-content h1 {
+            font-size: 18pt !important;
+            margin-bottom: 10px !important;
+          }
+
+          /* Ensure overflow content is visible */
+          .overflow-y-auto {
+            overflow: visible !important;
+            max-height: none !important;
+          }
+
+          /* Page break control */
+          .problem-group {
+            page-break-inside: avoid;
+          }
+        }
       `}</style>
 
       <Modal
@@ -112,7 +200,7 @@ export function ClinicalSummaryModal() {
           className="display-flex height-full maxh flex-column"
           style={{ maxHeight: '70vh' }}
         >
-          <div className="padding-3 border-base-light border-bottom-1px">
+          <div className="padding-3 screen-only border-base-light border-bottom-1px">
             <h2
               className="margin-0 font-heading-xl"
               id="clinical-summary-heading"
@@ -123,7 +211,7 @@ export function ClinicalSummaryModal() {
           </div>
 
           {patient && (
-            <div className="padding-3 border-base-light border-bottom-1px">
+            <div className="padding-3 screen-only border-base-light border-bottom-1px">
               <div className="margin-bottom-05">
                 <strong className="font-body-md">Patient:</strong>{' '}
                 <span className="font-body-md">
@@ -140,31 +228,66 @@ export function ClinicalSummaryModal() {
 
           <div className="flex-1 overflow-y-auto">
             <div className="padding-3" id="clinical-summary-description">
-              {loading && (
-                <div className="padding-5 text-center">
-                  <LoadingIndicator />
-                </div>
-              )}
+              {/* Wrapper for print content */}
+              <div id="clinical-summary-print-content">
+                {/* Print header - always visible during print if patient data exists */}
+                {patient && (
+                  <div className="print-only">
+                    <h1>Patient Medication Summary</h1>
+                    <div>Grouped by Problem with relevant Vitals and Labs</div>
+                    <div className="margin-top-2">
+                      <div>
+                        <strong>Patient:</strong>{' '}
+                        {patient.lastName?.toUpperCase()}, {patient.firstName}{' '}
+                        (ICN {patient.icn}, DOB {patient.dob || 'Unknown'})
+                      </div>
+                      <div>
+                        <strong>Generated:</strong>{' '}
+                        {new Date().toLocaleString()}
+                      </div>
+                    </div>
+                    <hr className="margin-y-3" />
+                  </div>
+                )}
 
-              {!loading && isError && (
-                <div className="padding-5 text-center text-secondary-dark">
-                  {error instanceof Error
-                    ? error.message
-                    : 'Failed to retrieve patient summary.'}
-                </div>
-              )}
+                {loading && (
+                  <div className="padding-5 screen-only text-center">
+                    <LoadingIndicator />
+                  </div>
+                )}
 
-              {!loading && summary?.summary && (
-                <div className="line-height-body-3 font-body-md text-base-darker">
-                  <MedicationSummary summary={summary.summary} />
-                </div>
-              )}
+                {!loading && isError && (
+                  <div className="padding-5 text-center text-secondary-dark">
+                    <div className="screen-only">
+                      {error instanceof Error
+                        ? error.message
+                        : 'Failed to retrieve patient summary.'}
+                    </div>
+                    <div className="print-only">
+                      <p>
+                        <strong>Error:</strong> Unable to generate medication
+                        summary at this time.
+                      </p>
+                      <p>
+                        Please try again later or contact support if the issue
+                        persists.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
-              {!(loading || isError || summary?.summary) && (
-                <div className="padding-5 text-center text-base">
-                  Click to load patient summary
-                </div>
-              )}
+                {!loading && summary?.summary && (
+                  <div className="line-height-body-3 font-body-md text-base-darker">
+                    <MedicationSummary summary={summary.summary} />
+                  </div>
+                )}
+
+                {!(loading || isError || summary?.summary) && (
+                  <div className="padding-5 screen-only text-center text-base">
+                    Click to load patient summary
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
