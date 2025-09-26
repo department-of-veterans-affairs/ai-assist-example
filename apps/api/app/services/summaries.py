@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import json
 import logging
+import re
 from enum import Enum
 from typing import TYPE_CHECKING, TypeVar, cast
 
@@ -37,6 +38,22 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
+
+JSON_CONTENT_MATCH_PATTERN = re.compile(
+    r"(?:\s*```json\s*)?(.*?)(?:\s*```\s*)?$", re.DOTALL
+)
+
+
+def extract_json_content(text: str) -> str:
+    """Extract JSON content, handling optional markdown code blocks."""
+    input = text.strip()
+    match = JSON_CONTENT_MATCH_PATTERN.search(input)
+    result = (
+        extracted_json
+        if (match and len(extracted_json := match.group(1)) > 0)
+        else input
+    )
+    return result
 
 
 class SummariesService:
@@ -206,12 +223,33 @@ class SummariesService:
 
     @staticmethod
     def _require_output(result: RunResult, model_type: type[T]) -> T:
-        final_output = result.final_output.replace("```json", "", 1).replace("```", "")
+        final_output = extract_json_content(result.final_output)
 
-        output_obj: T = model_type.model_validate_json(final_output)
-        if not isinstance(output_obj, model_type):
+        try:
+            output_obj: T = model_type.model_validate_json(final_output)
+            if not isinstance(output_obj, model_type):
+                raise HTTPException(
+                    status_code=500,
+                    detail="Agent run did not return the expected structured output.",
+                )
+            return output_obj
+        except Exception as e:
+            # Log the actual output for debugging
+            logger.error(f"Failed to parse agent output: {final_output}")
+            logger.error(f"Parse error: {e!s}")
+
+            # Check if the output is an error message from the AI
+            if (
+                "unable to" in final_output.lower()
+                or "error" in final_output.lower()
+                or "failed" in final_output.lower()
+            ):
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"Service unavailable: {final_output[:200]}",
+                ) from e
+
             raise HTTPException(
                 status_code=500,
-                detail="Agent run did not return the expected structured output.",
-            )
-        return output_obj
+                detail=f"Failed to parse agent response: {e}\n{final_output}",
+            ) from e

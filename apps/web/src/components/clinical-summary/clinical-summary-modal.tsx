@@ -5,6 +5,7 @@ import {
   ModalToggleButton,
 } from '@department-of-veterans-affairs/clinical-design-system';
 import { useRef, useState } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import regenerateIcon from '@/assets/icons/autorenew.svg';
 import copyIcon from '@/assets/icons/copy.svg';
 import LaunchIcon from '@/assets/icons/launch.svg';
@@ -26,6 +27,7 @@ const MODAL_ID = 'clinical-summary-modal';
 
 export function ClinicalSummaryModal() {
   const modalRef = useRef<ModalRef>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [amOpen, setAmOpen] = useState(false);
   const patient = usePatientStore((state) => state.patient);
 
@@ -58,9 +60,9 @@ export function ClinicalSummaryModal() {
       );
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = useReactToPrint({
+    contentRef,
+  });
 
   const handleModalOpen = () => {
     setAmOpen(true);
@@ -229,7 +231,7 @@ export function ClinicalSummaryModal() {
           <div className="flex-1 overflow-y-auto">
             <div className="padding-3" id="clinical-summary-description">
               {/* Wrapper for print content */}
-              <div id="clinical-summary-print-content">
+              <div id="clinical-summary-print-content" ref={contentRef}>
                 {/* Print header - always visible during print if patient data exists */}
                 {patient && (
                   <div className="print-only">
