@@ -17,8 +17,8 @@ def test_duz_extraction_for_matching_station():
         last_name="User",
         roles=["staff"],
         vista_ids=[
-            VistaId(site_id="530", site_name="Site 530", duz="123456789"),
-            VistaId(site_id="500", site_name="Site 500", duz="10000000219"),
+            VistaId(site_id="TEST001", site_name="Test Site 001", duz="TEST001001"),
+            VistaId(site_id="TEST002", site_name="Test Site 002", duz="TEST002002"),
         ],
     )
 
@@ -28,10 +28,10 @@ def test_duz_extraction_for_matching_station():
         user_info=user_info,
     )
 
-    # Create patient context with station 500
+    # Create patient context with station TEST002
     patient = PatientContext(
-        icn="1000000219V596118",
-        station="500",
+        icn="TEST123456V123456",
+        station="TEST002",
     )
 
     # Create request context
@@ -40,9 +40,9 @@ def test_duz_extraction_for_matching_station():
     # Get Vista context
     vista_context = context.get_vista_context()
 
-    # Should extract DUZ for station 500
-    assert vista_context.duz == "10000000219"
-    assert vista_context.station == "500"
+    # Should extract DUZ for station TEST002
+    assert vista_context.duz == "TEST002002"
+    assert vista_context.station == "TEST002"
 
 
 def test_duz_extraction_for_different_station():
@@ -55,8 +55,8 @@ def test_duz_extraction_for_different_station():
         last_name="User",
         roles=["staff"],
         vista_ids=[
-            VistaId(site_id="530", site_name="Site 530", duz="123456789"),
-            VistaId(site_id="500", site_name="Site 500", duz="10000000219"),
+            VistaId(site_id="TEST001", site_name="Test Site 001", duz="TEST001001"),
+            VistaId(site_id="TEST002", site_name="Test Site 002", duz="TEST002002"),
         ],
     )
 
@@ -66,10 +66,10 @@ def test_duz_extraction_for_different_station():
         user_info=user_info,
     )
 
-    # Create patient context with station 530
+    # Create patient context with station TEST001
     patient = PatientContext(
-        icn="1000000219V596118",
-        station="530",
+        icn="TEST123456V123456",
+        station="TEST001",
     )
 
     # Create request context
@@ -78,9 +78,9 @@ def test_duz_extraction_for_different_station():
     # Get Vista context
     vista_context = context.get_vista_context()
 
-    # Should extract DUZ for station 530
-    assert vista_context.duz == "123456789"
-    assert vista_context.station == "530"
+    # Should extract DUZ for station TEST001
+    assert vista_context.duz == "TEST001001"
+    assert vista_context.station == "TEST001"
 
 
 def test_duz_extraction_no_matching_station():
@@ -93,7 +93,7 @@ def test_duz_extraction_no_matching_station():
         last_name="User",
         roles=["staff"],
         vista_ids=[
-            VistaId(site_id="530", site_name="Site 530", duz="123456789"),
+            VistaId(site_id="TEST001", site_name="Test Site 001", duz="TEST001001"),
         ],
     )
 
@@ -105,8 +105,8 @@ def test_duz_extraction_no_matching_station():
 
     # Create patient context with station user doesn't have
     patient = PatientContext(
-        icn="1000000219V596118",
-        station="999",
+        icn="TEST123456V123456",
+        station="TEST999",
     )
 
     # Create request context
@@ -117,4 +117,4 @@ def test_duz_extraction_no_matching_station():
 
     # Should return None when no matching station
     assert vista_context.duz is None
-    assert vista_context.station == "999"
+    assert vista_context.station == "TEST999"

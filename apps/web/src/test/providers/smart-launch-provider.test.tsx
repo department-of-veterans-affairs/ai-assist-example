@@ -86,9 +86,9 @@ describe('SmartLaunchProvider', () => {
   it('should parse launch context and combine with FHIR patient data', async () => {
     // Create launch context
     const launchContext = {
-      patient: '1000000219V596118', // ICN
-      sta3n: '530',
-      duz: '520824797',
+      patient: 'TEST123456V123456', // ICN
+      sta3n: 'TEST001',
+      duz: 'TEST001001',
     };
     const encodedLaunch = btoa(JSON.stringify(launchContext));
 
@@ -104,14 +104,14 @@ describe('SmartLaunchProvider', () => {
 
     // Mock FHIR patient data
     const mockFhirPatient = {
-      id: '12345',
+      id: 'TEST001',
       name: [
         {
-          family: 'Martinez',
-          given: ['Maria', 'Elena'],
+          family: 'TestPatient',
+          given: ['Test', 'User'],
         },
       ],
-      birthDate: '1975-01-15',
+      birthDate: '1990-01-01',
     };
 
     const { usePatient } = await import('@/hooks/use-patient');
@@ -135,16 +135,16 @@ describe('SmartLaunchProvider', () => {
     // Check that patient store was updated correctly
     const state = usePatientStore.getState();
     expect(state.patient).toEqual({
-      id: '12345',
-      icn: '1000000219V596118', // From launch context
-      dfn: '12345',
-      station: '530', // From launch context
-      firstName: 'MARIA ELENA',
-      lastName: 'MARTINEZ',
+      id: 'TEST001',
+      icn: 'TEST123456V123456', // From launch context
+      dfn: 'TEST001',
+      station: 'TEST001', // From launch context
+      firstName: 'TEST USER',
+      lastName: 'TESTPATIENT',
       description: '',
       keyConditions: [],
       ssn: '',
-      dob: '1975-01-15',
+      dob: '1990-01-01',
       mrn: '',
     });
   });
@@ -162,14 +162,14 @@ describe('SmartLaunchProvider', () => {
 
     // Mock FHIR patient data
     const mockFhirPatient = {
-      id: '67890',
+      id: 'TEST002',
       name: [
         {
-          family: 'Doe',
-          given: ['John'],
+          family: 'TestUser',
+          given: ['Test'],
         },
       ],
-      birthDate: '1980-05-20',
+      birthDate: '1990-01-01',
     };
 
     const { usePatient } = await import('@/hooks/use-patient');
@@ -193,17 +193,17 @@ describe('SmartLaunchProvider', () => {
     // Check that patient store was updated with FHIR data only
     const state = usePatientStore.getState();
     expect(state.patient).toEqual({
-      id: '67890',
-      icn: '67890', // Falls back to FHIR ID
-      dfn: '67890',
-      station: '500', // Default station when no launch context
+      id: 'TEST002',
+      icn: 'TEST002', // Falls back to FHIR ID
+      dfn: 'TEST002',
+      station: 'TEST001', // Default station when no launch context
       duz: undefined, // No launch context or user vista_ids
-      firstName: 'JOHN',
-      lastName: 'DOE',
+      firstName: 'TEST',
+      lastName: 'TESTUSER',
       description: '',
       keyConditions: [],
       ssn: '',
-      dob: '1980-05-20',
+      dob: '1990-01-01',
       mrn: '',
     });
   });
@@ -225,8 +225,8 @@ describe('SmartLaunchProvider', () => {
 
     // Mock FHIR patient data
     const mockFhirPatient = {
-      id: '11111',
-      name: [{ family: 'Smith', given: ['Jane'] }],
+      id: 'TEST003',
+      name: [{ family: 'TestUser', given: ['Test'] }],
     };
 
     const { usePatient } = await import('@/hooks/use-patient');
@@ -255,8 +255,8 @@ describe('SmartLaunchProvider', () => {
 
     // Should still set patient with FHIR data
     const state = usePatientStore.getState();
-    expect(state.patient?.station).toBe('500'); // Default station
-    expect(state.patient?.firstName).toBe('JANE');
+    expect(state.patient?.station).toBe('TEST001'); // Default station
+    expect(state.patient?.firstName).toBe('TEST');
 
     consoleSpy.mockRestore();
   });
@@ -264,8 +264,8 @@ describe('SmartLaunchProvider', () => {
   it('should handle partial launch context', async () => {
     // Launch context missing duz
     const partialContext = {
-      patient: '1000000219V596118',
-      sta3n: '530',
+      patient: 'TEST123456V123456',
+      sta3n: 'TEST001',
       // Missing duz
     };
     const encodedLaunch = btoa(JSON.stringify(partialContext));
@@ -281,8 +281,8 @@ describe('SmartLaunchProvider', () => {
 
     // Mock FHIR patient data
     const mockFhirPatient = {
-      id: '22222',
-      name: [{ family: 'Johnson', given: ['Bob'] }],
+      id: 'TEST004',
+      name: [{ family: 'TestUser', given: ['Test'] }],
     };
 
     const { usePatient } = await import('@/hooks/use-patient');
@@ -305,16 +305,16 @@ describe('SmartLaunchProvider', () => {
 
     // Should not use partial context
     const state = usePatientStore.getState();
-    expect(state.patient?.icn).toBe('22222'); // Falls back to FHIR ID
-    expect(state.patient?.station).toBe('500'); // Default station when partial context
+    expect(state.patient?.icn).toBe('TEST004'); // Falls back to FHIR ID
+    expect(state.patient?.station).toBe('TEST001'); // Default station when partial context
   });
 
   it('should not update store when no FHIR patient is available', async () => {
     // Valid launch context
     const launchContext = {
-      patient: '1000000219V596118',
-      sta3n: '530',
-      duz: '520824797',
+      patient: 'TEST123456V123456',
+      sta3n: 'TEST001',
+      duz: 'TEST001001',
     };
     const encodedLaunch = btoa(JSON.stringify(launchContext));
 
