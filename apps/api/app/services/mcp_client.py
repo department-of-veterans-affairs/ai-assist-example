@@ -41,12 +41,16 @@ def get_vista_mcp_client(
     if requires_new_client:
         try:
             logger.info(
-                "Initializing Vista MCP client with URL: %s",
+                "Initializing Vista MCP client with URL: %s (timeout=%ds)",
                 settings.vista_mcp_server_url,
+                settings.vista_mcp_timeout_seconds,
             )
 
             params: MCPServerStreamableHttpParams = {
                 "url": settings.vista_mcp_server_url,
+                "timeout": float(settings.vista_mcp_timeout_seconds),
+                "sse_read_timeout": 300.0,
+                "terminate_on_close": True,
             }
 
             # Add JWT token and DUZ if provided

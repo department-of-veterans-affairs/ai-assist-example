@@ -1,6 +1,7 @@
 import { useUpdatePatient } from '@department-of-veterans-affairs/cds-patient-context-lib';
 import { type ReactNode, useEffect, useMemo } from 'react';
 import { CONFIG } from '@/config';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { usePatient } from '@/hooks/use-patient';
 import { usePatientStore } from '@/stores/patient-store';
 
@@ -40,30 +41,55 @@ function parseLaunchContext(): LaunchContext | null {
   return null;
 }
 
+function resolveStation(
+  launchContext: LaunchContext | null,
+  currentUser:
+    | {
+        authenticated: boolean;
+        user_info: {
+          vista_ids: Array<{ site_id: string; duz: string }>;
+        } | null;
+      }
+    | undefined
+): string {
+  let station = launchContext?.sta3n;
+
+  if (
+    !station &&
+    currentUser?.authenticated &&
+    currentUser.user_info?.vista_ids?.length
+  ) {
+    station = currentUser.user_info.vista_ids[0].site_id;
+  }
+
+  if (!station) {
+    station = '500';
+  }
+
+  return station;
+}
+
 export function SmartLaunchProvider({ children }: SmartLaunchProviderProps) {
-  // Initialize CDS Patient Context Library for bidirectional updates
   const smartContainerUrl = CONFIG.smartOnFhirContainerUrl;
   useUpdatePatient(smartContainerUrl);
 
-  // Get launch context (ICN, station, DUZ)
   const launchContext = useMemo(() => parseLaunchContext(), []);
-
-  // Get FHIR patient data
   const fhirPatient = usePatient();
   const setPatient = usePatientStore((state) => state.setPatient);
+  const { data: currentUser } = useCurrentUser();
 
-  // Set patient in store when FHIR data is loaded
   useEffect(() => {
     if (fhirPatient) {
       const firstName = fhirPatient.name?.[0]?.given?.join(' ') ?? '';
       const lastName = fhirPatient.name?.[0]?.family ?? '';
 
+      const station = resolveStation(launchContext, currentUser);
+
       setPatient({
         id: fhirPatient.id,
-        icn: launchContext?.patient || fhirPatient.id, // Use ICN from launch if available
+        icn: launchContext?.patient || fhirPatient.id,
         dfn: fhirPatient.id,
-        sta3n: launchContext?.sta3n, // Station from launch context
-        duz: launchContext?.duz, // DUZ from launch context
+        station,
         firstName: firstName.toUpperCase(),
         lastName: lastName.toUpperCase(),
         description: '',
@@ -73,7 +99,7 @@ export function SmartLaunchProvider({ children }: SmartLaunchProviderProps) {
         mrn: '',
       });
     }
-  }, [fhirPatient, launchContext, setPatient]);
+  }, [fhirPatient, launchContext, currentUser, setPatient]);
 
   return <>{children}</>;
 }

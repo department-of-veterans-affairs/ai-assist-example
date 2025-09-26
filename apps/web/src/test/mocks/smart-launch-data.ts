@@ -63,7 +63,7 @@ export const mockPatients: Record<string, FHIRPatient> = {
       {
         use: 'official',
         family: 'VETERAN',
-        given: ['JOHN', 'QUINCY'],
+        given: ['TEST', 'USER'],
       },
     ],
     birthDate: '1950-01-15',
@@ -90,7 +90,7 @@ export const mockPatients: Record<string, FHIRPatient> = {
       {
         use: 'official',
         family: 'VETERAN',
-        given: ['JANE', 'MARIE'],
+        given: ['TEST', 'USER'],
       },
     ],
     birthDate: '1955-03-22',
@@ -118,13 +118,13 @@ export const mockPatients: Record<string, FHIRPatient> = {
     name: [
       {
         use: 'official',
-        family: 'SMITH',
-        given: ['ROBERT', 'JAMES'],
+        family: 'TESTUSER',
+        given: ['TEST', 'USER'],
       },
       {
         use: 'nickname',
-        family: 'SMITH',
-        given: ['BOB'],
+        family: 'TESTUSER',
+        given: ['TEST'],
       },
     ],
   },

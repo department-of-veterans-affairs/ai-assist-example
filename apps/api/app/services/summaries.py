@@ -5,11 +5,13 @@ from __future__ import annotations
 import contextlib
 import json
 import logging
+import re
 from enum import Enum
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from agents import RunConfig, Runner, RunResult
 from fastapi import HTTPException
+from pydantic import BaseModel
 
 from ..agents import (
     MedicationRunContext,
@@ -35,7 +37,23 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar("T")
+T = TypeVar("T", bound=BaseModel)
+
+JSON_CONTENT_MATCH_PATTERN = re.compile(
+    r"(?:\s*```json\s*)?(.*?)(?:\s*```\s*)?$", re.DOTALL
+)
+
+
+def extract_json_content(text: str) -> str:
+    """Extract JSON content, handling optional markdown code blocks."""
+    input = text.strip()
+    match = JSON_CONTENT_MATCH_PATTERN.search(input)
+    result = (
+        extracted_json
+        if (match and len(extracted_json := match.group(1)) > 0)
+        else input
+    )
+    return result
 
 
 class SummariesService:
@@ -77,9 +95,17 @@ class SummariesService:
                 detail="Patient ICN is required to generate a medication summary.",
             )
 
-        azure_client = create_azure_openai_client()
+        vista_context = context.require_vista_context(
+            logger=logger,
+            require_icn=True,
+            endpoint="medication_summary",
+        )
 
-        jwt_token, user_duz, station_from_context = context.get_mcp_params()
+        jwt_token = vista_context.token
+        user_duz = vista_context.duz
+        station_from_context = vista_context.station
+
+        azure_client = create_azure_openai_client()
         station = patient.station or station_from_context
 
         vista_mcp = get_vista_mcp_client(
@@ -87,7 +113,7 @@ class SummariesService:
             user_duz=user_duz,
             station=station,
         )
-        logger.debug(
+        logger.info(
             "Initialized Vista MCP client for summary (jwt=%s, duz=%s, station=%s)",
             "present" if jwt_token else "missing",
             user_duz or "missing",
@@ -185,7 +211,7 @@ class SummariesService:
                 agent,
                 input=input_payload,
                 context=run_context,
-                max_turns=4,
+                max_turns=10,
                 run_config=RunConfig(
                     workflow_name=workflow_name,
                     trace_include_sensitive_data=settings.trace_include_sensitive_data,
@@ -196,11 +222,34 @@ class SummariesService:
         return await self._rate_limiter.run(_execute)
 
     @staticmethod
-    def _require_output(result: RunResult, expected_type: type[T]) -> T:
-        output_obj: object = cast("object", result.final_output)
-        if not isinstance(output_obj, expected_type):
+    def _require_output(result: RunResult, model_type: type[T]) -> T:
+        final_output = extract_json_content(result.final_output)
+
+        try:
+            output_obj: T = model_type.model_validate_json(final_output)
+            if not isinstance(output_obj, model_type):
+                raise HTTPException(
+                    status_code=500,
+                    detail="Agent run did not return the expected structured output.",
+                )
+            return output_obj
+        except Exception as e:
+            # Log the actual output for debugging
+            logger.error(f"Failed to parse agent output: {final_output}")
+            logger.error(f"Parse error: {e!s}")
+
+            # Check if the output is an error message from the AI
+            if (
+                "unable to" in final_output.lower()
+                or "error" in final_output.lower()
+                or "failed" in final_output.lower()
+            ):
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"Service unavailable: {final_output[:200]}",
+                ) from e
+
             raise HTTPException(
                 status_code=500,
-                detail="Agent run did not return the expected structured output.",
-            )
-        return output_obj
+                detail=f"Failed to parse agent response: {e}\n{final_output}",
+            ) from e

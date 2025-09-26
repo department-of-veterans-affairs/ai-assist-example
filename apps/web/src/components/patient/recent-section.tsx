@@ -11,19 +11,19 @@ import VertIcon from '@/assets/icons/vert.svg';
 const mockConversations = [
   {
     id: 1,
-    name: 'Sarah Brown',
+    name: 'Test Patient 1',
     time: 'Jul 31, 2025, 6:39am',
     isFavorite: false,
   },
   {
     id: 2,
-    name: 'Emily Johnson',
+    name: 'Test Patient 2',
     time: 'Jul 30, 2025, 6:39am',
     isFavorite: true,
   },
   {
     id: 3,
-    name: 'Jordan Taylor',
+    name: 'Test Patient 3',
     time: 'Jul 29, 2025, 6:39am',
     isFavorite: false,
   },

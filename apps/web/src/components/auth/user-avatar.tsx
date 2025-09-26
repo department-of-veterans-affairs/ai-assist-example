@@ -1,6 +1,11 @@
+import { clsx } from 'clsx';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
-export function UserAvatar() {
+interface UserAvatarProps {
+  inline?: boolean;
+}
+
+export function UserAvatar({ inline = false }: UserAvatarProps) {
   const { data: user, isLoading, error } = useCurrentUser();
 
   // Handle loading state
@@ -30,8 +35,16 @@ export function UserAvatar() {
   return (
     <button
       aria-label={`User menu for ${user.user_info.email}`}
-      className="width-5 height-5 min-width-5 min-height-5 radius-pill display-flex flex-align-center flex-justify-center cursor-pointer border-0 bg-white font-body-sm text-bold text-primary-darker hover:opacity-90"
+      className={clsx(
+        'radius-pill flex-align-center flex-justify-center cursor-pointer border-0 bg-white font-body-sm text-primary-darker hover:opacity-90',
+        inline
+          ? 'display-inline-flex min-height-4 min-width-4 width-4 height-4 margin-right-1'
+          : 'display-flex width-5 height-5 min-width-5 min-height-5 text-bold'
+      )}
       onClick={() => {
+        if (inline) {
+          return;
+        }
         // TODO: Implement user menu dropdown
       }}
       type="button"

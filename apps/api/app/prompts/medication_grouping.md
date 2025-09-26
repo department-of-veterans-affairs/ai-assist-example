@@ -37,4 +37,4 @@ Exclude: basic supplies like diapers, tape, gauze, gloves, catheters, and routin
 
 ## Output
 
-Return a `MedicationGroupingOutput` object. The Agents SDK enforces the schema, so respond using the structured fields without extra prose or markdown.
+Return ONLY a JSON Object matching the provided schema. Do not include any prose or markdown.

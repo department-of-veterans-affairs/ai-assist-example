@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -26,7 +27,12 @@ def build_medication_grouping_agent(
 ) -> Agent[MedicationRunContext]:
     """Create the medication grouping agent."""
 
-    instructions = PROMPT_PATH.read_text(encoding="utf-8")
+    instructions = (
+        PROMPT_PATH.read_text(encoding="utf-8")
+        + "\n\n"
+        + "Output should be a JSON object with the following schema:\n\n"
+        + json.dumps(MedicationGroupingOutput.model_json_schema())
+    )
 
     return Agent[MedicationRunContext](
         name="MedicationGroupingAgent",
@@ -36,11 +42,10 @@ def build_medication_grouping_agent(
             openai_client=openai_client,
         ),
         tools=list(tools),
-        output_type=MedicationGroupingOutput,
         model_settings=ModelSettings(
             temperature=0.2,
             top_p=0.1,
-            max_tokens=2400,
+            max_tokens=4096,
             parallel_tool_calls=False,
         ),
     )

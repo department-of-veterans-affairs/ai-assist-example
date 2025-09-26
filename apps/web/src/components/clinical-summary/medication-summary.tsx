@@ -138,7 +138,7 @@ export function MedicationSummary({
   return (
     <div>
       {groups.map((group) => (
-        <div className="margin-bottom-4" key={group.group_number}>
+        <div className="margin-bottom-4 problem-group" key={group.group_number}>
           <Problem group={group} index={group.group_number} />
         </div>
       ))}

@@ -75,6 +75,11 @@ class Settings(BaseSettings):
     vista_mcp_server_url: str = Field(
         default="http://localhost:8000/mcp", alias="VISTA_MCP_SERVER_URL"
     )
+    vista_mcp_timeout_seconds: int = Field(
+        default=60,
+        alias="VISTA_MCP_TIMEOUT_SECONDS",
+        description="Timeout in seconds for Vista MCP HTTP requests",
+    )
 
     # Rate limiting configuration (environment-specific)
     rate_limit_delay_ms: int = Field(

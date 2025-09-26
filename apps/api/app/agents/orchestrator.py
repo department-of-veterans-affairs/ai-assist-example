@@ -1,10 +1,14 @@
 """Main orchestrator agent for Vista patient queries."""
 
+import logging
 from typing import TYPE_CHECKING, Any
 
 from agents import Agent, OpenAIChatCompletionsModel
 
 from ..config import settings
+from ..services.mcp_client import get_vista_mcp_client
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from agents.mcp import MCPServer
@@ -59,8 +63,6 @@ def get_orchestrator_agent(
     station_header: str | None = None
     if with_mcp:
         try:
-            from ..services.mcp_client import get_vista_mcp_client
-
             # Extract Vista parameters from patient context if available
             user_duz = patient_context.get("duz") if patient_context else None
             station_header = patient_context.get("station") if patient_context else None
@@ -70,6 +72,13 @@ def get_orchestrator_agent(
                 jwt_token,
                 user_duz=user_duz,
                 station=station_header,
+            )
+            logger.info(
+                "Initialized Vista MCP client for orchestrator "
+                "(jwt=%s, duz=%s, station=%s)",
+                "present" if jwt_token else "missing",
+                user_duz or "missing",
+                station_header or "missing",
             )
             mcp_servers = [vista_mcp]
         except ImportError as e:

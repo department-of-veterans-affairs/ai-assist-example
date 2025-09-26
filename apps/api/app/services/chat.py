@@ -7,6 +7,8 @@ import logging
 from collections.abc import AsyncGenerator
 
 from agents import RunConfig, Runner
+from agents.exceptions import AgentsException
+from mcp.shared.exceptions import McpError
 from openai.types.responses import ResponseTextDeltaEvent
 
 from ..agents.orchestrator import get_orchestrator_agent
@@ -74,8 +76,16 @@ class ChatService:
         vista_mcp = None
 
         # Get auth params from context
-        jwt_token, user_duz, station_from_context = context.get_mcp_params()
-        station = patient_station or station_from_context
+        vista_context = context.require_vista_context(
+            logger=logger,
+            require_icn=True,
+            endpoint="chat",
+        )
+
+        jwt_token = vista_context.token
+        user_duz = vista_context.duz
+        station = patient_station or vista_context.station
+        patient_icn = vista_context.icn
 
         try:
             if settings.rate_limit_delay_ms > 0:
@@ -99,6 +109,12 @@ class ChatService:
                 jwt_token,
                 user_duz=user_duz,
                 station=station,
+            )
+            logger.info(
+                "Initialized Vista MCP client for chat (jwt=%s, duz=%s, station=%s)",
+                "present" if jwt_token else "missing",
+                user_duz or "missing",
+                station or "missing",
             )
             await vista_mcp.connect()
 
@@ -139,6 +155,26 @@ class ChatService:
                     content = json.dumps(event.data.delta)
                     yield f"0:{content}\n"
 
+        except AgentsException as e:
+            logger.error(f"Stream error: {e!s}", exc_info=True)
+            if (
+                isinstance(e.__cause__, McpError)
+                and "timed out" in str(e.__cause__).lower()
+            ):
+                logger.warning(
+                    "Vista MCP timeout - Vista RPC call took longer than %d seconds",
+                    settings.vista_mcp_timeout_seconds,
+                )
+                error_message = (
+                    "Vista is taking longer than expected to respond. "
+                    "This can happen with complex queries or large data sets. "
+                    "Please try a more specific query or contact support."
+                )
+            else:
+                error_message = (
+                    "An error occurred while processing your request. Please try again."
+                )
+            yield f"3:{json.dumps(error_message)}\n"
         except Exception as e:
             logger.error(f"Stream error: {e!s}", exc_info=True)
             # All error details are logged; users get only generic messages.

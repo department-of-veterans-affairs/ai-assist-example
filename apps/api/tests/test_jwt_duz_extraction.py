@@ -45,8 +45,8 @@ class TestSSOClient:
 
         jwt_string = create_test_jwt(
             vista_ids=[
-                {"siteId": "530", "siteName": "Site #530", "duz": "520824797"},
-                {"siteId": "500", "siteName": "500 VEText VistA", "duz": "520824893"},
+                {"siteId": "TEST001", "siteName": "Test Site #001", "duz": "TEST001001"},
+                {"siteId": "TEST002", "siteName": "Test Site #002", "duz": "TEST002002"},
             ]
         )
 
@@ -56,10 +56,10 @@ class TestSSOClient:
 
         assert token is not None
         assert len(token.user_info.vista_ids) == 2
-        assert token.user_info.vista_ids[0].site_id == "530"
-        assert token.user_info.vista_ids[0].duz == "520824797"
-        assert token.user_info.vista_ids[1].site_id == "500"
-        assert token.user_info.vista_ids[1].duz == "520824893"
+        assert token.user_info.vista_ids[0].site_id == "TEST001"
+        assert token.user_info.vista_ids[0].duz == "TEST001001"
+        assert token.user_info.vista_ids[1].site_id == "TEST002"
+        assert token.user_info.vista_ids[1].duz == "TEST002002"
 
     def test_parse_jwt_without_vista_ids(self):
         """Test parsing JWT handles missing Vista IDs gracefully."""
@@ -102,20 +102,20 @@ class TestDUZExtraction:
             last_name="User",
             roles=["staff"],
             vista_ids=[
-                VistaId(site_id="530", site_name="Site #530", duz="520824797"),
-                VistaId(site_id="500", site_name="500 VEText", duz="520824893"),
+                VistaId(site_id="TEST001", site_name="Test Site #001", duz="TEST001001"),
+                VistaId(site_id="TEST002", site_name="Test Site #002", duz="TEST002002"),
             ],
         )
 
-        # Find DUZ for station 530
-        patient_station = "530"
+        # Find DUZ for station TEST001
+        patient_station = "TEST001"
         user_duz = None
         for vista_id in user_info.vista_ids:
             if vista_id.site_id == patient_station:
                 user_duz = vista_id.duz
                 break
 
-        assert user_duz == "520824797"
+        assert user_duz == "TEST001001"
 
     def test_no_duz_for_mismatched_station(self):
         """Test handling when user doesn't have access to patient's station."""
@@ -126,12 +126,12 @@ class TestDUZExtraction:
             last_name="User",
             roles=["staff"],
             vista_ids=[
-                VistaId(site_id="530", site_name="Site #530", duz="520824797"),
+                VistaId(site_id="TEST001", site_name="Test Site #001", duz="TEST001001"),
             ],
         )
 
-        # Try to find DUZ for station 600 (not in user's access)
-        patient_station = "600"
+        # Try to find DUZ for station TEST999 (not in user's access)
+        patient_station = "TEST999"
         user_duz = None
         for vista_id in user_info.vista_ids:
             if vista_id.site_id == patient_station:
@@ -164,7 +164,7 @@ class TestJWTAuthService:
                 last_name="User",
                 roles=["staff"],
                 vista_ids=[
-                    VistaId(site_id="530", site_name="Site #530", duz="520824797"),
+                    VistaId(site_id="TEST001", site_name="Test Site #001", duz="TEST001001"),
                 ],
             ),
         )
@@ -183,7 +183,7 @@ class TestJWTAuthService:
             assert token is not None
             assert token.user_info.email == "test@example.com"
             assert len(token.user_info.vista_ids) == 1
-            assert token.user_info.vista_ids[0].duz == "520824797"
+            assert token.user_info.vista_ids[0].duz == "TEST001001"
 
     async def test_cache_reuses_valid_token(self):
         """Test that valid tokens are reused from cache."""

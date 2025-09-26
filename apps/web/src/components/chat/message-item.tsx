@@ -1,5 +1,6 @@
 import type { Message } from '@ai-sdk/react';
 import clsx from 'clsx';
+import { UserAvatar } from '../auth/user-avatar';
 import { MessageContent } from './message-content';
 import { MessageFeedback } from './message-feedback';
 
@@ -20,34 +21,38 @@ export function MessageItem({ message }: MessageItemProps) {
     <div className="display-flex flex-column">
       <div
         className={clsx(
-          'display-flex',
-          isUser ? 'flex-justify-end' : 'flex-justify-start'
+          'display-flex margin-1',
+          isUser ? 'flex-justify-start' : 'flex-justify-end'
         )}
       >
         <div className="display-flex max-width-tablet flex-column">
           <div
             className={clsx(
-              'padding-3 radius-md shadow-2',
+              'padding-y-2 padding-x-3 radius-md',
               isUser
-                ? 'bg-primary text-white'
-                : 'border-1px border-base-lighter bg-white'
+                ? 'bg-primary-dark text-white'
+                : 'margin-left-6 max-width-75vw bg-base-lightest text-base-darker'
             )}
           >
             <div
-              className={clsx('font-body-md', !isUser && 'text-base-darkest')}
+              className={clsx(
+                'font-body-md',
+                isUser ? 'display-flex flex-align-center' : 'text-base-darkest'
+              )}
             >
+              {isUser && <UserAvatar inline />}
               <MessageContent content={messageContent} isUser={isUser} />
+              {!isUser && (
+                <MessageFeedback
+                  className="margin-top-1"
+                  messageId={message.id}
+                  onCopy={() => {
+                    navigator.clipboard.writeText(messageContent);
+                  }}
+                />
+              )}
             </div>
           </div>
-          {!isUser && (
-            <MessageFeedback
-              className="margin-top-1"
-              messageId={message.id}
-              onCopy={() => {
-                navigator.clipboard.writeText(messageContent);
-              }}
-            />
-          )}
         </div>
       </div>
     </div>

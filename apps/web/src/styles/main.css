@@ -45,3 +45,20 @@ body,
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* Print utilities */
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    /* biome-ignore lint/nursery/noImportantStyles: Required to override screen styles for print */
+    display: block !important;
+  }
+
+  .screen-only {
+    /* biome-ignore lint/nursery/noImportantStyles: Required to hide screen content in print */
+    display: none !important;
+  }
+}
