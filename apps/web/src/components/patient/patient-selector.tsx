@@ -1,35 +1,48 @@
-import { useUpdatePatient } from '@department-of-veterans-affairs/cds-patient-context-lib';
 import {
   Alert,
   Button,
   TextInput,
 } from '@department-of-veterans-affairs/clinical-design-system';
 import { useState } from 'react';
-import { CONFIG } from '@/config';
+import { usePatientStore } from '@/stores/patient-store';
 
 export function PatientSelector() {
   const [icn, setIcn] = useState('');
-  const smartContainerUrl = CONFIG.smartOnFhirContainerUrl;
-  const { updatePatient, errorMessage, isLoading, isSuccess } =
-    useUpdatePatient(smartContainerUrl);
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const patient = usePatientStore((state) => state.patient);
+  const setPatient = usePatientStore((state) => state.setPatient);
 
   const handleUpdatePatient = () => {
-    if (icn.trim()) {
-      updatePatient(icn.trim());
+    const trimmedIcn = icn.trim();
+    if (!trimmedIcn) {
+      return;
     }
+
+    if (!patient) {
+      setStatus('error');
+      return;
+    }
+
+    setPatient({
+      ...patient,
+      icn: trimmedIcn,
+      dfn: trimmedIcn,
+    });
+
+    setStatus('success');
   };
 
   return (
     <div className="margin-bottom-4 padding-3 border-1px border-base-lighter bg-base-lightest">
-      {isSuccess && (
+      {status === 'success' && (
         <Alert className="margin-bottom-2" slim type="success">
           Patient context updated successfully
         </Alert>
       )}
 
-      {errorMessage && (
+      {status === 'error' && (
         <Alert className="margin-bottom-2" slim type="error">
-          {errorMessage.message}
+          Unable to update patient context.
         </Alert>
       )}
 
@@ -52,21 +65,21 @@ export function PatientSelector() {
           </label>
           <TextInput
             className="maxw-none"
-            disabled={isLoading}
             id="patient-icn"
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setIcn(event.target.value)
-            }
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              setStatus('idle');
+              setIcn(event.target.value);
+            }}
             placeholder="Enter patient ICN"
             value={icn}
           />
         </div>
         <Button
           className="margin-bottom-0"
-          disabled={isLoading || !icn.trim()}
+          disabled={!(icn.trim() && patient)}
           onClick={handleUpdatePatient}
         >
-          {isLoading ? 'Updating...' : 'Update Patient'}
+          Update Patient
         </Button>
       </div>
     </div>

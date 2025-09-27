@@ -5,7 +5,7 @@
  */
 function getApiBaseUrl(): string {
   // Use Vite's environment variable for API URL (build-time configuration)
-  const apiUrl = import.meta.env.VITE_API_URL || window.env.API_URL;
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   if (apiUrl) {
     // In deployed environments, append /api to the service URL
