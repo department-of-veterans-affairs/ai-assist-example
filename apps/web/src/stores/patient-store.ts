@@ -24,7 +24,7 @@ const TEST_PATIENT: Patient = {
   id: 'TEST001', // FHIR resource ID
   icn: 'TEST123456V123456', // Test ICN (primary identifier)
   dfn: 'TEST001', // DFN for backward compatibility
-  station: 'TEST001', // Default station for development
+  station: '500', // Default station for development
   firstName: 'TEST',
   lastName: 'PATIENT',
   description: 'Test Patient for Development',

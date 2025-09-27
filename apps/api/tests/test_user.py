@@ -24,7 +24,9 @@ def mock_jwt_token():
             first_name="Test",
             last_name="User",
             roles=["staff", "va", "hcp"],
-            vista_ids=[VistaId(site_id="TEST001", site_name="Test Site", duz="TEST001001")],
+            vista_ids=[
+                VistaId(site_id="TEST001", site_name="Test Site", duz="TEST001001")
+            ],
         ),
     )
 

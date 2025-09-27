@@ -45,8 +45,16 @@ class TestSSOClient:
 
         jwt_string = create_test_jwt(
             vista_ids=[
-                {"siteId": "TEST001", "siteName": "Test Site #001", "duz": "TEST001001"},
-                {"siteId": "TEST002", "siteName": "Test Site #002", "duz": "TEST002002"},
+                {
+                    "siteId": "TEST001",
+                    "siteName": "Test Site #001",
+                    "duz": "TEST001001",
+                },
+                {
+                    "siteId": "TEST002",
+                    "siteName": "Test Site #002",
+                    "duz": "TEST002002",
+                },
             ]
         )
 
@@ -102,8 +110,12 @@ class TestDUZExtraction:
             last_name="User",
             roles=["staff"],
             vista_ids=[
-                VistaId(site_id="TEST001", site_name="Test Site #001", duz="TEST001001"),
-                VistaId(site_id="TEST002", site_name="Test Site #002", duz="TEST002002"),
+                VistaId(
+                    site_id="TEST001", site_name="Test Site #001", duz="TEST001001"
+                ),
+                VistaId(
+                    site_id="TEST002", site_name="Test Site #002", duz="TEST002002"
+                ),
             ],
         )
 
@@ -126,7 +138,9 @@ class TestDUZExtraction:
             last_name="User",
             roles=["staff"],
             vista_ids=[
-                VistaId(site_id="TEST001", site_name="Test Site #001", duz="TEST001001"),
+                VistaId(
+                    site_id="TEST001", site_name="Test Site #001", duz="TEST001001"
+                ),
             ],
         )
 
@@ -164,7 +178,9 @@ class TestJWTAuthService:
                 last_name="User",
                 roles=["staff"],
                 vista_ids=[
-                    VistaId(site_id="TEST001", site_name="Test Site #001", duz="TEST001001"),
+                    VistaId(
+                        site_id="TEST001", site_name="Test Site #001", duz="TEST001001"
+                    ),
                 ],
             ),
         )
