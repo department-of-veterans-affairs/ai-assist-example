@@ -2,12 +2,12 @@ import FooterLogo from '../../assets/icons/va-footer-logo.svg';
 
 export function Footer() {
   return (
-    <footer className="w-full bg-primary-darker px-2 py-2 text-white">
+    <footer className="w-full bg-primary-darker px-4 py-4 text-white">
       <div className="flex w-full items-center">
         <div className="flex items-center">
           <img
             alt="U.S. Department of Veterans Affairs"
-            className="h-6"
+            className="h-8"
             src={FooterLogo}
           />
         </div>

@@ -61,52 +61,49 @@ export function ChatInput({
   };
 
   return (
-    <div className="m-3 rounded-lg border border-base-lighter bg-white px-4 pt-4 pb-3 shadow-2">
-      <form className="mx-auto max-w-5xl" onSubmit={handleSubmit}>
-        <div className="flex items-center rounded-md border border-base-lighter px-2">
-          <div
-            className={cn(
-              'flex-1 rounded-md border-[4px] border-transparent pr-3 transition-shadow',
-              isFocused &&
-                'border-primary shadow-[0_0_0_1px_rgba(0,94,162,0.2)]'
-            )}
-          >
-            <Textarea
-              aria-describedby="chat-input-instructions"
-              aria-label="Chat message input"
-              className="min-h-[44px] w-full border-0 bg-transparent px-3 py-2 placeholder:text-base focus:outline-none focus:ring-0"
-              disabled={isLoading}
-              id="chat-input"
-              name="message"
-              onBlur={() => setIsFocused(false)}
-              onChange={handleTextareaChange}
-              onFocus={() => setIsFocused(true)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
-              ref={textareaRef}
-              rows={1}
-              spellCheck
-              style={{ resize: 'none' }}
-              value={input}
-            />
-          </div>
+    <div className="m-3 rounded-lg bg-white px-4 pt-4 pb-3">
+      <form className="mx-auto max-w-desktop" onSubmit={handleSubmit}>
+        <div
+          className={cn(
+            'flex items-center rounded border p-4 transition-colors',
+            isFocused ? 'border-primary-light' : 'border-base-light'
+          )}
+        >
+          <Textarea
+            aria-describedby="chat-input-instructions"
+            aria-label="Chat message input"
+            className="min-h-11 flex-1 border-0 bg-transparent px-0 py-0 shadow-none placeholder:text-base-light focus:border-0 focus:outline-none focus:ring-0"
+            disabled={isLoading}
+            id="chat-input"
+            name="message"
+            onBlur={() => setIsFocused(false)}
+            onChange={handleTextareaChange}
+            onFocus={() => setIsFocused(true)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a message..."
+            ref={textareaRef}
+            rows={1}
+            spellCheck
+            style={{ resize: 'none' }}
+            value={input}
+          />
           <Button
             aria-label={isLoading ? 'Sending message' : 'Send message'}
-            className="h-[44px] rounded-none rounded-r-md border-0 border-base-light border-l px-4 font-semibold hover:bg-base-light"
+            className="h-11 shrink-0 rounded-none rounded-r border-0 border-l"
             disabled={!input.trim() || isLoading}
             type="submit"
+            variant="secondary"
           >
             {isLoading ? 'Sending...' : 'Send'}
           </Button>
         </div>
+
         <span
           aria-live="polite"
-          className="mt-2 block text-center text-gray-400 text-xs uppercase tracking-wide"
+          className="mt-2 block text-center text-base-light tracking-wide"
           id="chat-input-instructions"
         >
-          {isLoading
-            ? 'AI is responding...'
-            : 'AI-generated content may be incorrect'}
+          AI-generated content may be incorrect
         </span>
       </form>
     </div>

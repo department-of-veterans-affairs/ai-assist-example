@@ -45,7 +45,7 @@ const DialogContent = forwardRef<
     <DialogOverlay />
     <Content
       className={cn(
-        'dialog-content -translate-x-1/2 -translate-y-1/2 data-[state=open]:fade-in data-[state=open]:zoom-in data-[state=closed]:zoom-out fixed top-1/2 left-1/2 z-50 flex w-full max-w-3xl flex-col overflow-hidden rounded-lg border border-base-lighter bg-white shadow-3 outline-none data-[state=closed]:animate-out data-[state=open]:animate-in',
+        'dialog-content -translate-x-1/2 -translate-y-1/2 data-[state=open]:fade-in data-[state=open]:zoom-in data-[state=closed]:zoom-out fixed top-1/2 left-1/2 z-50 flex w-full max-w-3xl flex-col overflow-hidden rounded-lg border bg-white shadow-lg outline-none data-[state=closed]:animate-out data-[state=open]:animate-in',
         className
       )}
       ref={ref}
@@ -61,13 +61,7 @@ const DialogHeader = ({
   className,
   ...props
 }: HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      'border-base-lightest border-b px-6 py-4 text-left font-semibold text-base-darker text-lg',
-      className
-    )}
-    {...props}
-  />
+  <div className={cn('border-b px-6 py-4 text-left', className)} {...props} />
 );
 
 const DialogTitle = forwardRef<
@@ -75,7 +69,7 @@ const DialogTitle = forwardRef<
   ComponentPropsWithoutRef<typeof Title>
 >(({ className, ...props }, ref) => (
   <Title
-    className={cn('font-semibold text-base-darker text-xl', className)}
+    className={cn('font-semibold text-xl', className)}
     ref={ref}
     {...props}
   />
@@ -87,7 +81,7 @@ const DialogDescription = forwardRef<
   ComponentPropsWithoutRef<typeof Description>
 >(({ className, ...props }, ref) => (
   <Description
-    className={cn('text-base text-base-darker', className)}
+    className={cn('text-base-dark', className)}
     ref={ref}
     {...props}
   />
@@ -102,7 +96,7 @@ const DialogFooter = ({
 }: HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      'flex flex-wrap items-center justify-between gap-3 border-base-lightest border-t px-6 py-4',
+      'flex flex-wrap items-center justify-between gap-3 border-t px-6 py-4',
       className
     )}
     {...props}

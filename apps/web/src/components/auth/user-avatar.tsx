@@ -1,4 +1,5 @@
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { getUserInitials } from '@/lib/user';
 import { cn } from '@/lib/utils';
 
 interface UserAvatarProps {
@@ -11,11 +12,7 @@ const baseBadge =
 export function UserAvatar({ inline = false }: UserAvatarProps) {
   const { data: user, isLoading, error } = useCurrentUser();
 
-  const initials = user?.user_info
-    ? `${user.user_info.first_name?.[0] ?? ''}${
-        user.user_info.last_name?.[0] ?? ''
-      }`.trim() || 'VU'
-    : 'VU';
+  const initials = getUserInitials(user?.user_info);
 
   const renderBadge = (className: string, content: string) => (
     <div aria-hidden="true" className={cn(baseBadge, className)}>
@@ -24,7 +21,8 @@ export function UserAvatar({ inline = false }: UserAvatarProps) {
   );
 
   if (inline) {
-    const inlineClasses = 'h-10 w-10 rounded-lg bg-primary text-white';
+    const inlineClasses =
+      'mr-2 size-8 rounded-full bg-white text-xs text-primary-darker';
 
     if (isLoading) {
       return renderBadge(inlineClasses, '...');

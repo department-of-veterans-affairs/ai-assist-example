@@ -8,10 +8,10 @@ export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const VARIANT_STYLES: Record<NonNullable<AlertProps['variant']>, string> = {
-  info: 'border-info bg-info-lighter text-info-dark',
-  error: 'border-error bg-error-lighter text-error-dark',
-  success: 'border-success bg-success-lighter text-success-dark',
-  warning: 'border-warning bg-warning-lighter text-warning-dark',
+  info: 'border-l-info bg-info-lighter text-info-dark',
+  error: 'border-l-error bg-error-lighter text-error-dark',
+  success: 'border-l-success bg-success-lighter text-success-dark',
+  warning: 'border-l-warning bg-warning-lighter text-warning-dark',
 };
 
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(
@@ -20,7 +20,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(
       <div
         aria-live="polite"
         className={cn(
-          'rounded-md border px-4 font-medium text-sm',
+          'rounded border-l-4 px-4',
           slim ? 'py-2' : 'py-3',
           VARIANT_STYLES[variant],
           className

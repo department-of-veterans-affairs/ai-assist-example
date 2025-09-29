@@ -20,15 +20,14 @@ export function MessageFeedback({
   };
 
   return (
-    <div className={cn('flex items-center justify-start pt-4', className)}>
+    <div className={cn('flex items-center justify-start pt-2', className)}>
       <Button
         aria-label="Copy message"
-        className="text-primary hover:text-primary-dark"
         onClick={handleCopy}
         size="icon"
         variant="ghost"
       >
-        <Copy className="h-4 w-4" />
+        <Copy className="size-4" />
       </Button>
     </div>
   );

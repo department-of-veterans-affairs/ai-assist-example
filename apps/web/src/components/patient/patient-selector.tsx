@@ -32,7 +32,7 @@ export function PatientSelector() {
   };
 
   return (
-    <div className="mb-6 rounded-lg border border-base-lighter bg-base-lightest p-6 shadow-1">
+    <div className="mb-6 rounded-lg border bg-base-lightest p-6 shadow-sm">
       {status === 'success' && (
         <Alert className="mb-4" slim variant="success">
           Patient context updated successfully
@@ -45,11 +45,9 @@ export function PatientSelector() {
         </Alert>
       )}
 
-      <h3 className="mb-2 font-semibold text-base-darker text-lg">
-        Update Patient Context
-      </h3>
+      <h3 className="mb-2 font-semibold text-lg">Update Patient Context</h3>
 
-      <p className="mb-4 text-base text-sm">
+      <p className="mb-4 text-base-dark text-sm">
         Use this to update the patient context across all CDS-enabled
         applications.
       </p>
@@ -68,7 +66,6 @@ export function PatientSelector() {
           />
         </div>
         <Button
-          className="mb-1"
           disabled={!(icn.trim() && patient)}
           onClick={handleUpdatePatient}
         >

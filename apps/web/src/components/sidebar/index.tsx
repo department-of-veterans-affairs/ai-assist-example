@@ -16,77 +16,60 @@ export function Sidebar({ children }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'flex shrink-0 flex-col border-base-lighter border-l bg-white transition-all duration-300',
-        leftCollapsed ? 'w-14 items-center' : 'w-[30rem]'
+        'flex shrink-0 flex-col border-l bg-white transition-all duration-300',
+        leftCollapsed ? 'w-14 items-center' : 'w-auto'
       )}
     >
-      {/* Header with toggle */}
       {!leftCollapsed && (
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end p-2">
           <Button
-            aria-label={leftCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="h-9 w-9 rounded-full text-base-dark hover:bg-primary-lighter hover:text-primary"
+            aria-label="Collapse sidebar"
+            className="rounded-full"
             onClick={toggleLeftSidebar}
             size="icon"
             type="button"
             variant="ghost"
           >
-            <img alt="Close" className="h-4 w-4" src={Close} />
+            <img alt="Close" className="size-4" src={Close} />
           </Button>
         </div>
       )}
 
-      {/* Collapsed state - show only three icons */}
       {leftCollapsed && (
-        <div className="flex flex-col items-center">
-          <div>
-            <Button
-              aria-label="Expand sidebar"
-              className="text-base-dark hover:text-primary"
-              onClick={toggleLeftSidebar}
-              size="icon"
-              type="button"
-              variant="ghost"
-            >
-              <img
-                alt="Expand"
-                className="h-4 w-4 text-primary"
-                src={FirstPage}
-              />
-            </Button>
-          </div>
-          <div>
-            <Button
-              aria-label="Attachments"
-              className="text-base-dark hover:text-primary"
-              onClick={toggleLeftSidebar}
-              size="icon"
-              type="button"
-              variant="ghost"
-            >
-              <img
-                alt="Attachments"
-                className="h-4 w-4"
-                src={AttachmentsIcon}
-              />
-            </Button>
-          </div>
-          <div>
-            <Button
-              aria-label="History"
-              className="text-base-dark hover:text-primary"
-              onClick={toggleLeftSidebar}
-              size="icon"
-              type="button"
-              variant="ghost"
-            >
-              <img alt="History" className="h-4 w-4" src={HistoryIcon} />
-            </Button>
-          </div>
+        <div className="flex flex-col items-center gap-1 py-2">
+          <Button
+            aria-label="Expand sidebar"
+            className="size-10"
+            onClick={toggleLeftSidebar}
+            size="icon"
+            type="button"
+            variant="ghost"
+          >
+            <img alt="Expand" src={FirstPage} />
+          </Button>
+          <Button
+            aria-label="Attachments"
+            className="size-10"
+            onClick={toggleLeftSidebar}
+            size="icon"
+            type="button"
+            variant="ghost"
+          >
+            <img alt="Attachments" src={AttachmentsIcon} />
+          </Button>
+          <Button
+            aria-label="History"
+            className="size-10"
+            onClick={toggleLeftSidebar}
+            size="icon"
+            type="button"
+            variant="ghost"
+          >
+            <img alt="History" src={HistoryIcon} />
+          </Button>
         </div>
       )}
 
-      {/* Only show children (SummarySection) when sidebar is expanded */}
       {!leftCollapsed && children}
     </aside>
   );

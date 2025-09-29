@@ -3,27 +3,18 @@ import { PatientContextHeader } from '@/components/patient/patient-context-heade
 
 function VAHeader() {
   return (
-    <header className="w-full bg-primary-darker px-4 py-2">
+    <header className="w-full bg-primary-darker px-4 py-2 text-white">
       <div className="flex w-full items-center justify-between">
-        {/* App Title */}
-        <div className="flex items-center gap-2 text-white">
-          <span className="font-semibold text-lg uppercase tracking-wide">
-            VA
-          </span>
-          <span className="px-2 text-lg">|</span>
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-lg uppercase tracking-wide">VA</span>
+          <span className="px-2">|</span>
           <span className="font-light text-lg">AI assist</span>
         </div>
-
-        {/* User Avatar */}
-        <div className="flex items-center">
-          <UserAvatar />
-        </div>
+        <UserAvatar />
       </div>
     </header>
   );
 }
-
-// PatientContextHeader moved to @/components/patient/header
 
 export function Header() {
   return (

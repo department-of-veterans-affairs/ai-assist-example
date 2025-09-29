@@ -18,38 +18,33 @@ export function MessageItem({ message }: MessageItemProps) {
       .join('\n') || '';
 
   return (
-    <div className="my-3 flex">
+    <div className="flex flex-col">
       <div
-        className={cn('flex w-full', isUser ? 'justify-start' : 'justify-end')}
+        className={cn('my-2 flex', isUser ? 'justify-start' : 'justify-end')}
       >
-        <div
-          className={cn(
-            'flex max-w-3xl flex-col gap-2',
-            !isUser && 'items-start'
-          )}
-        >
+        <div className="flex max-w-tablet flex-col">
           <div
             className={cn(
-              'rounded-md px-6 py-4 shadow-1',
+              'rounded px-3 py-2',
               isUser
-                ? 'flex items-center gap-3 bg-primary-dark text-white'
-                : 'ml-12 max-w-[75vw] bg-base-lightest text-base-darker'
+                ? 'bg-primary-dark text-white'
+                : 'ml-12 max-w-[75vw] bg-base-lightest'
             )}
           >
-            {isUser && <UserAvatar inline />}
-            <div className="text-base leading-relaxed">
+            <div className={cn(isUser ? 'flex items-center' : '')}>
+              {isUser && <UserAvatar inline />}
               <MessageContent content={messageContent} isUser={isUser} />
+              {!isUser && (
+                <MessageFeedback
+                  className="mt-1"
+                  messageId={message.id}
+                  onCopy={() => {
+                    navigator.clipboard.writeText(messageContent);
+                  }}
+                />
+              )}
             </div>
           </div>
-          {!isUser && (
-            <MessageFeedback
-              className="pt-2 pl-12"
-              messageId={message.id}
-              onCopy={() => {
-                navigator.clipboard.writeText(messageContent);
-              }}
-            />
-          )}
         </div>
       </div>
     </div>

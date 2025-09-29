@@ -11,13 +11,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={cn('relative flex items-center', leadingIcon && 'gap-2')}>
         {leadingIcon ? (
-          <span className="pointer-events-none pl-3 text-base text-base-dark">
-            {leadingIcon}
-          </span>
+          <span className="pointer-events-none pl-3">{leadingIcon}</span>
         ) : null}
         <input
           className={cn(
-            'flex h-10 w-full rounded-md border border-base-light bg-white px-3 py-2 text-base text-base-darker shadow-sm transition placeholder:text-base-light focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60',
+            'flex h-10 w-full rounded border bg-white px-3 py-2 shadow-sm transition placeholder:text-base-light focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50',
             leadingIcon && 'pl-10',
             className
           )}

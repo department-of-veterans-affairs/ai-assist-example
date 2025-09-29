@@ -1,10 +1,4 @@
-import {
-  Copy,
-  Loader2,
-  Printer,
-  RefreshCw,
-  SquareArrowOutUpRight,
-} from 'lucide-react';
+import { Copy, Printer, RefreshCw, SquareArrowOutUpRight } from 'lucide-react';
 import type { RefObject } from 'react';
 import { useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
@@ -45,23 +39,19 @@ function SummaryPatientHeader({
   }
 
   return (
-    <div className="border-base-light border-b px-6 py-6 text-base-dark text-sm print:hidden">
-      <div className="mb-1 font-semibold text-base-dark text-xs uppercase tracking-wide">
+    <div className="border-b px-6 py-6 text-sm print:hidden">
+      <div className="mb-1 font-semibold text-xs uppercase tracking-wide">
         Patient
       </div>
-      <div className="font-semibold text-base text-base-darker">
-        <span className="font-normal">
-          {patient.lastName?.toUpperCase()}, {patient.firstName} (ICN{' '}
-          {patient.icn}, DOB {patient.dob || 'Unknown'})
-        </span>
+      <div>
+        {patient.lastName?.toUpperCase()}, {patient.firstName} (ICN{' '}
+        {patient.icn}, DOB {patient.dob || 'Unknown'})
       </div>
-      <div className="mt-2 text-base text-xs">
-        <span className="font-semibold text-base-dark uppercase tracking-wide">
+      <div className="mt-2 text-xs">
+        <span className="font-semibold uppercase tracking-wide">
           Generated:
         </span>{' '}
-        <span>
-          {summary?.timestamp ? summary.timestamp.toLocaleString() : ''}
-        </span>
+        {summary?.timestamp ? summary.timestamp.toLocaleString() : ''}
       </div>
     </div>
   );
@@ -94,7 +84,7 @@ function SummaryContent({
 
   if (isError) {
     return (
-      <div className="py-10 text-center text-base-darker">
+      <div className="py-10 text-center">
         <div className="screen-only">
           {error instanceof Error
             ? error.message
@@ -113,7 +103,7 @@ function SummaryContent({
 
   if (!summary?.summary) {
     return (
-      <div className="screen-only py-10 text-center text-base">
+      <div className="screen-only py-10 text-center">
         Click to load patient summary
       </div>
     );
@@ -123,13 +113,11 @@ function SummaryContent({
     <div id="clinical-summary-print-content" ref={contentRef}>
       {patient && (
         <div className="print-only mb-6">
-          <h1 className="mb-2 font-semibold text-2xl text-base-darker">
+          <h1 className="mb-2 font-semibold text-2xl">
             Patient Medication Summary
           </h1>
-          <div className="text-base">
-            Grouped by problem with relevant vitals and labs
-          </div>
-          <div className="mt-4 space-y-2 text-base">
+          <div>Grouped by problem with relevant vitals and labs</div>
+          <div className="mt-4 space-y-2">
             <div>
               <strong>Patient:</strong> {patient.lastName?.toUpperCase()},{' '}
               {patient.firstName} (ICN {patient.icn}, DOB{' '}
@@ -143,7 +131,7 @@ function SummaryContent({
         </div>
       )}
 
-      <div className="text-base text-base-darker leading-relaxed">
+      <div className="leading-relaxed">
         <MedicationSummary summary={summary.summary} />
       </div>
     </div>
@@ -199,14 +187,9 @@ export function ClinicalSummaryModal() {
   return (
     <Dialog onOpenChange={setAmOpen} open={amOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2" size="sm" variant="outline">
-          <span className="flex-1">
-            Generate Patient Medication-Problem Summary
-          </span>
-          <SquareArrowOutUpRight
-            aria-hidden="true"
-            className="h-2 w-2 flex-shrink-0"
-          />
+        <Button className="w-full justify-between" variant="outline">
+          <span>Generate Patient Medication-Problem Summary</span>
+          <SquareArrowOutUpRight aria-hidden="true" className="size-3" />
         </Button>
       </DialogTrigger>
 
@@ -254,12 +237,12 @@ export function ClinicalSummaryModal() {
         }
       `}</style>
 
-      <DialogContent className="dialog-content flex h-[70vh] max-w-5xl flex-col overflow-hidden rounded-lg border border-base-light bg-white shadow-3">
-        <DialogHeader className="border-base-light border-b px-6 py-6">
-          <DialogTitle className="font-semibold text-base-darker text-xl">
+      <DialogContent className="dialog-content flex h-[70vh] max-w-5xl flex-col overflow-hidden rounded-lg bg-white shadow-lg">
+        <DialogHeader className="border-b px-6 py-6">
+          <DialogTitle className="font-semibold text-xl">
             Patient Medication Summary
           </DialogTitle>
-          <DialogDescription className="text-base text-base">
+          <DialogDescription className="text-base-dark">
             Grouped by problem with relevant vitals and labs.
           </DialogDescription>
         </DialogHeader>
@@ -280,9 +263,9 @@ export function ClinicalSummaryModal() {
           />
         </div>
 
-        <DialogFooter className="dialog-footer border-base-light border-t bg-base-lightest/40 px-6 py-4">
+        <DialogFooter className="dialog-footer border-t bg-base-lightest/40 px-6 py-4">
           <div className="flex w-full items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <DialogClose asChild>
                 <Button onClick={() => setAmOpen(false)} size="sm">
                   Close
@@ -291,47 +274,41 @@ export function ClinicalSummaryModal() {
 
               <Button
                 aria-label="Regenerate report"
-                className="h-9 w-9 rounded-md text-base-dark hover:bg-primary-lighter hover:text-primary"
                 onClick={regenerateReport}
                 size="icon"
                 type="button"
                 variant="ghost"
               >
-                <RefreshCw aria-hidden="true" className="h-4 w-4" />
+                <RefreshCw aria-hidden="true" className="size-5" />
                 <span className="sr-only">Regenerate</span>
               </Button>
 
               <Button
                 aria-label="Copy summary"
-                className="h-9 w-9 rounded-md text-base-dark hover:bg-primary-lighter hover:text-primary"
                 disabled={!summary}
                 onClick={handleCopy}
                 size="icon"
                 type="button"
                 variant="ghost"
               >
-                <Copy aria-hidden="true" className="h-4 w-4" />
+                <Copy aria-hidden="true" className="size-5" />
                 <span className="sr-only">Copy summary</span>
               </Button>
 
               <Button
                 aria-label="Print summary"
-                className="print-allowed h-9 w-9 rounded-md text-base-dark hover:bg-primary-lighter hover:text-primary"
+                className="print-allowed"
                 onClick={handlePrint}
                 size="icon"
                 type="button"
                 variant="ghost"
               >
-                <Printer aria-hidden="true" className="h-4 w-4" />
+                <Printer aria-hidden="true" className="size-5" />
                 <span className="sr-only">Print summary</span>
               </Button>
-
-              {loading && (
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              )}
             </div>
 
-            <span className="text-base text-xs uppercase tracking-wide">
+            <span className="text-base-light text-xs tracking-wide">
               AI-generated content may be incorrect
             </span>
           </div>
