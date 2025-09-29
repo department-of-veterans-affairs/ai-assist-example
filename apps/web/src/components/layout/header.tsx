@@ -3,23 +3,19 @@ import { PatientContextHeader } from '@/components/patient/patient-context-heade
 
 function VAHeader() {
   return (
-    <header className="padding-x-2 padding-y-1 width-full display-block bg-primary-darker">
-      <div className="display-flex width-full minw-5 flex-align-center flex-justify-space-between">
+    <header className="w-full bg-primary-darker px-4 py-2">
+      <div className="flex w-full items-center justify-between">
         {/* App Title */}
-        <div className="display-flex height-full flex-align-center">
-          <span className="margin-0 display-flex flex-align-center font-body-lg text-semibold text-white">
+        <div className="flex items-center gap-2 text-white">
+          <span className="font-semibold text-lg uppercase tracking-wide">
             VA
           </span>
-          <span className="margin-0 padding-left-1 padding-right-1 display-flex flex-align-center font-body-lg text-white">
-            |
-          </span>
-          <span className="margin-0 display-flex flex-align-center font-body-lg text-light text-white">
-            AI assist
-          </span>
+          <span className="px-2 text-lg">|</span>
+          <span className="font-light text-lg">AI assist</span>
         </div>
 
         {/* User Avatar */}
-        <div className="display-flex height-full margin-left-auto flex-align-center">
+        <div className="flex items-center">
           <UserAvatar />
         </div>
       </div>

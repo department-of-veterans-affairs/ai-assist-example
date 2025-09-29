@@ -12,13 +12,13 @@ interface AssessmentProps {
 
 function Assessment({ reasoning, match }: AssessmentProps) {
   return (
-    <div className="margin-top-2">
+    <div className="mt-4 text-base text-base-darker">
       <div>
-        <div>Problem list match: {match}</div>
+        <div className="font-semibold">Problem list match: {match}</div>
         {reasoning && (
-          <div className="margin-left-1">
-            <div>Reasoning:</div>
-            <div className="margin-left-1">{reasoning}</div>
+          <div className="mt-1 ml-4 space-y-1 text-sm">
+            <div className="font-semibold">Reasoning:</div>
+            <div className="ml-2 text-base">{reasoning}</div>
           </div>
         )}
       </div>
@@ -44,16 +44,18 @@ function RegimenSection({ medications }: { medications: Medication[] }) {
   const medRows = medications.map((med) => {
     const medDetail = med_detail_row(med);
     return (
-      <div className="margin-left-2" key={med.name}>
+      <div className="ml-6 text-base" key={med.name}>
         {med.name || 'None'} {med.status && `(${med.status}) `}|{' '}
         {med.dose || 'None'} | {med.route || 'None'} | {med.sig || 'None'}
-        {medDetail && <div className="margin-left-2">{medDetail}</div>}
+        {medDetail && <div className="ml-4 text-base text-sm">{medDetail}</div>}
       </div>
     );
   });
   return (
     <div>
-      <div className="margin-top-2">Regimen:</div>
+      <div className="mt-4 font-semibold text-base text-base-darker">
+        Regimen:
+      </div>
       {medRows}
     </div>
   );
@@ -68,8 +70,10 @@ function VitalsLabsSection({
 }) {
   return (
     <div>
-      <div className="margin-top-2">Relevant Labs and Vitals:</div>
-      <div className="margin-left-2">
+      <div className="mt-4 font-semibold text-base text-base-darker">
+        Relevant Labs and Vitals:
+      </div>
+      <div className="ml-6 space-y-3 text-base text-base-darker">
         {vitals.length > 0 || labs.length > 0 ? (
           <div>
             {[...labs, ...vitals].map((lab_or_vital) => (
@@ -79,9 +83,11 @@ function VitalsLabsSection({
                     key={`${lab_or_vital.name}_${value.date}_${index}`}
                   >{`${lab_or_vital.name.toLocaleUpperCase()}: ${value.value} (${new Date(value.date).toLocaleDateString()})`}</div>
                 ))}
-                <div className="margin-bottom-1">
+                <div className="mb-2">
                   {lab_or_vital.values.length > 1 && (
-                    <div className="margin-left-1">{`Trend: ${lab_or_vital.trend}`}</div>
+                    <div className="ml-4 text-base text-sm">
+                      {`Trend: ${lab_or_vital.trend}`}
+                    </div>
                   )}
                 </div>
               </div>
@@ -138,7 +144,7 @@ export function MedicationSummary({
   return (
     <div>
       {groups.map((group) => (
-        <div className="margin-bottom-4 problem-group" key={group.group_number}>
+        <div className="problem-group mb-6" key={group.group_number}>
           <Problem group={group} index={group.group_number} />
         </div>
       ))}

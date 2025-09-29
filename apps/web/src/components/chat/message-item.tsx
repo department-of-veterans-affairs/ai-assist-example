@@ -1,5 +1,5 @@
 import type { Message } from '@ai-sdk/react';
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 import { UserAvatar } from '../auth/user-avatar';
 import { MessageContent } from './message-content';
 import { MessageFeedback } from './message-feedback';
@@ -18,41 +18,38 @@ export function MessageItem({ message }: MessageItemProps) {
       .join('\n') || '';
 
   return (
-    <div className="display-flex flex-column">
+    <div className="my-3 flex">
       <div
-        className={clsx(
-          'display-flex margin-1',
-          isUser ? 'flex-justify-start' : 'flex-justify-end'
-        )}
+        className={cn('flex w-full', isUser ? 'justify-start' : 'justify-end')}
       >
-        <div className="display-flex max-width-tablet flex-column">
+        <div
+          className={cn(
+            'flex max-w-3xl flex-col gap-2',
+            !isUser && 'items-start'
+          )}
+        >
           <div
-            className={clsx(
-              'padding-y-2 padding-x-3 radius-md',
+            className={cn(
+              'rounded-md px-6 py-4 shadow-1',
               isUser
-                ? 'bg-primary-dark text-white'
-                : 'margin-left-6 max-width-75vw bg-base-lightest text-base-darker'
+                ? 'flex items-center gap-3 bg-primary-dark text-white'
+                : 'ml-12 max-w-[75vw] bg-base-lightest text-base-darker'
             )}
           >
-            <div
-              className={clsx(
-                'font-body-md',
-                isUser ? 'display-flex flex-align-center' : 'text-base-darkest'
-              )}
-            >
-              {isUser && <UserAvatar inline />}
+            {isUser && <UserAvatar inline />}
+            <div className="text-base leading-relaxed">
               <MessageContent content={messageContent} isUser={isUser} />
-              {!isUser && (
-                <MessageFeedback
-                  className="margin-top-1"
-                  messageId={message.id}
-                  onCopy={() => {
-                    navigator.clipboard.writeText(messageContent);
-                  }}
-                />
-              )}
             </div>
           </div>
+          {!isUser && (
+            <MessageFeedback
+              className="pt-2 pl-12"
+              messageId={message.id}
+              onCopy={() => {
+                navigator.clipboard.writeText(messageContent);
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

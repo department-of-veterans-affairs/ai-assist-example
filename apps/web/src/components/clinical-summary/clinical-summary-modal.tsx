@@ -1,18 +1,28 @@
 import {
-  Modal,
-  ModalFooter,
-  type ModalRef,
-  ModalToggleButton,
-} from '@department-of-veterans-affairs/clinical-design-system';
+  Copy,
+  Loader2,
+  Printer,
+  RefreshCw,
+  SquareArrowOutUpRight,
+} from 'lucide-react';
+import type { RefObject } from 'react';
 import { useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import regenerateIcon from '@/assets/icons/autorenew.svg';
-import copyIcon from '@/assets/icons/copy.svg';
-import LaunchIcon from '@/assets/icons/launch.svg';
-import printIcon from '@/assets/icons/print.svg';
 import { useMedicationSummary } from '@/components/clinical-summary/use-medication-summary';
 import { LoadingIndicator } from '@/components/loading-indicator';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { usePatientStore } from '@/stores';
+import type { Patient } from '@/stores/patient-store';
 import type { MedicationSummary as MedicationSummaryType } from '@/types/medication-summary';
 import { MedicationSummary } from './medication-summary';
 
@@ -23,10 +33,124 @@ type SummaryEnvelope = {
 
 type SummaryState = SummaryEnvelope | null;
 
-const MODAL_ID = 'clinical-summary-modal';
+function SummaryPatientHeader({
+  patient,
+  summary,
+}: {
+  patient: Patient | null;
+  summary: SummaryState;
+}) {
+  if (!patient) {
+    return null;
+  }
+
+  return (
+    <div className="border-base-light border-b px-6 py-6 text-base-dark text-sm print:hidden">
+      <div className="mb-1 font-semibold text-base-dark text-xs uppercase tracking-wide">
+        Patient
+      </div>
+      <div className="font-semibold text-base text-base-darker">
+        <span className="font-normal">
+          {patient.lastName?.toUpperCase()}, {patient.firstName} (ICN{' '}
+          {patient.icn}, DOB {patient.dob || 'Unknown'})
+        </span>
+      </div>
+      <div className="mt-2 text-base text-xs">
+        <span className="font-semibold text-base-dark uppercase tracking-wide">
+          Generated:
+        </span>{' '}
+        <span>
+          {summary?.timestamp ? summary.timestamp.toLocaleString() : ''}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+interface SummaryContentProps {
+  loading: boolean;
+  isError: boolean;
+  error: Error | null | undefined;
+  summary: SummaryState;
+  patient: Patient | null;
+  contentRef: RefObject<HTMLDivElement | null>;
+}
+
+function SummaryContent({
+  loading,
+  isError,
+  error,
+  summary,
+  patient,
+  contentRef,
+}: SummaryContentProps) {
+  if (loading) {
+    return (
+      <div className="screen-only py-10 text-center">
+        <LoadingIndicator />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="py-10 text-center text-base-darker">
+        <div className="screen-only">
+          {error instanceof Error
+            ? error.message
+            : 'Failed to retrieve patient summary.'}
+        </div>
+        <div className="print-only">
+          <p>
+            <strong>Error:</strong> Unable to generate medication summary at
+            this time.
+          </p>
+          <p>Please try again later or contact support.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!summary?.summary) {
+    return (
+      <div className="screen-only py-10 text-center text-base">
+        Click to load patient summary
+      </div>
+    );
+  }
+
+  return (
+    <div id="clinical-summary-print-content" ref={contentRef}>
+      {patient && (
+        <div className="print-only mb-6">
+          <h1 className="mb-2 font-semibold text-2xl text-base-darker">
+            Patient Medication Summary
+          </h1>
+          <div className="text-base">
+            Grouped by problem with relevant vitals and labs
+          </div>
+          <div className="mt-4 space-y-2 text-base">
+            <div>
+              <strong>Patient:</strong> {patient.lastName?.toUpperCase()},{' '}
+              {patient.firstName} (ICN {patient.icn}, DOB{' '}
+              {patient.dob || 'Unknown'})
+            </div>
+            <div>
+              <strong>Generated:</strong> {new Date().toLocaleString()}
+            </div>
+          </div>
+          <hr className="my-6" />
+        </div>
+      )}
+
+      <div className="text-base text-base-darker leading-relaxed">
+        <MedicationSummary summary={summary.summary} />
+      </div>
+    </div>
+  );
+}
 
 export function ClinicalSummaryModal() {
-  const modalRef = useRef<ModalRef>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [amOpen, setAmOpen] = useState(false);
   const patient = usePatientStore((state) => state.patient);
@@ -64,10 +188,6 @@ export function ClinicalSummaryModal() {
     contentRef,
   });
 
-  const handleModalOpen = () => {
-    setAmOpen(true);
-  };
-
   const regenerateReport = () => {
     refetch({ throwOnError: false }).catch((refetchError) => {
       console.error('Failed to regenerate summary:', refetchError);
@@ -77,96 +197,41 @@ export function ClinicalSummaryModal() {
   const loading = isLoading || isFetching;
 
   return (
-    <>
-      <button
-        className="position-relative margin-bottom-1 padding-y-1 padding-x-2 display-flex radius-md width-full flex-align-center cursor-pointer gap-2 border-1px border-primary bg-white text-left hover:bg-base-lightest"
-        onClick={() => {
-          handleModalOpen();
-          modalRef.current?.toggleModal?.(undefined, true);
-        }}
-        type="button"
-      >
-        <span className="line-height-3 flex-1 font-body-sm text-primary">
-          Generate Patient Medication-Problem Summary
-        </span>
-        <img
-          alt=""
-          aria-hidden="true"
-          className="width-3 height-3 flex-shrink-0"
-          src={LaunchIcon}
-        />
-      </button>
+    <Dialog onOpenChange={setAmOpen} open={amOpen}>
+      <DialogTrigger asChild>
+        <Button className="gap-2" size="sm" variant="outline">
+          <span className="flex-1">
+            Generate Patient Medication-Problem Summary
+          </span>
+          <SquareArrowOutUpRight
+            aria-hidden="true"
+            className="h-2 w-2 flex-shrink-0"
+          />
+        </Button>
+      </DialogTrigger>
 
       <style>{`
-        #${MODAL_ID} .usa-modal__main {
-          max-width: 70rem;
-        }
-
-        /* Print styles */
         @media print {
-          /* Hide UI elements */
-          .usa-modal__overlay,
-          .usa-modal__close,
-          .usa-modal__footer,
+          .dialog-overlay,
+          .dialog-close,
+          .dialog-footer,
           header,
           footer,
           nav,
           aside,
-          button {
+          button:not(.print-allowed) {
             display: none !important;
           }
 
-          /* Hide screen-only content */
-          .screen-only {
-            display: none !important;
-          }
-
-          /* Show print-only content */
-          .print-only {
-            display: block !important;
-            margin-bottom: 20px !important;
-          }
-
-          .print-only h1 {
-            font-size: 18pt !important;
-            margin: 0 0 10px 0 !important;
-            color: black !important;
-          }
-
-          .print-only hr {
-            border: 1px solid #000 !important;
-            margin: 20px 0 !important;
-          }
-
-          .print-only strong {
-            font-weight: bold !important;
-          }
-
-          .print-only p {
-            margin: 10px 0 !important;
-          }
-
-          /* Reset modal positioning for print */
-          #${MODAL_ID} {
+          .dialog-content {
             position: static !important;
             width: 100% !important;
             max-width: 100% !important;
-          }
-
-          #${MODAL_ID} .usa-modal__content {
-            position: static !important;
-            max-height: none !important;
-            padding: 0 !important;
             box-shadow: none !important;
             border: none !important;
-          }
-
-          #${MODAL_ID} .usa-modal__main {
-            max-width: 100% !important;
             padding: 0 !important;
           }
 
-          /* Style the print content */
           #clinical-summary-print-content {
             padding: 20px !important;
             font-size: 12pt !important;
@@ -178,187 +243,100 @@ export function ClinicalSummaryModal() {
             margin-bottom: 10px !important;
           }
 
-          /* Ensure overflow content is visible */
           .overflow-y-auto {
             overflow: visible !important;
             max-height: none !important;
           }
 
-          /* Page break control */
           .problem-group {
             page-break-inside: avoid;
           }
         }
       `}</style>
 
-      <Modal
-        aria-describedby="clinical-summary-description"
-        aria-labelledby="clinical-summary-heading"
-        id={MODAL_ID}
-        isLarge
-        ref={modalRef}
-      >
+      <DialogContent className="dialog-content flex h-[70vh] max-w-5xl flex-col overflow-hidden rounded-lg border border-base-light bg-white shadow-3">
+        <DialogHeader className="border-base-light border-b px-6 py-6">
+          <DialogTitle className="font-semibold text-base-darker text-xl">
+            Patient Medication Summary
+          </DialogTitle>
+          <DialogDescription className="text-base text-base">
+            Grouped by problem with relevant vitals and labs.
+          </DialogDescription>
+        </DialogHeader>
+
+        <SummaryPatientHeader patient={patient} summary={summary} />
+
         <div
-          className="display-flex height-full maxh flex-column"
-          style={{ maxHeight: '70vh' }}
+          className="flex-1 overflow-y-auto px-6 py-4"
+          id="clinical-summary-description"
         >
-          <div className="padding-3 screen-only border-base-light border-bottom-1px">
-            <h2
-              className="margin-0 font-heading-xl"
-              id="clinical-summary-heading"
-            >
-              Patient Medication Summary
-            </h2>
-            <div>Grouped by Problem with relevant Vitals and Labs</div>
-          </div>
-
-          {patient && (
-            <div className="padding-3 screen-only border-base-light border-bottom-1px">
-              <div className="margin-bottom-05">
-                <strong className="font-body-md">Patient:</strong>{' '}
-                <span className="font-body-md">
-                  {patient.lastName?.toUpperCase()}, {patient.firstName} (ICN{' '}
-                  {patient.icn}, DOB {patient.dob || 'Unknown'})
-                </span>
-              </div>
-              <span className="text-bold">
-                Generated:{' '}
-                {summary?.timestamp ? summary.timestamp.toLocaleString() : ''}
-              </span>
-            </div>
-          )}
-
-          <div className="flex-1 overflow-y-auto">
-            <div className="padding-3" id="clinical-summary-description">
-              {/* Wrapper for print content */}
-              <div id="clinical-summary-print-content" ref={contentRef}>
-                {/* Print header - always visible during print if patient data exists */}
-                {patient && (
-                  <div className="print-only">
-                    <h1>Patient Medication Summary</h1>
-                    <div>Grouped by Problem with relevant Vitals and Labs</div>
-                    <div className="margin-top-2">
-                      <div>
-                        <strong>Patient:</strong>{' '}
-                        {patient.lastName?.toUpperCase()}, {patient.firstName}{' '}
-                        (ICN {patient.icn}, DOB {patient.dob || 'Unknown'})
-                      </div>
-                      <div>
-                        <strong>Generated:</strong>{' '}
-                        {new Date().toLocaleString()}
-                      </div>
-                    </div>
-                    <hr className="margin-y-3" />
-                  </div>
-                )}
-
-                {loading && (
-                  <div className="padding-5 screen-only text-center">
-                    <LoadingIndicator />
-                  </div>
-                )}
-
-                {!loading && isError && (
-                  <div className="padding-5 text-center text-secondary-dark">
-                    <div className="screen-only">
-                      {error instanceof Error
-                        ? error.message
-                        : 'Failed to retrieve patient summary.'}
-                    </div>
-                    <div className="print-only">
-                      <p>
-                        <strong>Error:</strong> Unable to generate medication
-                        summary at this time.
-                      </p>
-                      <p>
-                        Please try again later or contact support if the issue
-                        persists.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {!loading && summary?.summary && (
-                  <div className="line-height-body-3 font-body-md text-base-darker">
-                    <MedicationSummary summary={summary.summary} />
-                  </div>
-                )}
-
-                {!(loading || isError || summary?.summary) && (
-                  <div className="padding-5 screen-only text-center text-base">
-                    Click to load patient summary
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <ModalFooter>
-            <div className="width-full display-flex flex-align-center flex-justify-space-between">
-              <div className="display-flex flex-align-center gap-2">
-                <ModalToggleButton
-                  className="usa-button"
-                  closer
-                  modalRef={modalRef}
-                  onClick={() => setAmOpen(false)}
-                >
-                  Close
-                </ModalToggleButton>
-
-                <button
-                  aria-label="Regenerate Report"
-                  className="padding-05 cursor-pointer border-0 bg-transparent"
-                  onClick={regenerateReport}
-                  type="button"
-                >
-                  <img
-                    alt=""
-                    aria-hidden="true"
-                    height="20"
-                    src={regenerateIcon}
-                    width="20"
-                  />
-                </button>
-
-                <button
-                  aria-label="Copy to clipboard"
-                  className="padding-05 cursor-pointer border-0 bg-transparent"
-                  disabled={!summary}
-                  onClick={handleCopy}
-                  type="button"
-                >
-                  <img
-                    alt=""
-                    aria-hidden="true"
-                    height="20"
-                    src={copyIcon}
-                    width="20"
-                  />
-                </button>
-
-                <button
-                  aria-label="Print"
-                  className="padding-05 cursor-pointer border-0 bg-transparent"
-                  onClick={handlePrint}
-                  type="button"
-                >
-                  <img
-                    alt=""
-                    aria-hidden="true"
-                    height="20"
-                    src={printIcon}
-                    width="20"
-                  />
-                </button>
-              </div>
-
-              <span className="font-body-xs text-base">
-                AI-generated content may be incorrect
-              </span>
-            </div>
-          </ModalFooter>
+          <SummaryContent
+            contentRef={contentRef}
+            error={error}
+            isError={isError}
+            loading={loading}
+            patient={patient}
+            summary={summary}
+          />
         </div>
-      </Modal>
-    </>
+
+        <DialogFooter className="dialog-footer border-base-light border-t bg-base-lightest/40 px-6 py-4">
+          <div className="flex w-full items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <DialogClose asChild>
+                <Button onClick={() => setAmOpen(false)} size="sm">
+                  Close
+                </Button>
+              </DialogClose>
+
+              <Button
+                aria-label="Regenerate report"
+                className="h-9 w-9 rounded-md text-base-dark hover:bg-primary-lighter hover:text-primary"
+                onClick={regenerateReport}
+                size="icon"
+                type="button"
+                variant="ghost"
+              >
+                <RefreshCw aria-hidden="true" className="h-4 w-4" />
+                <span className="sr-only">Regenerate</span>
+              </Button>
+
+              <Button
+                aria-label="Copy summary"
+                className="h-9 w-9 rounded-md text-base-dark hover:bg-primary-lighter hover:text-primary"
+                disabled={!summary}
+                onClick={handleCopy}
+                size="icon"
+                type="button"
+                variant="ghost"
+              >
+                <Copy aria-hidden="true" className="h-4 w-4" />
+                <span className="sr-only">Copy summary</span>
+              </Button>
+
+              <Button
+                aria-label="Print summary"
+                className="print-allowed h-9 w-9 rounded-md text-base-dark hover:bg-primary-lighter hover:text-primary"
+                onClick={handlePrint}
+                size="icon"
+                type="button"
+                variant="ghost"
+              >
+                <Printer aria-hidden="true" className="h-4 w-4" />
+                <span className="sr-only">Print summary</span>
+              </Button>
+
+              {loading && (
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              )}
+            </div>
+
+            <span className="text-base text-xs uppercase tracking-wide">
+              AI-generated content may be incorrect
+            </span>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

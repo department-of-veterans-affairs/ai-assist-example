@@ -1,9 +1,8 @@
-import {
-  Alert,
-  Button,
-  TextInput,
-} from '@department-of-veterans-affairs/clinical-design-system';
 import { useState } from 'react';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { usePatientStore } from '@/stores/patient-store';
 
 export function PatientSelector() {
@@ -33,38 +32,32 @@ export function PatientSelector() {
   };
 
   return (
-    <div className="margin-bottom-4 padding-3 border-1px border-base-lighter bg-base-lightest">
+    <div className="mb-6 rounded-lg border border-base-lighter bg-base-lightest p-6 shadow-1">
       {status === 'success' && (
-        <Alert className="margin-bottom-2" slim type="success">
+        <Alert className="mb-4" slim variant="success">
           Patient context updated successfully
         </Alert>
       )}
 
       {status === 'error' && (
-        <Alert className="margin-bottom-2" slim type="error">
+        <Alert className="mb-4" slim variant="error">
           Unable to update patient context.
         </Alert>
       )}
 
-      <h3 className="margin-top-0 margin-bottom-2 font-body-lg text-bold">
+      <h3 className="mb-2 font-semibold text-base-darker text-lg">
         Update Patient Context
       </h3>
 
-      <p className="margin-bottom-2 font-body-sm text-base">
+      <p className="mb-4 text-base text-sm">
         Use this to update the patient context across all CDS-enabled
-        applications
+        applications.
       </p>
 
-      <div className="display-flex flex-align-end gap-2">
-        <div className="flex-1">
-          <label
-            className="usa-label font-body-xs text-bold"
-            htmlFor="patient-icn"
-          >
-            Patient ICN:
-          </label>
-          <TextInput
-            className="maxw-none"
+      <div className="flex items-end gap-3">
+        <div className="flex-1 space-y-2">
+          <Label htmlFor="patient-icn">Patient ICN</Label>
+          <Input
             id="patient-icn"
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               setStatus('idle');
@@ -75,7 +68,7 @@ export function PatientSelector() {
           />
         </div>
         <Button
-          className="margin-bottom-0"
+          className="mb-1"
           disabled={!(icn.trim() && patient)}
           onClick={handleUpdatePatient}
         >

@@ -1,10 +1,10 @@
-import { Button } from '@department-of-veterans-affairs/clinical-design-system';
-import clsx from 'clsx';
 import type { PropsWithChildren } from 'react';
 import AttachmentsIcon from '@/assets/icons/attachments.svg';
 import Close from '@/assets/icons/close.svg';
 import FirstPage from '@/assets/icons/first_page.svg';
 import HistoryIcon from '@/assets/icons/history.svg';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useLayoutStore } from '@/stores/layout-store';
 
 type SidebarProps = PropsWithChildren;
@@ -15,53 +15,58 @@ export function Sidebar({ children }: SidebarProps) {
 
   return (
     <aside
-      className={clsx(
-        'display-flex flex-column flex-shrink-0 border-base-lighter border-left bg-white transition-all',
-        leftCollapsed ? 'width-7' : 'width-mobile-lg'
+      className={cn(
+        'flex shrink-0 flex-col border-base-lighter border-l bg-white transition-all duration-300',
+        leftCollapsed ? 'w-14 items-center' : 'w-[30rem]'
       )}
     >
       {/* Header with toggle */}
       {!leftCollapsed && (
-        <div className="padding-top-3 padding-left-2 display-flex flex-align-center flex-justify-space-between">
+        <div className="flex items-center justify-end">
           <Button
             aria-label={leftCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className={clsx(
-              'padding-1 display-flex flex-align-center text-base-dark hover:text-primary'
-            )}
+            className="h-9 w-9 rounded-full text-base-dark hover:bg-primary-lighter hover:text-primary"
             onClick={toggleLeftSidebar}
+            size="icon"
             type="button"
-            unstyled
+            variant="ghost"
           >
-            <img alt="Close" className="width-4 height-4" src={Close} />
+            <img alt="Close" className="h-4 w-4" src={Close} />
           </Button>
         </div>
       )}
 
       {/* Collapsed state - show only three icons */}
       {leftCollapsed && (
-        <div className="display-flex padding-y-3 flex-align-center flex-column">
-          <div className="margin-bottom-2">
+        <div className="flex flex-col items-center">
+          <div>
             <Button
               aria-label="Expand sidebar"
-              className="padding-1 hover:opacity-70"
+              className="text-base-dark hover:text-primary"
               onClick={toggleLeftSidebar}
+              size="icon"
               type="button"
-              unstyled
+              variant="ghost"
             >
-              <img alt="Expand" className="width-4 height-4" src={FirstPage} />
+              <img
+                alt="Expand"
+                className="h-4 w-4 text-primary"
+                src={FirstPage}
+              />
             </Button>
           </div>
-          <div className="margin-bottom-2">
+          <div>
             <Button
               aria-label="Attachments"
-              className="padding-1 hover:opacity-70"
+              className="text-base-dark hover:text-primary"
               onClick={toggleLeftSidebar}
+              size="icon"
               type="button"
-              unstyled
+              variant="ghost"
             >
               <img
                 alt="Attachments"
-                className="width-4 height-4"
+                className="h-4 w-4"
                 src={AttachmentsIcon}
               />
             </Button>
@@ -69,16 +74,13 @@ export function Sidebar({ children }: SidebarProps) {
           <div>
             <Button
               aria-label="History"
-              className="padding-1 hover:opacity-70"
+              className="text-base-dark hover:text-primary"
               onClick={toggleLeftSidebar}
+              size="icon"
               type="button"
-              unstyled
+              variant="ghost"
             >
-              <img
-                alt="History"
-                className="width-4 height-4"
-                src={HistoryIcon}
-              />
+              <img alt="History" className="h-4 w-4" src={HistoryIcon} />
             </Button>
           </div>
         </div>

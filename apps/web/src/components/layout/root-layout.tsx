@@ -8,9 +8,9 @@ type RootLayoutProps = PropsWithChildren;
 
 export function RootLayout({ children }: RootLayoutProps) {
   return (
-    <div className="display-flex height-full flex-column overflow-hidden">
+    <div className="flex h-full flex-col overflow-hidden bg-background">
       <Header />
-      <div className="display-flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         <main className="flex-1 overflow-y-auto bg-white">{children}</main>
 
         {/* Sidebar */}

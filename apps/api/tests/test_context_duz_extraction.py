@@ -30,7 +30,7 @@ def test_duz_extraction_for_matching_station():
 
     # Create patient context with station TEST002
     patient = PatientContext(
-        icn="TEST123456V123456",
+        icn="1000220000V123456",
         station="TEST002",
     )
 
@@ -68,7 +68,7 @@ def test_duz_extraction_for_different_station():
 
     # Create patient context with station TEST001
     patient = PatientContext(
-        icn="TEST123456V123456",
+        icn="1000220000V123456",
         station="TEST001",
     )
 
@@ -105,7 +105,7 @@ def test_duz_extraction_no_matching_station():
 
     # Create patient context with station user doesn't have
     patient = PatientContext(
-        icn="TEST123456V123456",
+        icn="1000220000V123456",
         station="TEST999",
     )
 

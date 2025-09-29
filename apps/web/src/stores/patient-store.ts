@@ -1,11 +1,12 @@
-import type { Header as VACDSHeader } from '@department-of-veterans-affairs/clinical-design-system';
-import type { ComponentProps } from 'react';
 import { create } from 'zustand';
 
-// Type was not exported from VACDSHeader, so we need to define it here
-export type PatientContextProps = NonNullable<
-  ComponentProps<typeof VACDSHeader>['patientContextProps']
->;
+export interface PatientContextProps {
+  firstName: string;
+  lastName: string;
+  description: string;
+  keyConditions: string[];
+  ssn: string;
+}
 
 export interface Patient extends PatientContextProps {
   id?: string; // FHIR resource ID
@@ -22,11 +23,11 @@ export interface Patient extends PatientContextProps {
 // Hardcoded test patient: TEST, PATIENT
 const TEST_PATIENT: Patient = {
   id: 'TEST001', // FHIR resource ID
-  icn: 'TEST123456V123456', // Test ICN (primary identifier)
+  icn: '1000220000V123456', // Test ICN (primary identifier)
   dfn: 'TEST001', // DFN for backward compatibility
   station: '500', // Default station for development
-  firstName: 'TEST',
-  lastName: 'PATIENT',
+  firstName: 'John',
+  lastName: 'Doe',
   description: 'Test Patient for Development',
   keyConditions: ['Test Condition 1', 'Test Condition 2', 'Test Condition 3'],
   ssn: '000-00-0000',

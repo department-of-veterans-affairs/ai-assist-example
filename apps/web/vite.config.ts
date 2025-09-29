@@ -1,5 +1,6 @@
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -16,7 +17,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base,
-    plugins: [react(), tsconfigPaths()],
+    plugins: [react(), tailwindcss(), tsconfigPaths()],
     server: {
       port: Number(env.VITE_DEV_SERVER_PORT) || 3000,
       proxy: {
@@ -37,15 +38,7 @@ export default defineConfig(({ mode }) => {
           */
         },
       },
-      chunkSizeWarningLimit: 2100, // Increase to 2.1MB to accommodate VACDS
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            // Split VACDS into its own chunk
-            vacds: ['@department-of-veterans-affairs/clinical-design-system'],
-          },
-        },
-      },
+      chunkSizeWarningLimit: 2100,
     },
   };
 });
