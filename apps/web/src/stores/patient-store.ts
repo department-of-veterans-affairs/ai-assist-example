@@ -23,7 +23,7 @@ export interface Patient extends PatientContextProps {
 // Hardcoded test patient: TEST, PATIENT
 const TEST_PATIENT: Patient = {
   id: 'TEST001', // FHIR resource ID
-  icn: '1000220000V123456', // Test ICN (primary identifier)
+  icn: '1000000219V596118', // Test ICN (primary identifier)
   dfn: 'TEST001', // DFN for backward compatibility
   station: '500', // Default station for development
   firstName: 'John',
