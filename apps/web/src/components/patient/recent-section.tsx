@@ -1,11 +1,13 @@
 import {
-  Button,
-  Icon,
-} from '@department-of-veterans-affairs/clinical-design-system';
+  ChevronDown,
+  ChevronUp,
+  History,
+  Repeat,
+  Star,
+  StarOff,
+} from 'lucide-react';
 import { useState } from 'react';
-import HistoryIcon from '@/assets/icons/history.svg';
-import SwapIcon from '@/assets/icons/swap.svg';
-import VertIcon from '@/assets/icons/vert.svg';
+import { Button } from '@/components/ui/button';
 
 // Mock data for past conversations
 const mockConversations = [
@@ -42,73 +44,72 @@ export function RecentSection() {
   };
 
   return (
-    <div className="padding-2 width-full border-base-lighter">
-      <div className="display-flex width-full flex-align-center">
-        <div className="display-flex flex-1 flex-align-center gap-2">
-          <img
-            alt="Past Conversations icon"
-            className="width-4 height-4 flex-shrink-0"
-            src={HistoryIcon}
-          />
-          <span className="padding-left-1 font-body-lg text-bold">
+    <div className="w-full border border-base-lighter bg-white p-4 shadow-1">
+      <div className="flex w-full items-center">
+        <div className="flex flex-1 items-center gap-2">
+          <History aria-hidden="true" className="h-4 w-4 text-primary" />
+          <span className="pl-2 font-semibold text-base-darker text-lg">
             Past Conversations
           </span>
         </div>
-        <Icon
-          className="margin-left-auto cursor-pointer text-base-dark transition-transform"
-          onClick={() => setExpanded(!expanded)}
-          size={3}
-          type={expanded ? 'ExpandLess' : 'ExpandMore'}
-        />
+        <button
+          aria-label={
+            expanded
+              ? 'Collapse past conversations'
+              : 'Expand past conversations'
+          }
+          className="ml-auto rounded-full p-1 text-base-dark transition hover:bg-base-lightest"
+          onClick={() => setExpanded((prev) => !prev)}
+          type="button"
+        >
+          {expanded ? (
+            <ChevronUp className="h-5 w-5" />
+          ) : (
+            <ChevronDown className="h-5 w-5" />
+          )}
+        </button>
       </div>
 
       {expanded && (
-        <div className="padding-left-3">
+        <div className="mt-4 space-y-3 pl-4">
           {conversations.map((conversation) => (
             <div
-              className="padding-2 margin-bottom-1 display-flex radius-md flex-align-center flex-justify-space-between cursor-pointer border-base-lighter border-bottom hover:bg-base-lighter"
+              className="flex cursor-pointer items-center justify-between rounded-md border border-base-lightest bg-base-lightest/40 px-4 py-3 transition hover:bg-base-lightest"
               key={conversation.id}
             >
-              <div className="minw-0 flex-1">
-                <div className="display-flex flex-align-center gap-1 font-body-sm text-no-wrap text-primary text-underline">
-                  <img
-                    alt="Swap Icon"
-                    className="width-2 height-2 flex-shrink-0"
-                    src={SwapIcon}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 text-primary text-sm">
+                  <Repeat
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5 flex-shrink-0"
                   />
-                  <span className="text-truncate">
+                  <span className="truncate font-semibold underline">
                     Switch to {conversation.name}
                   </span>
                 </div>
-                <div className="margin-left-2 font-body-xs text-base">
+                <div className="pl-4 text-base text-xs">
                   Created: {conversation.time}
                 </div>
               </div>
-              <div className="display-flex flex-align-center">
-                {conversation.isFavorite ? (
-                  <Button
-                    aria-label="Remove from favorites"
-                    className="padding-05"
-                    onClick={() => toggleFavorite(conversation.id)}
-                    type="button"
-                    unstyled
-                  >
-                    <Icon size={3} type="Favorite" />
-                  </Button>
-                ) : (
-                  <Button
-                    aria-label="More options"
-                    className="padding-05 text-base hover:text-primary"
-                    type="button"
-                    unstyled
-                  >
-                    <img
-                      alt="More options"
-                      className="width-3 height-3"
-                      src={VertIcon}
+              <div className="flex items-center">
+                <Button
+                  aria-label={
+                    conversation.isFavorite ? 'Remove favorite' : 'Add favorite'
+                  }
+                  onClick={() => toggleFavorite(conversation.id)}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  {conversation.isFavorite ? (
+                    <Star
+                      aria-hidden="true"
+                      className="h-4 w-4 fill-primary text-primary"
                     />
-                  </Button>
-                )}
+                  ) : (
+                    <StarOff aria-hidden="true" className="h-4 w-4 text-base" />
+                  )}
+                </Button>
               </div>
             </div>
           ))}

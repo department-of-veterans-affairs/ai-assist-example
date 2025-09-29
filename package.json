@@ -29,7 +29,7 @@
     "lint-staged": "^16.1.2",
     "ultracite": "5.1.1"
   },
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.17.1",
   "workspaces": [
     "apps/*"
   ],
@@ -48,6 +48,9 @@
       "prismjs": "^1.30.0",
       "jsondiffpatch": "^0.7.2",
       "vite": "^7.0.7"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "@tailwindcss/oxide"
+    ]
   }
 }

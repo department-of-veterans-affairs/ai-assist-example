@@ -1,8 +1,6 @@
-import {
-  Button,
-  Icon,
-} from '@department-of-veterans-affairs/clinical-design-system';
-import clsx from 'clsx';
+import { Copy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface MessageFeedbackProps {
   messageId: string;
@@ -22,24 +20,15 @@ export function MessageFeedback({
   };
 
   return (
-    <div
-      className={clsx(
-        'display-flex padding-top-2 flex-align-center flex-justify-start',
-        className
-      )}
-    >
-      <span className="margin-right-1">
-        <Button
-          aria-label="Copy message"
-          className="padding-1 text-base-dark"
-          onClick={handleCopy}
-          unstyled
-        >
-          <span className="padding-1 radius-md bg-primary-lighter">
-            <Icon size={3} type="ContentCopy" />
-          </span>
-        </Button>
-      </span>
+    <div className={cn('flex items-center justify-start pt-2', className)}>
+      <Button
+        aria-label="Copy message"
+        onClick={handleCopy}
+        size="icon"
+        variant="ghost"
+      >
+        <Copy className="size-4" />
+      </Button>
     </div>
   );
 }

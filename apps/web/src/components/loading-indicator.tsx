@@ -1,15 +1,15 @@
 export function LoadingIndicator() {
   return (
-    <div className="display-flex margin-top-1 margin-bottom-1 padding-y-3 padding-x-3 flex-align-center border-base-light border-left-2px">
-      <div className="position-relative width-5 height-5">
+    <div className="flex items-center border-base-light border-l-4 px-6 py-6 text-base-darker">
+      <div className="relative h-10 w-10">
         {/* Background circle */}
-        <div className="position-absolute width-full height-full radius-pill top-0 left-0 border-2px border-base-lightest" />
+        <div className="absolute inset-0 rounded-full border-2 border-base-lightest" />
 
         {/* Spinning progress circle - using CSS animation */}
-        <div className="position-absolute width-full height-full top-0 left-0">
+        <div className="absolute inset-0">
           <svg
             aria-hidden="true"
-            className="width-full height-full animate-spin"
+            className="h-full w-full animate-spin"
             viewBox="0 0 40 40"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -28,7 +28,7 @@ export function LoadingIndicator() {
         </div>
       </div>
 
-      <span className="margin-left-3 font-body-sm text-base-dark">
+      <span className="ml-6 font-medium text-base-dark text-sm">
         Working on summary...
       </span>
     </div>

@@ -1,8 +1,8 @@
 export function LoadingIndicator() {
   return (
-    <div className="display-flex flex-justify-start">
-      <div className="padding-2 radius-md bg-base-lightest">
-        <span className="font-body-sm text-base">Thinking...</span>
+    <div className="flex justify-start">
+      <div className="rounded-md bg-base-lightest px-3 py-2 shadow-1">
+        <span className="font-medium text-base-dark text-sm">Thinking...</span>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import type { Message } from '@ai-sdk/react';
-import { Alert } from '@department-of-veterans-affairs/clinical-design-system';
-import clsx from 'clsx';
+import { Alert } from '@/components/ui/alert';
 import { useChatScroll } from '@/hooks/use-chat-scroll';
+import { cn } from '@/lib/utils';
 import { LoadingIndicator } from './loading-indicator';
 import { MessageItem } from './message-item';
 
@@ -21,8 +21,8 @@ export function MessageThread({
   if (error) {
     return (
       <div className="flex-1 overflow-y-auto">
-        <div className="max-width-desktop margin-x-auto padding-3">
-          <Alert className="margin-bottom-3" type="error">
+        <div className="mx-auto max-w-5xl p-6">
+          <Alert className="mb-6" variant="error">
             An error occurred: {error.message}
           </Alert>
         </div>
@@ -32,19 +32,16 @@ export function MessageThread({
 
   return (
     <div className="flex-1 overflow-y-auto" ref={scrollRef}>
-      <div className="max-width-desktop margin-x-auto padding-3">
+      <div className="mx-auto max-w-5xl p-6">
         {messages.length > 0 && (
-          <div className="display-flex flex-column">
+          <div className="flex flex-col">
             {messages.map((message, index) => (
-              <div
-                className={clsx(index > 0 && 'margin-top-2')}
-                key={message.id}
-              >
+              <div className={cn(index > 0 && 'mt-4')} key={message.id}>
                 <MessageItem message={message} />
               </div>
             ))}
             {isLoading && (
-              <div className="margin-top-2">
+              <div className="mt-4">
                 <LoadingIndicator />
               </div>
             )}

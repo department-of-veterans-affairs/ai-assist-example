@@ -1,64 +1,193 @@
-/*
- * VA Clinical Design System Integration
- *
- * Pure CSS approach - no SCSS needed!
- * 1. VACDS React components (imported directly - includes styles)
- * 2. VACDS utility classes for colors, spacing, typography
- * 3. CSS modules for custom layouts (no arbitrary colors)
- * 4. Direct CSS imports (no Sass required)
- *
- * Color Guidelines:
- * - Use VACDS color utilities: bg-*, text-*, border-*
- * - No arbitrary hex values or custom colors
- * - Follow VA design system for accessibility compliance
- */
+@import "tailwindcss";
 
-/* VACDS Core Styles - Use clinical-design-system for utility classes */
-@import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/utility-classes.css";
-@import "@department-of-veterans-affairs/clinical-design-system/dist/core/css/typography.css";
+/* biome-ignore lint/nursery/noUnknownAtRule: Tailwind CSS @theme directive */
+@theme {
+  /* VACDS Font Families */
+  --font-family-sans:
+    "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
-/* Reset default browser margins */
-body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
+  /* VACDS Font Sizes */
+  --font-size-xs: 0.8125rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.5rem;
+
+  /* VACDS Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* VACDS Spacing Scale matches Tailwind defaults (4px grid) */
+  --spacing-0: 0;
+  --spacing-px: 1px;
+  --spacing-0\.5: 0.125rem; /* 2px */
+  --spacing-1: 0.25rem; /* 4px */
+  --spacing-1\.5: 0.375rem; /* 6px */
+  --spacing-2: 0.5rem; /* 8px */
+  --spacing-2\.5: 0.625rem; /* 10px */
+  --spacing-3: 0.75rem; /* 12px */
+  --spacing-3\.5: 0.875rem; /* 14px */
+  --spacing-4: 1rem; /* 16px */
+  --spacing-5: 1.25rem; /* 20px */
+  --spacing-6: 1.5rem; /* 24px */
+  --spacing-7: 1.75rem; /* 28px */
+  --spacing-8: 2rem; /* 32px */
+  --spacing-9: 2.25rem; /* 36px */
+  --spacing-10: 2.5rem; /* 40px */
+  --spacing-11: 2.75rem; /* 44px */
+  --spacing-12: 3rem; /* 48px */
+  --spacing-14: 3.5rem; /* 56px */
+  --spacing-16: 4rem; /* 64px */
+  --spacing-20: 5rem; /* 80px */
+  --spacing-24: 6rem; /* 96px */
+  --spacing-32: 8rem; /* 128px */
+
+  /* VACDS Base Colors */
+  --color-base-lightest: #f0f0f0;
+  --color-base-lighter: #dfe1e2;
+  --color-base-light: #a9aeb1;
+  --color-base: #71767a;
+  --color-base-dark: #565c65;
+  --color-base-darker: #3d4551;
+  --color-base-darkest: #1b1b1b;
+
+  /* VACDS Primary Colors */
+  --color-primary-lighter: #d9e8f6;
+  --color-primary-light: #73b3e7;
+  --color-primary: #005ea2;
+  --color-primary-vivid: #0050d8;
+  --color-primary-dark: #1a4480;
+  --color-primary-darker: #162e51;
+
+  /* VACDS Secondary Colors */
+  --color-secondary-lighter: #f8dfe2;
+  --color-secondary-light: #f2938c;
+  --color-secondary: #d83933;
+  --color-secondary-vivid: #e41d3d;
+  --color-secondary-dark: #b50909;
+  --color-secondary-darker: #8b0a03;
+
+  /* VACDS Info Colors */
+  --color-info-lighter: #e1f3f8;
+  --color-info-light: #97d4ea;
+  --color-info: #00bde3;
+  --color-info-dark: #28a0cb;
+  --color-info-darker: #07648d;
+
+  /* VACDS Success Colors */
+  --color-success-lighter: #ecf3ec;
+  --color-success-light: #70e17b;
+  --color-success: #00a91c;
+  --color-success-dark: #008817;
+  --color-success-darker: #216e1f;
+
+  /* VACDS Warning Colors */
+  --color-warning-lighter: #faf3d1;
+  --color-warning-light: #fee685;
+  --color-warning: #ffbe2e;
+  --color-warning-dark: #e5a000;
+  --color-warning-darker: #936f38;
+
+  /* VACDS Error Colors */
+  --color-error-lighter: #f4e3db;
+  --color-error-light: #f39268;
+  --color-error: #d54309;
+  --color-error-dark: #b50909;
+  --color-error-darker: #6f3331;
+
+  /* VACDS Disabled Colors */
+  --color-disabled-light: #e6e6e6;
+  --color-disabled: #c9c9c9;
+  --color-disabled-dark: #adadad;
+
+  /* VACDS Emergency Colors */
+  --color-emergency: #9c3d10;
+  --color-emergency-dark: #332d29;
+
+  /* VACDS Max Width Tokens */
+  --max-width-desktop: 64rem;
+  --max-width-5xl: 80rem;
+
+  /* VACDS Shadows */
+  --shadow-sm: 0px 1px 4px 0px rgba(0, 0, 0, 0.1);
+  --shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0px 4px 8px 0px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0px 8px 16px 0px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0px 12px 24px 0px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0px 16px 32px 0px rgba(0, 0, 0, 0.1);
+
+  /* VACDS Border Radius */
+  --radius-sm: 2px;
+  --radius: 4px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
 }
 
-html,
-body,
-#root {
-  height: 100%;
-}
-
-/* More custom global styles can go here (spacing/layout only) */
-
-/* Animation for loading spinner */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
+@layer base {
+  * {
+    border-color: var(--color-base-lighter);
   }
-  to {
-    transform: rotate(360deg);
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--color-base-lightest);
+    color: var(--color-base-darker);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button {
+    font-family: inherit;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+    font-size: inherit;
   }
 }
 
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
+@layer utilities {
+  .screen-only {
+    display: block;
+  }
 
-/* Print utilities */
-.print-only {
-  display: none;
+  .print-only {
+    display: none;
+  }
 }
 
 @media print {
   .print-only {
-    /* biome-ignore lint/nursery/noImportantStyles: Required to override screen styles for print */
-    display: block !important;
+    display: block;
   }
 
   .screen-only {
-    /* biome-ignore lint/nursery/noImportantStyles: Required to hide screen content in print */
-    display: none !important;
+    display: none;
   }
 }

@@ -2,17 +2,17 @@ import FooterLogo from '../../assets/icons/va-footer-logo.svg';
 
 export function Footer() {
   return (
-    <footer className="padding-3 width-full bg-primary-darker">
-      <div className="display-flex width-full flex-align-center">
-        <div className="display-flex flex-align-center">
+    <footer className="w-full bg-primary-darker px-4 py-4 text-white">
+      <div className="flex w-full items-center">
+        <div className="flex items-center">
           <img
             alt="U.S. Department of Veterans Affairs"
-            className="height-6"
+            className="h-8"
             src={FooterLogo}
           />
         </div>
         <a
-          className="margin-left-auto font-body-sm text-decoration-none text-white hover:text-underline"
+          className="ml-auto font-medium text-sm hover:underline"
           href="https://dvagov.sharepoint.com/sites/oitchiefaiofficerteam/SitePages/AI-Policy.aspx"
           rel="noopener noreferrer"
           target="_blank"
