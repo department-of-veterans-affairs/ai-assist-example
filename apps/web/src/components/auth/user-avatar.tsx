@@ -1,50 +1,62 @@
-import { clsx } from 'clsx';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { getUserInitials } from '@/lib/user';
+import { cn } from '@/lib/utils';
 
 interface UserAvatarProps {
   inline?: boolean;
 }
 
+const baseBadge =
+  'flex items-center justify-center font-semibold uppercase leading-none tracking-wide';
+
 export function UserAvatar({ inline = false }: UserAvatarProps) {
   const { data: user, isLoading, error } = useCurrentUser();
 
-  // Handle loading state
+  const initials = getUserInitials(user?.user_info);
+
+  const renderBadge = (className: string, content: string) => (
+    <div aria-hidden="true" className={cn(baseBadge, className)}>
+      {content}
+    </div>
+  );
+
+  if (inline) {
+    const inlineClasses =
+      'mr-2 size-8 rounded-full bg-white text-xs text-primary-darker';
+
+    if (isLoading) {
+      return renderBadge(inlineClasses, '...');
+    }
+
+    if (error || !user?.authenticated || !user.user_info) {
+      return renderBadge(inlineClasses, 'VU');
+    }
+
+    return renderBadge(inlineClasses, initials);
+  }
+
   if (isLoading) {
-    return (
-      <div className="width-5 height-5 min-width-5 min-height-5 radius-pill display-flex flex-align-center flex-justify-center bg-gray-30">
-        <span className="font-body-sm text-bold text-gray-70">...</span>
-      </div>
+    return renderBadge(
+      'h-12 w-12 rounded-full bg-base-lighter text-base-dark',
+      '...'
     );
   }
 
-  // Handle error or unauthenticated state
   if (error || !user?.authenticated || !user.user_info) {
-    return (
-      <div className="width-5 height-5 min-width-5 min-height-5 radius-pill display-flex flex-align-center flex-justify-center bg-gray-30">
-        <span className="font-body-sm text-bold text-gray-70">VU</span>
-      </div>
+    return renderBadge(
+      'h-12 w-12 rounded-full bg-base-lighter text-base-dark',
+      'VU'
     );
   }
-
-  // Generate user initials
-  const initials =
-    user.user_info.first_name?.[0] && user.user_info.last_name?.[0]
-      ? `${user.user_info.first_name[0]}${user.user_info.last_name[0]}`
-      : 'VU';
 
   return (
     <button
       aria-label={`User menu for ${user.user_info.email}`}
-      className={clsx(
-        'radius-pill flex-align-center flex-justify-center cursor-pointer border-0 bg-white font-body-sm text-primary-darker hover:opacity-90',
-        inline
-          ? 'display-inline-flex min-height-4 min-width-4 width-4 height-4 margin-right-1'
-          : 'display-flex width-5 height-5 min-width-5 min-height-5 text-bold'
+      className={cn(
+        baseBadge,
+        'h-12 w-12 rounded-full border border-base-light bg-white text-primary transition hover:bg-primary hover:text-white'
       )}
       onClick={() => {
-        if (inline) {
-          return;
-        }
         // TODO: Implement user menu dropdown
       }}
       type="button"

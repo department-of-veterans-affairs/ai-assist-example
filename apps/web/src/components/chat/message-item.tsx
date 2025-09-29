@@ -1,5 +1,5 @@
 import type { Message } from '@ai-sdk/react';
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 import { UserAvatar } from '../auth/user-avatar';
 import { MessageContent } from './message-content';
 import { MessageFeedback } from './message-feedback';
@@ -18,33 +18,25 @@ export function MessageItem({ message }: MessageItemProps) {
       .join('\n') || '';
 
   return (
-    <div className="display-flex flex-column">
+    <div className="flex flex-col">
       <div
-        className={clsx(
-          'display-flex margin-1',
-          isUser ? 'flex-justify-start' : 'flex-justify-end'
-        )}
+        className={cn('my-2 flex', isUser ? 'justify-start' : 'justify-end')}
       >
-        <div className="display-flex max-width-tablet flex-column">
+        <div className="flex max-w-tablet flex-col">
           <div
-            className={clsx(
-              'padding-y-2 padding-x-3 radius-md',
+            className={cn(
+              'rounded px-3 py-2',
               isUser
                 ? 'bg-primary-dark text-white'
-                : 'margin-left-6 max-width-75vw bg-base-lightest text-base-darker'
+                : 'ml-12 max-w-[75vw] bg-base-lightest'
             )}
           >
-            <div
-              className={clsx(
-                'font-body-md',
-                isUser ? 'display-flex flex-align-center' : 'text-base-darkest'
-              )}
-            >
+            <div className={cn(isUser ? 'flex items-center' : '')}>
               {isUser && <UserAvatar inline />}
               <MessageContent content={messageContent} isUser={isUser} />
               {!isUser && (
                 <MessageFeedback
-                  className="margin-top-1"
+                  className="mt-1"
                   messageId={message.id}
                   onCopy={() => {
                     navigator.clipboard.writeText(messageContent);

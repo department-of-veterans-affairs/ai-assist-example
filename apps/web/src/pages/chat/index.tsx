@@ -26,7 +26,7 @@ export default function ChatPage() {
   const isLoading = status === 'streaming';
 
   return (
-    <div className="display-flex height-full flex-column">
+    <div className="flex h-full flex-col">
       <MessageThread error={error} isLoading={isLoading} messages={messages} />
       <ChatInput
         handleInputChange={handleInputChange}
